@@ -7,6 +7,8 @@ import random
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
 
+import time
+
 class StackedGrid(object):
     def __init__(self, width, height):
         self.width = width
@@ -81,8 +83,8 @@ class StackedGrid(object):
         rectangles = []
 
         for i in range(amount):
-            width = random.randrange(2, 30, 2)
-            height = random.randrange(2, 30, 2)
+            width = random.randrange(2, 20, 2)
+            height = random.randrange(2, 20, 2)
 
             r = Rectangle(np.array([0,0]), width, height)
             rectangles.append(r)
@@ -131,8 +133,10 @@ class StackedGrid(object):
 
 if __name__ == "__main__":
     grid = StackedGrid(100, 100)
-    
-    rectangles = grid.generateRandomRectangles(20)
+    t_start = time.time()
+
+    n = 100
+    rectangles = grid.generateRandomRectangles(n)
     rectangles = grid.computeRectangleOrderArea(rectangles)
 
     for rectangle in rectangles:
@@ -140,3 +144,6 @@ if __name__ == "__main__":
 
     grid.plot()
     grid.toDxf()
+
+    t_stop = time.time() - t_start
+    print("Time: " + str(round(t_stop)) + " seconds")
