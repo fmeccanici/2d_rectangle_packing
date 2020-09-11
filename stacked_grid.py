@@ -4,15 +4,34 @@ import copy
 from bokeh.plotting import figure, output_file, show  
 import random
 
+import dxfwrite
+from dxfwrite import DXFEngine as dxf
+
 class StackedGrid(object):
     def __init__(self, width, height):
         self.width = width
         self.height = height
         self.stacked_rectangles = []
 
+        self.grid_dxf = "grid.dxf"
+        self.drawing = dxf.drawing(self.grid_dxf)
+
+    def toDxf(self):
+        for rectangle in self.stacked_rectangles:
+            x = rectangle.getPosition()[0]
+            y = rectangle.getPosition()[1]
+            width = rectangle.getWidth()
+            height = rectangle.getHeight()
+            bgcolor = random.randint(1,255)
+            
+            self.drawing.add(dxf.rectangle((x,y), width, height,
+                                  bgcolor=bgcolor))
+
+        self.drawing.save()
+        
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
-    
+
     def isValidStackingPosition(self, rectangle):
         for i, stacked_rectangle in enumerate(self.stacked_rectangles):
             
@@ -29,9 +48,6 @@ class StackedGrid(object):
                 position = np.array([x,y])
                 rectangle.setPosition(position)
 
-                # print(position)
-                # self.isValidStackingPosition(rectangle)
-                # print(np.linalg.norm(position) < np.linalg.norm(stacking_position))
                 if self.isValidStackingPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
 
@@ -123,3 +139,4 @@ if __name__ == "__main__":
         grid.computeStackingPositionAndAdd(rectangle)
 
     grid.plot()
+    grid.toDxf()
