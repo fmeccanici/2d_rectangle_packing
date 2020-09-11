@@ -18,8 +18,8 @@ class StackedGrid(object):
 
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
-            x = rectangle.getPosition()[0]
-            y = rectangle.getPosition()[1]
+            x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+            y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()
             height = rectangle.getHeight()
             bgcolor = random.randint(1,255)
