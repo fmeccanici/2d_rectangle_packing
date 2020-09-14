@@ -73,7 +73,7 @@ class StackedGrid(object):
         else:
             print("Could not fit rectangle in grid")
 
-    def printAddedRectangles(self):
+    def printStackedRectangles(self):
         for r in self.stacked_rectangles:
             print(r.getPosition())
 
@@ -89,10 +89,13 @@ class StackedGrid(object):
     
     def generateRandomRectangles(self, amount):
         rectangles = []
-        random.seed(42)
+        random.seed(41)
         for i in range(amount):
-            width = random.randrange(50, 200, 2)
-            height = random.randrange(50, 200, 2)
+            # width = random.randrange(50, 200, 2)
+            # height = random.randrange(50, 200, 2)
+
+            width = random.randrange(self.min_rectangle_width, 1000, 2)
+            height = random.randrange(self.min_rectangle_height, 1000, 2)
 
             r = Rectangle(np.array([0,0]), width, height)
             rectangles.append(r)
