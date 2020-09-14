@@ -2,6 +2,8 @@ import numpy as np
 import pickle
 import os 
 
+from pathlib import Path
+
 class Rectangle(object):
     def __init__(self, position, width, height, name):
         self.position = position
@@ -9,7 +11,6 @@ class Rectangle(object):
         self.height = height
         self.name = name
     
-
     def setPicklePath(self, path):
         self.path = path
 
@@ -53,7 +54,7 @@ class Rectangle(object):
         return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
 
     def loadFromPickle(self):
-        with open(self.path, 'rb') as f:
+        with open(self.path + str(self.name) + '.pickle', 'rb') as f:
             rectangle = pickle.load(f)
             self.name = rectangle['name']
             self.width = rectangle['width']
@@ -62,11 +63,10 @@ class Rectangle(object):
 
     def saveAsPickle(self):
         rectangle_dict = self.toDict()
-        with open(self.path, 'wb') as f:
+        with open(self.path + str(self.name) + '.pickle', 'wb') as f:
             pickle.dump(rectangle_dict, f)
 
     def removePickle(self):
-        os.remove(self.path)
+        os.remove(self.path + str(self.name) + '.pickle')
 
-    
     
