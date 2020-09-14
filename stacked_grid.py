@@ -17,11 +17,6 @@ class StackedGrid(object):
 
         self.grid_dxf = "grid.dxf"
         self.drawing = dxf.drawing(self.grid_dxf)
-        
-        self.min_rectangle_width = 100 #cm
-        self.min_rectangle_height = 50 #cm
-        self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
 
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
@@ -50,8 +45,8 @@ class StackedGrid(object):
     def computeStackingPosition(self, rectangle):
         stacking_position = [self.width, self.height]
 
-        for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2), self.min_rectangle_width)):
-            for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2), self.min_rectangle_height)):
+        for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2))):
+            for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2))):
                 position = np.array([x,y])
                 rectangle.setPosition(position)
 
@@ -88,8 +83,8 @@ class StackedGrid(object):
         rectangles = []
 
         for i in range(amount):
-            width = random.randrange(self.min_rectangle_width, 1000, 2)
-            height = random.randrange(self.min_rectangle_height, 1000, 2)
+            width = random.randrange(50, 200, 2)
+            height = random.randrange(50, 200, 2)
 
             r = Rectangle(np.array([0,0]), width, height)
             rectangles.append(r)
