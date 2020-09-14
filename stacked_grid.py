@@ -49,12 +49,12 @@ class StackedGrid(object):
 
     def computeStackingPosition(self, rectangle):
         stacking_position = [self.width, self.height]
+        
+        # for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2), int(self.min_rectangle_width/2 + rectangle.width/2))):
+        #     for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2), int(self.min_rectangle_height/2 + rectangle.height/2))):
 
-        for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2), int(self.min_rectangle_width/15))):
-            for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2), int(self.min_rectangle_height/15))):
-
-        # for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2))):
-        #     for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2))):
+        for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2))):
+            for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2))):
                 position = np.array([x,y])
                 rectangle.setPosition(position)
 
