@@ -71,7 +71,7 @@ class StackedGrid(object):
         if stacking_position[0] != self.width and stacking_position[1] != self.height:
             self.addRectangle(rectangle)
         else:
-            print("Could not fit rectangle in grid")
+            print("Could not fit rectangle in grid!")
 
     def printStackedRectangles(self):
         for r in self.stacked_rectangles:
