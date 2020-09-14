@@ -1,11 +1,24 @@
 import numpy as np
+import pickle
+import os 
 
 class Rectangle(object):
-    def __init__(self, position, width, height):
+    def __init__(self, position, width, height, name):
         self.position = position
         self.width = width
         self.height = height
+        self.name = name
     
+
+    def setPicklePath(self, path):
+        self.path = path
+
+    def getName(self):
+        return self.name
+    
+    def setName(self, name):
+        self.name = name
+
     def getWidth(self):
         return self.width
     
@@ -35,5 +48,25 @@ class Rectangle(object):
             return False
 
         return True
+    
+    def toDict(self):
+        return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
+
+    def loadFromPickle(self):
+        with open(self.path, 'rb') as f:
+            rectangle = pickle.load(f)
+            self.name = rectangle['name']
+            self.width = rectangle['width']
+            self.height = rectangle['height']
+            self.position = rectangle['position']
+
+    def saveAsPickle(self):
+        rectangle_dict = self.toDict()
+        with open(self.path, 'wb') as f:
+            pickle.dump(rectangle_dict, f)
+
+    def removePickle(self):
+        os.remove(self.path)
+
     
     
