@@ -5,16 +5,28 @@ import os
 from pathlib import Path
 
 class Rectangle(object):
-    def __init__(self, position, width, height, name, is_stacked=False):
+    def __init__(self, position, width, height, name, grid_number=0, is_stacked=False):
         self.position = position
         self.width = width
         self.height = height
         self.name = name
+        self.grid_number = grid_number
         self.is_stacked = is_stacked
-        
-        
+
     def setPicklePath(self, path):
         self.path = path
+
+    def getGridNumber(self):
+        return self.grid_number
+
+    def setGridNumber(self, grid_number):
+        self.grid_number = grid_number
+
+    def isStacked(self):
+        return self.is_stacked
+
+    def setStacked(self):
+        self.is_stacked = True
 
     def getName(self):
         return self.name
