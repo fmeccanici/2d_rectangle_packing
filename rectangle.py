@@ -5,12 +5,14 @@ import os
 from pathlib import Path
 
 class Rectangle(object):
-    def __init__(self, position, width, height, name):
+    def __init__(self, position, width, height, name, is_stacked=False):
         self.position = position
         self.width = width
         self.height = height
         self.name = name
-    
+        self.is_stacked = is_stacked
+        
+        
     def setPicklePath(self, path):
         self.path = path
 
