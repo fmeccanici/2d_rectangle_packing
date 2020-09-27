@@ -27,7 +27,7 @@ class DatabaseManager(object):
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
 
-        return { "name": name, "width": width, "height": height, "position": position, "isStacked": is_stacked, "grid_number": grid_number }
+        return { "name": name, "width": width, "height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
 
     def addRectangle(self, rectangle):
         document = self.createDocument(rectangle)
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     if "stacked_grids_database" in db_list:
         print("database exists")
     
-    r = Rectangle([0,0], 1, 1, '1')
-    db_manager.addRectangle(r)
-    # db_manager.makeBackup()
-    db_manager.loadBackup("27-09-2020-11:00:20")
+    # r = Rectangle([0,0], 1, 1, '1')
+    # db_manager.addRectangle(r)
+    db_manager.makeBackup()
+    # db_manager.loadBackup("27-09-2020-11:00:20")

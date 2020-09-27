@@ -41,6 +41,7 @@ class StackedGrid(object):
         self.max_rectangle_height = 1500 #cm
 
         self.base_path = os.path.abspath(os.getcwd())
+        self.db_manager = DatabaseManager()
 
     def setPicklePath(self, path):
         self.path = path
@@ -121,6 +122,8 @@ class StackedGrid(object):
             rectangle.setPosition(stacking_position)
             
             if stacking_position[0] != self.width and stacking_position[1] != self.height:
+                rectangle.setStacked()
+                rectangle.setGridNumber(self.name)
                 self.addRectangle(rectangle)
                 # grid_path = self.base_path + '/grids/'
                 # self.setPicklePath(grid_path)
@@ -130,8 +133,9 @@ class StackedGrid(object):
                 # rectangle.saveAsPickle()
 
             else:
+                self.addRectangle(rectangle)
                 raise InvalidGridPositionError
-
+            
         except InvalidGridPositionError:
             print("Could not fit rectangle in grid!")
 
@@ -218,13 +222,12 @@ class StackedGrid(object):
     def startStacking(self):
         t_start = time.time()
 
-        # n = 20
-        # rectangles = self.generateAndSaveRandomRectangles(n)
+        n = 20
+        rectangles = self.generateAndSaveRandomRectangles(n)
         
         self.loadAndAddRectanglesTodo()
         
         self.unstacked_rectangles = grid.computeRectangleOrderArea(self.unstacked_rectangles)
-        
         
         for i, rectangle in enumerate(self.unstacked_rectangles):
             print("Rectangle " + str(i))
