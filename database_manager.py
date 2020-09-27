@@ -22,7 +22,7 @@ class DatabaseManager(object):
         document = self.createDocument(rectangle)
         self.collection.insert(document)
 
-    def backup(self, path):
+    def makeBackup(self, path):
         col = getattr(self.db, self.collection)
         collection = col.find()
         jsonfile = "rectangles.json"
@@ -36,3 +36,6 @@ if __name__ == "__main__":
     db_list = db_manager.client.list_database_names()
     if "stacked_grids_database" in db_list:
         print("database exists")
+    
+    db_manager.makeBackup('/home/fmeccanici/Documents/2d_rectangle_packing/')
+    
