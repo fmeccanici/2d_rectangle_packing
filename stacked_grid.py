@@ -1,4 +1,6 @@
 from rectangle import Rectangle
+from database_manager import DatabaseManager
+
 import numpy as np
 import copy
 from bokeh.plotting import figure, output_file, show  
