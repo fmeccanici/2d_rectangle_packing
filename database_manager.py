@@ -1,3 +1,5 @@
+from rectangle import Rectangle
+
 import pymongo
 from os.path import join
 from bson.json_util import dumps
@@ -10,11 +12,12 @@ class DatabaseManager(object):
         self.port = port
         self.username = username
         self.password = password
+        self.db_name = database
 
         self.client = pymongo.MongoClient(host, port)
         self.db = self.client[database]
         self.collection = self.db["rectangles"]
-        self.backup_path = '/home/fmeccanici/Documents/2d_rectangle_packing/database/'
+        self.backup_path = '/home/fmeccanici/Documents/2d_rectangle_packing/databases/'
 
     def createDocument(self, rectangle):
         width = rectangle.getWidth()
@@ -50,10 +53,20 @@ class DatabaseManager(object):
 
         print("mongo backup progress started")
 
+    def loadBackup(self, datetime):
+        command = "mongorestore -d " + self.db_name + " " + self.backup_path + datetime + "/" + self.db_name 
+        print(command)
+        os.system(command)
+
+        print("loading backup from " + str(datetime))
+
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()
     if "stacked_grids_database" in db_list:
         print("database exists")
     
-    db_manager.makeBackup()
+    r = Rectangle([0,0], 1, 1, '1')
+    db_manager.addRectangle(r)
+    # db_manager.makeBackup()
+    db_manager.loadBackup("27-09-2020-11:00:20")

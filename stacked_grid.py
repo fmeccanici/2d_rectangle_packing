@@ -1,16 +1,17 @@
+
+# my own classes
 from rectangle import Rectangle
 from database_manager import DatabaseManager
 
+# external dependencies
 import numpy as np
 import copy
 from bokeh.plotting import figure, output_file, show  
 import random
 import pickle
 import os
-
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
-
 import time
 
 class Error(Exception):
@@ -121,12 +122,12 @@ class StackedGrid(object):
             
             if stacking_position[0] != self.width and stacking_position[1] != self.height:
                 self.addRectangle(rectangle)
-                grid_path = self.base_path + '/grids/'
-                self.setPicklePath(grid_path)
-                self.saveAsPickle()
-                rectangle.removePickle()
-                rectangle.setPicklePath(done_path)
-                rectangle.saveAsPickle()
+                # grid_path = self.base_path + '/grids/'
+                # self.setPicklePath(grid_path)
+                # self.saveAsPickle()
+                # rectangle.removePickle()
+                # rectangle.setPicklePath(done_path)
+                # rectangle.saveAsPickle()
 
             else:
                 raise InvalidGridPositionError
