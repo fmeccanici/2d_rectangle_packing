@@ -1,6 +1,6 @@
 import pymongo
 from os.path import join
-from bson.json_utils import dumps
+from bson.json_util import dumps
 
 class DatabaseManager(object):
     def __init__(self, host='localhost', port=27017, database="stacked_rectangles_database"):
