@@ -58,14 +58,14 @@ class StackedGrid(object):
         with open(file_path, 'rb') as f:
             stacked_grid = pickle.load(f)
             self.name = stacked_grid['name']
-            self.stacked_rectangles = [Rectangle(rect['position'], rect['width'], rect['height'], rect['name']) for rect in stacked_grid['stacked_rectangles']]
+            self.stacked_rectangles = [Rectangle(rect['width'], rect['height'], rect['name'], rect['position']) for rect in stacked_grid['stacked_rectangles']]
     
     def loadAndAddRectanglesTodo(self):
         todo_path = self.base_path + '/rectangles/todo/'
         files = os.listdir(todo_path)
         
         for f in enumerate(files):
-            rectangle = Rectangle([0,0], 0, 0, str(f[1].split('.')[0]))
+            rectangle = Rectangle(0, 0, str(f[1].split('.')[0]))
             rectangle.setPicklePath(todo_path)
             rectangle.loadFromPickle()
             self.unstacked_rectangles.append(rectangle)
@@ -114,9 +114,8 @@ class StackedGrid(object):
 
         return stacking_position
 
-    def computeStackingPositionAddAndSave(self, rectangle):
+    def computeStackingPositionAndUpdateDatabase(self, rectangle):
         try:
-            done_path = self.base_path + '/rectangles/done/'
 
             stacking_position = self.computeStackingPosition(rectangle)
             rectangle.setPosition(stacking_position)
@@ -124,7 +123,10 @@ class StackedGrid(object):
             if stacking_position[0] != self.width and stacking_position[1] != self.height:
                 rectangle.setStacked()
                 rectangle.setGridNumber(self.name)
+
                 self.addRectangle(rectangle)
+                self.db_manager.updateRectangle(rectangle)
+
                 # grid_path = self.base_path + '/grids/'
                 # self.setPicklePath(grid_path)
                 # self.saveAsPickle()
@@ -133,7 +135,6 @@ class StackedGrid(object):
                 # rectangle.saveAsPickle()
 
             else:
-                self.addRectangle(rectangle)
                 raise InvalidGridPositionError
             
         except InvalidGridPositionError:
@@ -161,7 +162,7 @@ class StackedGrid(object):
             width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
             height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)
 
-            r = Rectangle(np.array([0,0]), width, height, name=i)
+            r = Rectangle(width, height, name=i)
             rectangles.append(r)
         return rectangles
     
@@ -172,7 +173,7 @@ class StackedGrid(object):
             width = random.randrange(self.min_rectangle_width, 200, 2)
             height = random.randrange(self.min_rectangle_height, 200, 2)
 
-            r = Rectangle(np.array([0,0]), width, height, name=i)
+            r = Rectangle(width, height, name=i)
             r.setPicklePath(self.base_path + '/rectangles/todo/')
             r.saveAsPickle()
             rectangles.append(r)
@@ -219,26 +220,37 @@ class StackedGrid(object):
         # displaying the model  
         show(graph) 
 
+    def addToDatabase(self, rectangles):
+        for rectangle in rectangles:
+            self.db_manager.addRectangle(rectangle)
+
     def startStacking(self):
         t_start = time.time()
 
-        n = 20
-        rectangles = self.generateAndSaveRandomRectangles(n)
+        # n = 20
         
-        self.loadAndAddRectanglesTodo()
+        # self.unstacked_rectangles = self.generateRandomRectangles(n)
         
-        self.unstacked_rectangles = grid.computeRectangleOrderArea(self.unstacked_rectangles)
+        # self.loadAndAddRectanglesTodo()
         
-        for i, rectangle in enumerate(self.unstacked_rectangles):
-            print("Rectangle " + str(i))
-            self.computeStackingPositionAddAndSave(rectangle)
+        # self.addToDatabase(self.unstacked_rectangles)
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
-        self.plot()
-        self.toDxf()
-    
-        t_stop = time.time() - t_start
-        print("Time: " + str(round(t_stop)) + " seconds")
-    
+        if len(self.unstacked_rectangles) > 4:
+            self.unstacked_rectangles = grid.computeRectangleOrderArea(self.unstacked_rectangles)
+
+            # print([rect.toDict() for rect in self.unstacked_rectangles])
+
+            for i, rectangle in enumerate(self.unstacked_rectangles):
+                print("Rectangle " + str(rectangle.getName()))
+                self.computeStackingPositionAndUpdateDatabase(rectangle)
+
+            # self.plot()
+            # self.toDxf()
+        
+            # t_stop = time.time() - t_start
+            # print("Time: " + str(round(t_stop)) + " seconds")
+        
 if __name__ == "__main__":
     # 3 meters long
     # grid = StackedGrid(width=200, height=1500, name=0)

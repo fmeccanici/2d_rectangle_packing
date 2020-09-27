@@ -60,6 +60,22 @@ class DatabaseManager(object):
 
         print("loading backup from " + str(datetime))
 
+    def getUnstackedRectangles(self):
+        rectangles_dict = self.collection.find({
+            "isStacked" : {"$eq" : False}
+        })
+
+        rectangles = []
+        for rectangle in rectangles_dict:
+            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name']))
+
+        return rectangles
+    
+    def updateRectangle(self, rectangle):
+        query = {"name" : rectangle.getName()}
+        new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked() } }
+        self.collection.update_one(query, new_values)
+
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()

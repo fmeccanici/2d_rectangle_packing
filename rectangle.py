@@ -5,8 +5,8 @@ import os
 from pathlib import Path
 
 class Rectangle(object):
-    def __init__(self, position, width, height, name, grid_number=0, is_stacked=False):
-        self.position = position
+    def __init__(self, width, height, name, position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
+        self.position = np.asarray(position)
         self.width = width
         self.height = height
         self.name = name
