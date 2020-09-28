@@ -235,7 +235,6 @@ class StackedGrid(object):
         
         # self.addToDatabase(self.unstacked_rectangles)
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-
         if len(self.unstacked_rectangles) > 4:
             self.unstacked_rectangles = grid.computeRectangleOrderArea(self.unstacked_rectangles)
 

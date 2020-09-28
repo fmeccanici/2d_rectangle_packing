@@ -16,7 +16,9 @@ class DatabaseManager(object):
 
         self.client = pymongo.MongoClient(host, port)
         self.db = self.client[database]
-        self.collection = self.db["rectangles"]
+        self.rectangles_collection = self.db["rectangles"]
+        self.grids_collection = self.db["grids"]
+
         self.backup_path = '/home/fmeccanici/Documents/2d_rectangle_packing/databases/'
 
     def createDocument(self, rectangle):
@@ -31,7 +33,7 @@ class DatabaseManager(object):
 
     def addRectangle(self, rectangle):
         document = self.createDocument(rectangle)
-        self.collection.insert(document)
+        self.rectangles_collection.insert(document)
 
     def renderOutputLocations(self):
         return self.backup_path + time.strftime("%d-%m-%Y-%H:%M:%S")
@@ -61,7 +63,7 @@ class DatabaseManager(object):
         print("loading backup from " + str(datetime))
 
     def getUnstackedRectangles(self):
-        rectangles_dict = self.collection.find({
+        rectangles_dict = self.rectangles_collection.find({
             "isStacked" : {"$eq" : False}
         })
 
@@ -74,7 +76,7 @@ class DatabaseManager(object):
     def updateRectangle(self, rectangle):
         query = {"name" : rectangle.getName()}
         new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked() } }
-        self.collection.update_one(query, new_values)
+        self.rectangles_collection.update_one(query, new_values)
 
 if __name__ == "__main__":
     db_manager = DatabaseManager()
