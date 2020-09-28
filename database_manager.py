@@ -21,7 +21,17 @@ class DatabaseManager(object):
 
         self.backup_path = '/home/fmeccanici/Documents/2d_rectangle_packing/databases/'
 
-    def createDocument(self, rectangle):
+    def createGridDocument(self, grid):
+        width = grid.getWidth()
+        height = grid.getHeight()
+        num_rectangles = grid.getNumStackedRectangles()
+        name = grid.getName()
+        is_full = grid.isFull()
+        is_cut = grid.isCut()
+
+        return { "name": name, "width": width, "height": height, "num rectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+
+    def createRectangleDocument(self, rectangle):
         width = rectangle.getWidth()
         height = rectangle.getHeight()
         position = rectangle.getPosition()
@@ -32,9 +42,20 @@ class DatabaseManager(object):
         return { "name": name, "width": width, "height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
 
     def addRectangle(self, rectangle):
-        document = self.createDocument(rectangle)
+        document = self.createRectangleDocument(rectangle)
         self.rectangles_collection.insert(document)
 
+    def getRectangles(self, grid):
+        rectangles_dict = self.rectangles_collection.find({
+            "grid_number" : {"$eq" : grid.getName()}
+        })
+        
+        rectangles = []
+        for rectangle in rectangles_dict:
+            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name']))
+
+        return rectangles
+    
     def renderOutputLocations(self):
         return self.backup_path + time.strftime("%d-%m-%Y-%H:%M:%S")
 

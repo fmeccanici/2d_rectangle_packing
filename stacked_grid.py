@@ -23,14 +23,16 @@ class InvalidGridPositionError(Error):
     pass
 
 class StackedGrid(object):
-    def __init__(self, width, height, name):
+    def __init__(self, width, height, name, stacked_rectangles = [], is_full = False, is_cut = False):
         self.width = width
         self.height = height
         self.name = name
+        self.stacked_rectangles = stacked_rectangles
+        self.is_full = is_full
+        self.is_cut = is_cut
 
         self.unstacked_rectangles = []
-        self.stacked_rectangles = []
-
+        
         self.grid_dxf = "grid" + str(name) + ".dxf"
         
         self.drawing = dxf.drawing(self.grid_dxf)
@@ -43,9 +45,48 @@ class StackedGrid(object):
         self.base_path = os.path.abspath(os.getcwd())
         self.db_manager = DatabaseManager()
 
+    def getWidth(self):
+        return self.width
+    
+    def setWidth(self, width):
+        self.width = width
+
+    def getHeight(self):
+        return self.height
+    
+    def setHeight(self, height):
+        self.height = height
+
+    def getName(self):
+        return self.name
+    
+    def setName(self, name):
+        self.name = name
+
+    def getNumStackedRectangles(self):
+        return len(self.stacked_rectangles)
+
+    def getStackedRectangles(self):
+        return self.stacked_rectangles
+
+    def setStackedRectangles(self, rectangles):
+        self.stacked_rectangles = rectangles
+
     def setPicklePath(self, path):
         self.path = path
 
+    def isFull(self):
+        return self.is_full
+    
+    def setFull(self):
+        self.is_full = True
+
+    def isCut(self):
+        return self.is_cut
+    
+    def setCut(self):
+        self.is_cut = True
+    
     def toDict(self):
         return {'name': self.name, 'width': self.width, 'height': self.height, 'stacked_rectangles': [rect.toDict() for rect in self.stacked_rectangles]}
 
