@@ -30,6 +30,11 @@ class DatabaseManager(object):
         is_cut = grid.isCut()
 
         return { "name": name, "width": width, "height": height, "num rectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+    
+    def getGrids(self):
+        cursor = self.grids_collection.find({})
+        for document in cursor:
+            print(document)
 
     def createRectangleDocument(self, rectangle):
         width = rectangle.getWidth()
@@ -40,6 +45,10 @@ class DatabaseManager(object):
         grid_number = rectangle.getGridNumber()
 
         return { "name": name, "width": width, "height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
+
+    def addGrid(self, grid):
+        document = self.createGridDocument(grid)
+        self.grids_collection.insert(document)
 
     def addRectangle(self, rectangle):
         document = self.createRectangleDocument(rectangle)
@@ -107,5 +116,6 @@ if __name__ == "__main__":
     
     # r = Rectangle([0,0], 1, 1, '1')
     # db_manager.addRectangle(r)
-    db_manager.makeBackup()
+    # db_manager.makeBackup()
+    db_manager.getGrids()
     # db_manager.loadBackup("27-09-2020-11:00:20")

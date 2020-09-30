@@ -268,13 +268,12 @@ class StackedGrid(object):
     def startStacking(self):
         t_start = time.time()
 
-        # n = 20
+        n = 20
         
-        # self.unstacked_rectangles = self.generateRandomRectangles(n)
-        
+        self.unstacked_rectangles = self.generateRandomRectangles(n)
         # self.loadAndAddRectanglesTodo()
-        
-        # self.addToDatabase(self.unstacked_rectangles)
+        self.addToDatabase(self.unstacked_rectangles)
+
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
         if len(self.unstacked_rectangles) > 4:
             self.unstacked_rectangles = grid.computeRectangleOrderArea(self.unstacked_rectangles)
@@ -299,6 +298,7 @@ if __name__ == "__main__":
     # grid.loadFromPickle('/home/fmeccanici/Documents/2d_rectangle_packing/grids/0')
     # grid.startStacking()
 
+    db_manager = DatabaseManager()
     grid = StackedGrid(width=200, height=1500, name=1)
     grid.startStacking()
 
