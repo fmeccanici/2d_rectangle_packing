@@ -1,5 +1,8 @@
+# import own classes
 from rectangle import Rectangle
+from stacked_grid import StackedGrid
 
+# external dependencies
 import pymongo
 from os.path import join
 from bson.json_util import dumps
@@ -32,10 +35,19 @@ class DatabaseManager(object):
         return { "name": name, "width": width, "height": height, "num rectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
     def getGrids(self):
+        grids = []
+
         cursor = self.grids_collection.find({})
         for document in cursor:
-            print(document)
-
+            grid_number = document['name']
+            grid = StackedGrid(document['width'], document['height'], document['name'])
+            rectangles = self.getRectangles(grid)
+            grid.setStackedRectangles(rectangles)
+            
+            grids.append(grid)
+        
+        return grids
+        
     def createRectangleDocument(self, rectangle):
         width = rectangle.getWidth()
         height = rectangle.getHeight()

@@ -300,6 +300,8 @@ if __name__ == "__main__":
 
     db_manager = DatabaseManager()
     grid = StackedGrid(width=200, height=1500, name=1)
-    grid.startStacking()
+    # db_manager.addGrid(grid)
+    db_manager.getGrids()
+    # grid.startStacking()
 
 
