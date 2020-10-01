@@ -39,7 +39,6 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid_number = document['name']
             grid = StackedGrid(document['width'], document['height'], document['name'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
@@ -47,7 +46,7 @@ class DatabaseManager(object):
             grids.append(grid)
         
         return grids
-        
+
     def createRectangleDocument(self, rectangle):
         width = rectangle.getWidth()
         height = rectangle.getHeight()
