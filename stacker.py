@@ -4,6 +4,7 @@ from database_manager import DatabaseManager
 
 import random
 import time
+import numpy as np
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -20,17 +21,14 @@ class GridFullError(Error):
 class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
+        
         # grid = StackedGrid(width=200, height=1500, name=1)
         # self.db_manager.addGrid(grid)
+
         self.grids = self.db_manager.getGrids()
 
-        print("Grids present: ")
-
-        for grid in self.grids:
-            print(grid.getName())
-
         self.unstacked_rectangles = []
-
+        
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
@@ -40,54 +38,46 @@ class Stacker(object):
         for rectangle in rectangles:
             self.db_manager.addRectangle(rectangle)
 
-    def computeStackingPositionAndUpdateDatabase(self, rectangle):
-        try:
-            for grid in self.grids:
-                print([x.getName() for x in self.db_manager.getRectangles(grid)])
+    def computeStackingPosition(self, rectangle, grid):
+        stacking_position = [grid.getWidth(), grid.getHeight()]
 
-                if not grid.isFull():
-                    stacking_position = grid.computeStackingPosition(rectangle)
-                    rectangle.setPosition(stacking_position)
-                    
-                    if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
-                        rectangle.setStacked()
-                        rectangle.setGridNumber(grid.getName())
-
-                        grid.addRectangle(rectangle)
-                        self.db_manager.updateRectangle(rectangle)
-
-                    else:
-                        raise InvalidGridPositionError
+        for x in reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2))):
+            for y in reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2))):
                 
-                elif grid.isFull() and self.grids[-1].getName() == grid.getName():
-                    print("Grid full")
-                    print("Create new grid")
+                position = np.array([x,y])
+                rectangle.setPosition(position)
+                if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
+                    stacking_position = position
 
-                    grid = StackedGrid(width=200, height=1500, name=self.grids[-1].getName() + 1)
-                    self.grids.append(grid)
-                    
-                    stacking_position = grid.computeStackingPosition(rectangle)
-                    rectangle.setPosition(stacking_position)
-                    
-                    if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
-                        rectangle.setStacked()
-                        rectangle.setGridNumber(grid.getName())
+        return stacking_position
 
-                        grid.addRectangle(rectangle)
-                        self.db_manager.updateRectangle(rectangle)
+    def createAndAddNewGrid(self):
+        try:
+            grid = StackedGrid(width=200, height=1500, name=self.grids[-1].getName() + 1, stacked_rectangles=[])
+            self.grids.append(grid)
 
-                    else:
-                        raise InvalidGridPositionError
+            self.db_manager.addGrid(grid)
+            print("Created and added new grid to database")
 
-                elif grid.isFull() and self.grids[-1].getName() != grid.getName():
-                    print("Grid full")
-                    print("Continue to next grid")
+        except IndexError:
+            grid = StackedGrid(width=200, height=1500, name=1)
+            self.grids.append(grid)
+            self.db_manager.addGrid(grid)
+            print("Created and added initial grid to database")
 
-                    continue
+    def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
+        stacking_position = self.computeStackingPosition(rectangle, grid)
+        rectangle.setPosition(stacking_position)
 
-        
-        except InvalidGridPositionError:
-            print("Could not fit rectangle in grid!")
+        if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
+            rectangle.setStacked()
+            rectangle.setGridNumber(grid.getName())
+
+            grid.addRectangle(rectangle)
+            self.db_manager.updateRectangle(rectangle)
+
+        else:
+            raise InvalidGridPositionError
 
     def computeRectangleOrderArea(self, rectangles):
         
@@ -113,25 +103,49 @@ class Stacker(object):
     def start(self):
         t_start = time.time()
 
-        n = 20
+        n = 30
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
 
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
-        if len(self.unstacked_rectangles) > 4:
+        while len(self.unstacked_rectangles ) > 0:
+            
+            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+
+            print([x.getName() for x in self.unstacked_rectangles])
+            print([x.getName() for x in self.grids])
+
             self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
-            for i, rectangle in enumerate(self.unstacked_rectangles):
-                print("Rectangle " + str(rectangle.getName()))
-                self.computeStackingPositionAndUpdateDatabase(rectangle)
 
-            # self.plot()
-            # self.toDxf()
-        
-            t_stop = time.time() - t_start
-            print("Time: " + str(round(t_stop)) + " seconds")
+            for i, rectangle in enumerate(self.unstacked_rectangles):
+                print("Amount of unstacked rectangles = " + str(len(self.unstacked_rectangles)))
+
+                print("Rectangle " + str(rectangle.getName()))
+
+                for grid in self.grids:
+                    print("Grid " + str(grid.getName()))
+
+                    try:
+                        self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                        del self.unstacked_rectangles[i]
+                        break
+
+                    except InvalidGridPositionError:
+                        print("Invalid grid position")
+                        continue
+                        
+                if not rectangle.isStacked():
+                    self.createAndAddNewGrid()
+            
+                t_stop = time.time() - t_start
+                print("Time: " + str(round(t_stop)) + " seconds")
+
+        for grid in self.grids:
+            grid.plot()
 
 if __name__ == "__main__":
     stacker = Stacker()
     stacker.start()
+

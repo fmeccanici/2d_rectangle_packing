@@ -115,10 +115,14 @@ class DatabaseManager(object):
         return rectangles
     
     def updateRectangle(self, rectangle):
+        print("Updating rectangle in database")
         query = {"name" : rectangle.getName()}
+        print(rectangle.getWidth())
+        print(rectangle.getHeight())
+
         new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked() } }
         self.rectangles_collection.update_one(query, new_values)
-
+    
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()

@@ -65,11 +65,23 @@ class StackedGrid(object):
     def setStackedRectangles(self, rectangles):
         self.stacked_rectangles = rectangles
 
+    def computeStackingPosition(self, rectangle):
+        stacking_position = [self.getWidth(), self.getHeight()]
+
+        for x in reversed(range(int(rectangle.width/2), int(self.getWidth() - rectangle.width/2))):
+            for y in reversed(range(int(rectangle.height/2), int(self.getHeight() - rectangle.height/2))):
+                position = np.array([x,y])
+                rectangle.setPosition(position)
+                if self.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
+                    stacking_position = position
+
+        return stacking_position
+
     def isFull(self):
         min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
         min_rectangle.setPosition(self.computeStackingPosition(min_rectangle))
 
-        if not self.isValidStackingPosition(min_rectangle):
+        if not self.isValidPosition(min_rectangle):
             self.is_full = True
             return True
         else: 
@@ -101,7 +113,7 @@ class StackedGrid(object):
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
 
-    def isValidStackingPosition(self, rectangle):
+    def isValidPosition(self, rectangle):
         for i, stacked_rectangle in enumerate(self.stacked_rectangles):
             
             if rectangle.intersection(stacked_rectangle):
@@ -109,37 +121,21 @@ class StackedGrid(object):
 
         return True
 
-    def computeStackingPosition(self, rectangle):
-        stacking_position = [self.width, self.height]
-        
-        # for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2), int(self.min_rectangle_width/2 + rectangle.width/2))):
-        #     for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2), int(self.min_rectangle_height/2 + rectangle.height/2))):
-
-        print("width = " + str(self.width))
-        print("height = " + str(self.height))
-        print(rectangle.width)
-        print(rectangle.height)
-
-        for x in reversed(range(int(rectangle.width/2), int(self.width - rectangle.width/2))):
-            for y in reversed(range(int(rectangle.height/2), int(self.height - rectangle.height/2))):
-                position = np.array([x,y])
-                rectangle.setPosition(position)
-                if self.isValidStackingPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
-                    stacking_position = position
-
-        return stacking_position
-
     def printStackedRectangles(self):
         for r in self.stacked_rectangles:
             print(r.getPosition())  
 
     def plot(self):
+        print("Plotting grid " + str(self.getName()))
+
         # file to save the model  
-        output_file("stacked_grid.html")  
+        output_file("stacked_grid_" + str(self.getName()) + ".html")  
             
         # instantiating the figure object  
-        graph = figure(title = "Stacked grid")  
-        
+        graph = figure(title = "Stacked grid " + str(self.getName()))  
+        graph.x_range(0, self.width)
+        graph.y_range(0, self.height)
+
         # name of the x-axis  
         graph.xaxis.axis_label = "x-axis"
             
