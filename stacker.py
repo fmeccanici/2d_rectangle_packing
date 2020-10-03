@@ -96,14 +96,15 @@ class Stacker(object):
             width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
             height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)
 
-            r = Rectangle(width, height, name=i)
+            r = Rectangle(width, height, name=int(time.time())
             rectangles.append(r)
+            time.sleep(1)
         return rectangles
 
     def start(self):
         t_start = time.time()
 
-        n = 30
+        n = 50
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
 

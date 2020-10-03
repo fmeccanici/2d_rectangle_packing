@@ -132,9 +132,7 @@ class StackedGrid(object):
         output_file("stacked_grid_" + str(self.getName()) + ".html")  
             
         # instantiating the figure object  
-        graph = figure(title = "Stacked grid " + str(self.getName()))  
-        graph.x_range(0, self.width)
-        graph.y_range(0, self.height)
+        graph = figure(title = "Stacked grid " + str(self.getName()), x_range=(0, self.width), y_range=(0, self.height))  
 
         # name of the x-axis  
         graph.xaxis.axis_label = "x-axis"
