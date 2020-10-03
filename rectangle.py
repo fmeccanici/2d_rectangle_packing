@@ -37,8 +37,14 @@ class Rectangle(object):
     def getWidth(self):
         return self.width
     
+    def setWidth(self, width):
+        self.width = width
+
     def getHeight(self):
         return self.height
+
+    def setHeight(self, height):
+        self.height = height
 
     def getPosition(self):
         return self.position
@@ -54,6 +60,13 @@ class Rectangle(object):
     
     def getArea(self):
         return self.width * self.height
+
+    def rotate(self):
+        width = self.getHeight()
+        height = self.getWidth()
+
+        self.setWidth(width)
+        self.setHeight(height)
         
     def intersection(self, other):
         if self.getBottomRight()[0] <= other.getTopLeft()[0] or self.getTopLeft()[0] >= other.getBottomRight()[0]:

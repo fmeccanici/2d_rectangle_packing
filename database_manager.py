@@ -39,12 +39,13 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
+            print("Loaded grid " + str(document["name"]) + " from database")
             grid = StackedGrid(document['width'], document['height'], document['name'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             grid.isFull()
             grids.append(grid)
-        
+
         return grids
 
     def createRectangleDocument(self, rectangle):
@@ -72,7 +73,7 @@ class DatabaseManager(object):
         
         rectangles = []
         for rectangle in rectangles_dict:
-            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name']))
+            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
 
         return rectangles
     

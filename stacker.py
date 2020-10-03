@@ -24,7 +24,6 @@ class Stacker(object):
         
         # grid = StackedGrid(width=200, height=1500, name=1)
         # self.db_manager.addGrid(grid)
-
         self.grids = self.db_manager.getGrids()
 
         self.unstacked_rectangles = []
@@ -96,46 +95,61 @@ class Stacker(object):
             width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
             height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)
 
-            r = Rectangle(width, height, name=int(time.time())
+            r = Rectangle(width, height, name=int(time.time()))
             rectangles.append(r)
             time.sleep(1)
+
+            print("Generated random rectangle " + str(r.getName()))
+
         return rectangles
 
     def start(self):
         t_start = time.time()
 
-        n = 50
+        n = 10
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
-
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
         while len(self.unstacked_rectangles ) > 0:
             
             self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
-            print([x.getName() for x in self.unstacked_rectangles])
-            print([x.getName() for x in self.grids])
+            # print([x.getName() for x in self.unstacked_rectangles])
+            # print([x.getName() for x in self.grids])
 
             self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
 
             for i, rectangle in enumerate(self.unstacked_rectangles):
                 print("Amount of unstacked rectangles = " + str(len(self.unstacked_rectangles)))
-
                 print("Rectangle " + str(rectangle.getName()))
 
                 for grid in self.grids:
                     print("Grid " + str(grid.getName()))
 
                     try:
+                        print("Original rectangle")
+                        print(rectangle.getWidth(), rectangle.getHeight())
                         self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
                         del self.unstacked_rectangles[i]
                         break
 
                     except InvalidGridPositionError:
-                        print("Invalid grid position")
-                        continue
+                        print("Failed to stack original rectangle")
+                        print("Try rotated")
+                        try:
+                            rectangle.rotate()
+                            print("Rotated rectangle")
+                            print(rectangle.getWidth(), rectangle.getHeight())
+
+                            self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                            del self.unstacked_rectangles[i]
+                            break
+
+                        except InvalidGridPositionError:
+                            print("Invalid grid position")
+                            continue
                         
                 if not rectangle.isStacked():
                     self.createAndAddNewGrid()
