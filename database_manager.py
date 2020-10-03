@@ -42,7 +42,7 @@ class DatabaseManager(object):
             grid = StackedGrid(document['width'], document['height'], document['name'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
-            
+            grid.isFull()
             grids.append(grid)
         
         return grids

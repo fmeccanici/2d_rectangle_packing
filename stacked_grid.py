@@ -1,18 +1,14 @@
-
 # my own classes
 from rectangle import Rectangle
-from database_manager import DatabaseManager
 
 # external dependencies
 import numpy as np
 import copy
 from bokeh.plotting import figure, output_file, show  
 import random
-import pickle
 import os
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
-import time
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -34,16 +30,13 @@ class StackedGrid(object):
         self.unstacked_rectangles = []
         
         self.grid_dxf = "grid" + str(name) + ".dxf"
-        
         self.drawing = dxf.drawing(self.grid_dxf)
+        self.base_path = os.path.abspath(os.getcwd())
 
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
-
-        self.base_path = os.path.abspath(os.getcwd())
-        self.db_manager = DatabaseManager()
 
     def getWidth(self):
         return self.width
@@ -72,15 +65,17 @@ class StackedGrid(object):
     def setStackedRectangles(self, rectangles):
         self.stacked_rectangles = rectangles
 
-    def setPicklePath(self, path):
-        self.path = path
-
     def isFull(self):
-        return self.is_full
-    
-    def setFull(self):
-        self.is_full = True
+        min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
+        min_rectangle.setPosition(self.computeStackingPosition(min_rectangle))
 
+        if not self.isValidStackingPosition(min_rectangle):
+            self.is_full = True
+            return True
+        else: 
+            self.is_full = False
+            return False
+    
     def isCut(self):
         return self.is_cut
     
@@ -89,27 +84,6 @@ class StackedGrid(object):
     
     def toDict(self):
         return {'name': self.name, 'width': self.width, 'height': self.height, 'stacked_rectangles': [rect.toDict() for rect in self.stacked_rectangles]}
-
-    def saveAsPickle(self):
-        stacked_grid_dict = self.toDict()
-        with open(self.path + str(self.name), 'wb') as f:
-            pickle.dump(stacked_grid_dict, f)
-    
-    def loadFromPickle(self, file_path):
-        with open(file_path, 'rb') as f:
-            stacked_grid = pickle.load(f)
-            self.name = stacked_grid['name']
-            self.stacked_rectangles = [Rectangle(rect['width'], rect['height'], rect['name'], rect['position']) for rect in stacked_grid['stacked_rectangles']]
-    
-    def loadAndAddRectanglesTodo(self):
-        todo_path = self.base_path + '/rectangles/todo/'
-        files = os.listdir(todo_path)
-        
-        for f in enumerate(files):
-            rectangle = Rectangle(0, 0, str(f[1].split('.')[0]))
-            rectangle.setPicklePath(todo_path)
-            rectangle.loadFromPickle()
-            self.unstacked_rectangles.append(rectangle)
 
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
@@ -155,70 +129,9 @@ class StackedGrid(object):
 
         return stacking_position
 
-    def computeStackingPositionAndUpdateDatabase(self, rectangle):
-        try:
-
-            stacking_position = self.computeStackingPosition(rectangle)
-            rectangle.setPosition(stacking_position)
-            
-            if stacking_position[0] != self.width and stacking_position[1] != self.height:
-                rectangle.setStacked()
-                rectangle.setGridNumber(self.name)
-
-                self.addRectangle(rectangle)
-                self.db_manager.updateRectangle(rectangle)
-
-                # grid_path = self.base_path + '/grids/'
-                # self.setPicklePath(grid_path)
-                # self.saveAsPickle()
-                # rectangle.removePickle()
-                # rectangle.setPicklePath(done_path)
-                # rectangle.saveAsPickle()
-
-            else:
-                raise InvalidGridPositionError
-            
-        except InvalidGridPositionError:
-            print("Could not fit rectangle in grid!")
-
-
     def printStackedRectangles(self):
         for r in self.stacked_rectangles:
-            print(r.getPosition())
-
-    def computeRectangleOrderArea(self, rectangles):
-        
-        areas = [x.getArea() for x in rectangles]
-        indices_descending_order = sorted(range(len(areas)), key=lambda k: areas[k])
-        rectangles_descending_area_order = []
-        for idx in indices_descending_order:
-            rectangles_descending_area_order.append(rectangles[idx])
-
-        return list(reversed(rectangles_descending_area_order))
-    
-    def generateRandomRectangles(self, amount):
-        rectangles = []
-        random.seed(41)
-        for i in range(amount):
-            width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
-            height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)
-
-            r = Rectangle(width, height, name=i)
-            rectangles.append(r)
-        return rectangles
-    
-    def generateAndSaveRandomRectangles(self, amount):
-        rectangles = []
-        random.seed(41)
-        for i in range(amount):
-            width = random.randrange(self.min_rectangle_width, 200, 2)
-            height = random.randrange(self.min_rectangle_height, 200, 2)
-
-            r = Rectangle(width, height, name=i)
-            r.setPicklePath(self.base_path + '/rectangles/todo/')
-            r.saveAsPickle()
-            rectangles.append(r)
-        return rectangles     
+            print(r.getPosition())  
 
     def plot(self):
         # file to save the model  
@@ -260,48 +173,5 @@ class StackedGrid(object):
             
         # displaying the model  
         show(graph) 
-
-    def addToDatabase(self, rectangles):
-        for rectangle in rectangles:
-            self.db_manager.addRectangle(rectangle)
-
-    def startStacking(self):
-        t_start = time.time()
-
-        n = 20
-        
-        self.unstacked_rectangles = self.generateRandomRectangles(n)
-        # self.loadAndAddRectanglesTodo()
-        self.addToDatabase(self.unstacked_rectangles)
-
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-        if len(self.unstacked_rectangles) > 4:
-            self.unstacked_rectangles = grid.computeRectangleOrderArea(self.unstacked_rectangles)
-
-            # print([rect.toDict() for rect in self.unstacked_rectangles])
-
-            for i, rectangle in enumerate(self.unstacked_rectangles):
-                print("Rectangle " + str(rectangle.getName()))
-                self.computeStackingPositionAndUpdateDatabase(rectangle)
-
-            # self.plot()
-            # self.toDxf()
-        
-            # t_stop = time.time() - t_start
-            # print("Time: " + str(round(t_stop)) + " seconds")
-        
-if __name__ == "__main__":
-    # 3 meters long
-    # grid = StackedGrid(width=200, height=1500, name=0)
-
-    # grid = StackedGrid(width=0, height=0, name=0)
-    # grid.loadFromPickle('/home/fmeccanici/Documents/2d_rectangle_packing/grids/0')
-    # grid.startStacking()
-
-    db_manager = DatabaseManager()
-    grid = StackedGrid(width=200, height=1500, name=1)
-    # db_manager.addGrid(grid)
-    db_manager.getGrids()
-    # grid.startStacking()
 
 
