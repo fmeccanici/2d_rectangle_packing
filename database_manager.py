@@ -121,7 +121,7 @@ class DatabaseManager(object):
         print(rectangle.getWidth())
         print(rectangle.getHeight())
 
-        new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked() } }
+        new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked(), 'width': rectangle.getWidth(), 'height': rectangle.getHeight() } }
         self.rectangles_collection.update_one(query, new_values)
     
 if __name__ == "__main__":
