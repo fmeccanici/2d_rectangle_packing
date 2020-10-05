@@ -26,8 +26,10 @@ class Stacker(object):
         # self.db_manager.addGrid(grid)
         all_grids = self.db_manager.getGrids()
         self.grids = []
+        
         for grid in all_grids:
             if not grid.isFull():
+                print("Grid " + str(grid.getName()) + " is not full")
                 self.grids.append(grid)
             else:
                 print("Grid " + str(grid.getName()) + " is full")
@@ -117,7 +119,7 @@ class Stacker(object):
         self.addToDatabase(self.unstacked_rectangles)
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
-        while len(self.unstacked_rectangles ) > 0:
+        while len(self.unstacked_rectangles ) > 4:
             
             self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
@@ -133,6 +135,7 @@ class Stacker(object):
 
                 for grid in self.grids:
                     print("Grid " + str(grid.getName()))
+                    grid.plot()
 
                     try:
                         print("Original rectangle")
@@ -168,5 +171,7 @@ class Stacker(object):
 
 if __name__ == "__main__":
     stacker = Stacker()
-    stacker.start()
+
+    while True:
+        stacker.start()
 
