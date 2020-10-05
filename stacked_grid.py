@@ -4,7 +4,7 @@ from rectangle import Rectangle
 # external dependencies
 import numpy as np
 import copy
-from bokeh.plotting import figure, output_file, show  
+from bokeh.plotting import figure, output_file, show, save
 import random
 import os
 import dxfwrite
@@ -78,6 +78,7 @@ class StackedGrid(object):
         return stacking_position
 
     def isFull(self):
+        print("Checking if grid " + str(self.getName()) + " is full")
         min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
         min_rectangle.setPosition(self.computeStackingPosition(min_rectangle))
 
@@ -86,9 +87,11 @@ class StackedGrid(object):
 
         if self.isValidPosition(min_rectangle) or self.isValidPosition(min_rectangle_rotated):
             self.is_full = False
+            print("Grid " + str(self.getName()) + " is not full")
             return False
         else: 
             self.is_full = True
+            print("Grid " + str(self.getName()) + " is full")
             return True
     
     def isCut(self):
@@ -169,6 +172,6 @@ class StackedGrid(object):
                 fill_alpha = fill_alpha)  
             
         # displaying the model  
-        show(graph) 
-
+        # show(graph) 
+        save(graph)
 

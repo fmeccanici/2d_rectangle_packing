@@ -32,9 +32,9 @@ class DatabaseManager(object):
         is_full = grid.isFull()
         is_cut = grid.isCut()
 
-        return { "name": name, "width": width, "height": height, "num rectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+        return { "name": name, "width": width, "height": height, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
-    def getGrids(self):
+    def getGridsNotFull(self):
         grids = []
 
         cursor = self.grids_collection.find({})
@@ -43,8 +43,9 @@ class DatabaseManager(object):
             grid = StackedGrid(document['width'], document['height'], document['name'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
-            grid.isFull()
-            grids.append(grid)
+            
+            if not grid.isFull():
+                grids.append(grid)
 
         return grids
 
@@ -67,6 +68,8 @@ class DatabaseManager(object):
         self.rectangles_collection.insert(document)
 
     def getRectangles(self, grid):
+        print("Loading rectangles within grid " + str(grid.getName()) + " from database")
+
         rectangles_dict = self.rectangles_collection.find({
             "grid_number" : {"$eq" : grid.getName()}
         })
@@ -74,7 +77,7 @@ class DatabaseManager(object):
         rectangles = []
         for rectangle in rectangles_dict:
             rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
-
+            print("Rectangle " + str(rectangle['name']) + " loaded from database")
         return rectangles
     
     def renderOutputLocations(self):
@@ -115,6 +118,13 @@ class DatabaseManager(object):
 
         return rectangles
     
+    def updateGrid(self, grid):
+        print("Updating grid " + str(grid.getName()) + " in database")
+        query = {"name" : grid.getName()}
+
+        new_values = { "$set": { "numRectangles" : grid.getNumStackedRectangles() + 1 } }
+        self.grids_collection.update_one(query, new_values)
+    
     def updateRectangle(self, rectangle):
         print("Updating rectangle in database")
         query = {"name" : rectangle.getName()}
@@ -133,5 +143,5 @@ if __name__ == "__main__":
     # r = Rectangle([0,0], 1, 1, '1')
     # db_manager.addRectangle(r)
     # db_manager.makeBackup()
-    db_manager.getGrids()
+    db_manager.getGridsNotFull()
     # db_manager.loadBackup("27-09-2020-11:00:20")
