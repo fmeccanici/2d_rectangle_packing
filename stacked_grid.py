@@ -135,7 +135,7 @@ class StackedGrid(object):
         print("Plotting grid " + str(self.getName()))
 
         # file to save the model  
-        output_file("stacked_grid_" + str(self.getName()) + ".html")  
+        output_file("grids/stacked_grid_" + str(self.getName()) + ".html")  
             
         # instantiating the figure object  
         graph = figure(title = "Stacked grid " + str(self.getName()), x_range=(0, self.width), y_range=(0, self.height))  
