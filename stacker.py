@@ -43,7 +43,7 @@ class Stacker(object):
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
 
-        self.min_grid_buffer_size = 10
+        self.min_grid_buffer_size = 50
 
     def addToDatabase(self, rectangles):
         for rectangle in rectangles:
@@ -87,7 +87,7 @@ class Stacker(object):
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)
             self.db_manager.updateGrid(grid)
-            
+
         else:
             raise InvalidGridPositionError
 
@@ -116,17 +116,14 @@ class Stacker(object):
 
         return rectangles
 
-    def start(self):
-        t_start = time.time()
-        
-        
-        n = 10
+    def start(self):        
+        n = 60
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
         
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
-        # minimum of 5 such that we can sort the rectangles based on area
+        # minimum amount of rectangles such that we can sort the rectangles based on area
         while len(self.unstacked_rectangles) > self.min_grid_buffer_size:
             
             self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
@@ -166,15 +163,16 @@ class Stacker(object):
                 if not rectangle.isStacked():
                     self.createAndAddNewGrid()
             
-                t_stop = time.time() - t_start
-                print("Time: " + str(round(t_stop)) + " seconds")
-
         for grid in self.grids:
             grid.plot()
 
 if __name__ == "__main__":
     stacker = Stacker()
 
-    while True:
-        stacker.start()
+    t_start = time.time()
+    stacker.start()
+    t_stop = time.time() - t_start
+    
+    print("Time: " + str(round(t_stop)) + " seconds")
+  
 
