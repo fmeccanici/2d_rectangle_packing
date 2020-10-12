@@ -24,8 +24,6 @@ class Stacker(object):
         
         # grid = StackedGrid(width=200, height=1500, name=1)
         # self.db_manager.addGrid(grid)
-        self.grids = self.db_manager.getGridsNotFull()
-        """
         all_grids = self.db_manager.getGrids()
         self.grids = []
         
@@ -35,15 +33,13 @@ class Stacker(object):
                 self.grids.append(grid)
             else:
                 print("Grid " + str(grid.getName()) + " is full")
-        """
+
         self.unstacked_rectangles = []
         
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
-
-        self.min_grid_buffer_size = 10
 
     def addToDatabase(self, rectangles):
         for rectangle in rectangles:
@@ -86,8 +82,7 @@ class Stacker(object):
 
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)
-            self.db_manager.updateGrid(grid)
-            
+
         else:
             raise InvalidGridPositionError
 
@@ -118,19 +113,21 @@ class Stacker(object):
 
     def start(self):
         t_start = time.time()
-        
-        
+
         n = 10
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
-        
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
-        # minimum of 5 such that we can sort the rectangles based on area
-        while len(self.unstacked_rectangles) > self.min_grid_buffer_size:
+        while len(self.unstacked_rectangles ) > 4:
             
             self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+
+            # print([x.getName() for x in self.unstacked_rectangles])
+            # print([x.getName() for x in self.grids])
+
             self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+
 
             for i, rectangle in enumerate(self.unstacked_rectangles):
                 print("Amount of unstacked rectangles = " + str(len(self.unstacked_rectangles)))
