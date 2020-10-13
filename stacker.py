@@ -169,10 +169,11 @@ class Stacker(object):
 if __name__ == "__main__":
     stacker = Stacker()
 
-    t_start = time.time()
-    stacker.start()
-    t_stop = time.time() - t_start
-    
-    print("Time: " + str(round(t_stop)) + " seconds")
+    while True:
+        t_start = time.time()
+        stacker.start()
+        t_stop = time.time() - t_start
+        
+        print("Time: " + str(round(t_stop)) + " seconds")
   
 
