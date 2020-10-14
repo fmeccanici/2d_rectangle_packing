@@ -8,6 +8,8 @@ from os.path import join
 from bson.json_util import dumps
 import time
 import os
+import getpass
+
 
 class DatabaseManager(object):
     def __init__(self, host='localhost', port=27017, database="stacked_rectangles_database", username="NA", password="NA"):
@@ -22,7 +24,9 @@ class DatabaseManager(object):
         self.rectangles_collection = self.db["rectangles"]
         self.grids_collection = self.db["grids"]
 
-        self.backup_path = '/home/fmeccanici/Documents/2d_rectangle_packing/databases/'
+        username = getpass.getuser()
+
+        self.backup_path = '/home/' + username + '/Documents/2d_rectangle_packing/rectangle_packing/database_backups/'
 
     def createGridDocument(self, grid):
         width = grid.getWidth()
@@ -34,6 +38,26 @@ class DatabaseManager(object):
 
         return { "name": name, "width": width, "height": height, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
+    def convertGridsNotCutToDxf(self):
+        grids_not_cut = self.getGridsNotCut()
+        for grid in grids_not_cut:
+            grid.toDxf()
+
+    def getGridsNotCut(self):
+        grids = []
+
+        cursor = self.grids_collection.find({})
+        for document in cursor:
+            print("Loaded grid " + str(document["name"]) + " from database")
+            grid = StackedGrid(document['width'], document['height'], document['name'])
+            rectangles = self.getRectangles(grid)
+            grid.setStackedRectangles(rectangles)
+            
+            if not grid.isCut():
+                grids.append(grid)
+
+        return grids
+
     def getGridsNotFull(self):
         grids = []
 
@@ -93,9 +117,10 @@ class DatabaseManager(object):
             command += " --username " + self.username
         if self.password != 'NA':
             command += " --password " + self.password
-
+        
         command += " --out " + self.renderOutputLocations()
 
+        os.mkdir(self.renderOutputLocations())
         os.system(command)
 
         print("mongo backup progress started")

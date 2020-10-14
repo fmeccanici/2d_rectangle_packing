@@ -1,11 +1,8 @@
 import unittest
 import sys
 
-# make importing my own classes work
-sys.path.append("..")
-
-from rectangle_packing.stacked_grid import StackedGrid
-from rectangle_packing.rectangle import Rectangle
+from stacked_grid import StackedGrid
+from rectangle import Rectangle
 
 class StackedGridTest(unittest.TestCase):
 

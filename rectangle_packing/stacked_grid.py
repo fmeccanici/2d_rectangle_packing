@@ -1,5 +1,5 @@
 # my own classes
-from rectangle_packing.rectangle import Rectangle
+from rectangle import Rectangle
 
 # external dependencies
 import numpy as np
@@ -29,7 +29,7 @@ class StackedGrid(object):
 
         self.unstacked_rectangles = []
         
-        self.grid_dxf = "grid" + str(name) + ".dxf"
+        self.grid_dxf = "./dxf/grid" + str(name) + ".dxf"
         self.drawing = dxf.drawing(self.grid_dxf)
         self.base_path = os.path.abspath(os.getcwd())
 
@@ -135,7 +135,7 @@ class StackedGrid(object):
         print("Plotting grid " + str(self.getName()))
 
         # file to save the model  
-        output_file("grids/stacked_grid_" + str(self.getName()) + ".html")  
+        output_file("plots/stacked_grid_" + str(self.getName()) + ".html")  
             
         # instantiating the figure object  
         graph = figure(title = "Stacked grid " + str(self.getName()), x_range=(0, self.width), y_range=(0, self.height))  

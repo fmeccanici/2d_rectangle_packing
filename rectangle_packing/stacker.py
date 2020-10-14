@@ -1,3 +1,4 @@
+
 from rectangle import Rectangle
 from stacked_grid import StackedGrid
 from database_manager import DatabaseManager
@@ -24,18 +25,10 @@ class Stacker(object):
         
         # grid = StackedGrid(width=200, height=1500, name=1)
         # self.db_manager.addGrid(grid)
-        self.grids = self.db_manager.getGridsNotFull()
-        """
-        all_grids = self.db_manager.getGrids()
-        self.grids = []
         
-        for grid in all_grids:
-            if not grid.isFull():
-                print("Grid " + str(grid.getName()) + " is not full")
-                self.grids.append(grid)
-            else:
-                print("Grid " + str(grid.getName()) + " is full")
-        """
+        self.grids = self.db_manager.getGridsNotFull()
+        
+
         self.unstacked_rectangles = []
         
         self.min_rectangle_width = 100 #cm
@@ -117,7 +110,7 @@ class Stacker(object):
         return rectangles
 
     def start(self):        
-        n = 60
+        n = 5
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
         
@@ -168,12 +161,14 @@ class Stacker(object):
 
 if __name__ == "__main__":
     stacker = Stacker()
-
+    # stacker.db_manager.convertGridsNotCutToDxf()
+    
     while True:
         t_start = time.time()
         stacker.start()
+        stacker.db_manager.makeBackup()
         t_stop = time.time() - t_start
-        
+
         print("Time: " + str(round(t_stop)) + " seconds")
-  
+    
 
