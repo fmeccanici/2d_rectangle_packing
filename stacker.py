@@ -42,6 +42,8 @@ class Stacker(object):
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
+        
+        self.min_grid_buffer_size = 50
 
     def addToDatabase(self, rectangles):
         for rectangle in rectangles:
@@ -171,10 +173,11 @@ class Stacker(object):
 if __name__ == "__main__":
     stacker = Stacker()
 
-    t_start = time.time()
-    stacker.start()
-    t_stop = time.time() - t_start
-    
-    print("Time: " + str(round(t_stop)) + " seconds")
+    while True:
+        t_start = time.time()
+        stacker.start()
+        t_stop = time.time() - t_start
+        
+        print("Time: " + str(round(t_stop)) + " seconds")
   
 
