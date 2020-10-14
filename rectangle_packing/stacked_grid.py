@@ -174,4 +174,3 @@ class StackedGrid(object):
         # displaying the model  
         # show(graph) 
         save(graph)
-
