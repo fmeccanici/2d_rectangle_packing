@@ -2,7 +2,7 @@ import sys
 import os
 
 from PyQt5 import QtWebEngineWidgets, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot
+from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot, QRect
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
                              QMenu, QPushButton, QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QSlider, QLabel,
                              QLineEdit, QListWidget, QListWidgetItem, QMainWindow)
@@ -62,10 +62,15 @@ class RectanglePackingGui(QWidget):
         self.createGridOrdersLayout()
 
         self.grid_drawing = QtWidgets.QLabel()
-        canvas = QPixmap(400, 800)
+        self.canvas_width = 400
+        self.canvas_height = 800
+        self.max_rectangle_width = 200 #cm
+        self.max_rectangle_height = 1500 #cm
+
+        self.canvas = QPixmap(self.canvas_width, self.canvas_height)
         color = QColor(255, 255, 255);
-        canvas.fill(color)
-        self.grid_drawing.setPixmap(canvas)
+        self.canvas.fill(color)
+        self.grid_drawing.setPixmap(self.canvas)
 
         self.buttons_layout.addWidget(self.grid_drawing)
 
@@ -75,18 +80,35 @@ class RectanglePackingGui(QWidget):
         self.setLayout(self.main_layout)
 
     def drawGrid(self, grid):
+        self.grid_drawing.setPixmap(self.canvas)
+        
         rectangles = grid.getStackedRectangles()
         for rectangle in rectangles:
             self.drawRectangle(rectangle)
-        
+        self.grid_drawing.update()
 
     def drawRectangle(self, rectangle):
         painter = QPainter(self.grid_drawing.pixmap())
-        x = rectangle.getPosition()[0]
-        y = rectangle.getPosition()[1]
+        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
 
-        painter.drawRect(x, y, rectangle.getWidth(), rectangle.getHeight())
-        # painter.drawRect(10, 10, 300, 200)
+        x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+        y = rectangle.getPosition()[1] + rectangle.getHeight()/2
+        width = rectangle.getWidth() 
+        height = rectangle.getHeight() 
+
+        y = self.max_rectangle_height - y 
+
+        x = x / self.max_rectangle_width * self.canvas_width
+        y = y / self.max_rectangle_height * self.canvas_height
+
+        print(x, y , width, height)
+
+        width = width / self.max_rectangle_width * self.canvas_width
+        height = height / self.max_rectangle_height * self.canvas_height
+
+        painter.drawRect(x, y, width, height)
+
         painter.end()
 
     def useMultithread(self, function):
@@ -108,8 +130,10 @@ class RectanglePackingGui(QWidget):
             try:
                 self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
                 grid.plot()
-                self.buttons_layout.removeWidget(self.grid_html_viewer)
-                self.createGridHtmlViewer(grid_number)
+                # self.buttons_layout.removeWidget(self.grid_html_viewer)
+                # self.createGridHtmlViewer(grid_number)
+                self.drawRectangle(rectangle)
+                self.drawGrid(grid)
             except InvalidGridPositionError:
                 print("Rectangle does not fit")
 
