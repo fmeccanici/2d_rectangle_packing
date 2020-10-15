@@ -61,24 +61,32 @@ class RectanglePackingGui(QWidget):
         self.createGridHtmlViewer(grid_number)
         self.createGridOrdersLayout()
 
-        self.label = QtWidgets.QLabel()
+        self.grid_drawing = QtWidgets.QLabel()
         canvas = QPixmap(400, 800)
         color = QColor(255, 255, 255);
         canvas.fill(color)
-        self.label.setPixmap(canvas)
+        self.grid_drawing.setPixmap(canvas)
 
-        # self.setCentralWidget(self.label)
-        self.draw_something()
-        self.buttons_layout.addWidget(self.label)
+        self.buttons_layout.addWidget(self.grid_drawing)
 
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.addLayout(self.grid_orders_layout)
 
         self.setLayout(self.main_layout)
+
+    def drawGrid(self, grid):
+        rectangles = grid.getStackedRectangles()
+        for rectangle in rectangles:
+            self.drawRectangle(rectangle)
         
-    def draw_something(self):
-        painter = QPainter(self.label.pixmap())
-        painter.drawRect(10, 10, 300, 200)
+
+    def drawRectangle(self, rectangle):
+        painter = QPainter(self.grid_drawing.pixmap())
+        x = rectangle.getPosition()[0]
+        y = rectangle.getPosition()[1]
+
+        painter.drawRect(x, y, rectangle.getWidth(), rectangle.getHeight())
+        # painter.drawRect(10, 10, 300, 200)
         painter.end()
 
     def useMultithread(self, function):
@@ -115,8 +123,8 @@ class RectanglePackingGui(QWidget):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         
         grid = self.db_manager.getGrid(grid_number)
-        self.createGridHtmlViewer(grid_number)
-
+        # self.createGridHtmlViewer(grid_number)
+        self.drawGrid(grid)
         self.removeAllOrderItems()
 
         for rectangle in grid.getStackedRectangles():
