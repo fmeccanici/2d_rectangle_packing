@@ -26,7 +26,7 @@ class Stacker(object):
         # grid = StackedGrid(width=200, height=1500, name=1)
         # self.db_manager.addGrid(grid)
         
-        # self.grids = self.db_manager.getGridsNotFull()
+        self.grids = self.db_manager.getGridsNotFull()
         
 
         self.unstacked_rectangles = []

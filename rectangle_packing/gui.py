@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
                              QMenu, QPushButton, QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QSlider, QLabel,
                              QLineEdit, QListWidget, QListWidgetItem)
 
+
 from database_manager import DatabaseManager
 from stacked_grid import StackedGrid
 from stacker import Stacker, InvalidGridPositionError
