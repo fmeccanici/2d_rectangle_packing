@@ -58,18 +58,44 @@ class DatabaseManager(object):
 
         return grids
 
-    def getGridsNotFull(self):
+    def getAllGrids(self):
         grids = []
-
         cursor = self.grids_collection.find({})
+
         for document in cursor:
-            print("Loaded grid " + str(document["name"]) + " from database")
+                print("Loaded grid " + str(document["name"]) + " from database")
+                grid = StackedGrid(document['width'], document['height'], document['name'])
+                rectangles = self.getRectangles(grid)
+                grid.setStackedRectangles(rectangles)
+                grids.append(grid)
+
+    def getGrid(self, grid_number):
+        query = {"name" : grid_number}
+
+        cursor = self.grids_collection.find(query)
+        for document in cursor:
             grid = StackedGrid(document['width'], document['height'], document['name'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
-            
-            if not grid.isFull():
-                grids.append(grid)
+        
+        return grid
+
+    def getGridsNotFull(self):
+        try:
+            grids = []
+
+            cursor = self.grids_collection.find({})
+
+            for document in cursor:
+                    print("Loaded grid " + str(document["name"]) + " from database")
+                    grid = StackedGrid(document['width'], document['height'], document['name'])
+                    rectangles = self.getRectangles(grid)
+                    grid.setStackedRectangles(rectangles)
+                    
+                    if not grid.isFull():
+                        grids.append(grid)
+        except:
+            pass
 
         return grids
 
