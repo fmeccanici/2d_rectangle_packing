@@ -85,7 +85,6 @@ class RectanglePackingGui(QWidget):
         rectangles = grid.getStackedRectangles()
         for rectangle in rectangles:
             self.drawRectangle(rectangle)
-        self.grid_drawing.update()
 
     def drawRectangle(self, rectangle):
         painter = QPainter(self.grid_drawing.pixmap())
@@ -102,14 +101,14 @@ class RectanglePackingGui(QWidget):
         x = x / self.max_rectangle_width * self.canvas_width
         y = y / self.max_rectangle_height * self.canvas_height
 
-        print(x, y , width, height)
-
         width = width / self.max_rectangle_width * self.canvas_width
         height = height / self.max_rectangle_height * self.canvas_height
 
         painter.drawRect(x, y, width, height)
 
         painter.end()
+        
+        self.grid_drawing.update()
 
     def useMultithread(self, function):
         worker = Worker(function)
@@ -129,11 +128,11 @@ class RectanglePackingGui(QWidget):
         for rectangle in self.unstacked_rectangles:
             try:
                 self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                grid.plot()
+                # grid.plot()
                 # self.buttons_layout.removeWidget(self.grid_html_viewer)
                 # self.createGridHtmlViewer(grid_number)
                 self.drawRectangle(rectangle)
-                self.drawGrid(grid)
+                # self.drawGrid(grid)
             except InvalidGridPositionError:
                 print("Rectangle does not fit")
 
@@ -192,6 +191,7 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(self.start_stacking_button)
 
         self.cut_button = QPushButton("Cut")
+
         self.buttons_layout.addWidget(self.cut_button)
 
 if __name__ == '__main__':
