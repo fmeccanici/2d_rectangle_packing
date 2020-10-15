@@ -1,12 +1,12 @@
 import sys
 import os
 
-from PyQt5 import QtWebEngineWidgets
+from PyQt5 import QtWebEngineWidgets, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
                              QMenu, QPushButton, QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QSlider, QLabel,
-                             QLineEdit, QListWidget, QListWidgetItem)
-
+                             QLineEdit, QListWidget, QListWidgetItem, QMainWindow)
+from PyQt5.QtGui import QPainter, QBrush, QPen, QPixmap, QColor
 
 from database_manager import DatabaseManager
 from stacked_grid import StackedGrid
@@ -59,13 +59,27 @@ class RectanglePackingGui(QWidget):
 
         grid_number = 1
         self.createGridHtmlViewer(grid_number)
-
         self.createGridOrdersLayout()
+
+        self.label = QtWidgets.QLabel()
+        canvas = QPixmap(400, 800)
+        color = QColor(255, 255, 255);
+        canvas.fill(color)
+        self.label.setPixmap(canvas)
+
+        # self.setCentralWidget(self.label)
+        self.draw_something()
+        self.buttons_layout.addWidget(self.label)
 
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.addLayout(self.grid_orders_layout)
 
         self.setLayout(self.main_layout)
+        
+    def draw_something(self):
+        painter = QPainter(self.label.pixmap())
+        painter.drawRect(10, 10, 300, 200)
+        painter.end()
 
     def useMultithread(self, function):
         worker = Worker(function)
@@ -115,7 +129,7 @@ class RectanglePackingGui(QWidget):
             os.path.split(os.path.abspath(__file__))[0] + '/plots/stacked_grid_' + str(grid_number) + '.html'
         ))
 
-        self.buttons_layout.addWidget(self.grid_html_viewer)
+        # self.buttons_layout.addWidget(self.grid_html_viewer)
 
     def createGridOrdersLayout(self):
         self.list_widget_grids = QListWidget() 
