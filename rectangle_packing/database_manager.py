@@ -75,12 +75,13 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            print("Loaded grid " + str(document["name"]) + " from database")
-            grid = StackedGrid(document['width'], document['height'], document['name'])
+            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
             if not grid.isCut():
+                print("Loaded grid " + str(document["name"]) + " from database")
+
                 grids.append(grid)
 
         return grids
@@ -207,9 +208,12 @@ class DatabaseManager(object):
     
     def updateGrid(self, grid):
         print("Updating grid " + str(grid.getName()) + " in database")
+        print("isCut = " + str(grid.isCut()))
+        print("numRectangles = " + str(grid.getNumStackedRectangles()))
+
         query = {"name" : grid.getName()}
 
-        new_values = { "$set": { "numRectangles" : grid.getNumStackedRectangles() + 1 } }
+        new_values = { "$set": { "numRectangles" : grid.getNumStackedRectangles() + 1 , "isCut": grid.isCut()} }
         self.grids_collection.update_one(query, new_values)
     
     def updateRectangle(self, rectangle):

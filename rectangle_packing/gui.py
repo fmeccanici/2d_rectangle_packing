@@ -233,11 +233,15 @@ class RectanglePackingGui(QWidget):
         grid.toDxf()
 
     def onCutClick(self):
+
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
         grid.setCut()
+        grid.toDxf()
+
         self.db_manager.updateGrid(grid)
 
+        x = self.db_manager.getGridsNotCut()
         item = self.list_widget_grids.findItems(self.list_widget_grids.currentItem().text(), Qt.MatchExactly)
         row = self.list_widget_grids.row(item[0])
         self.list_widget_grids.takeItem(row)
