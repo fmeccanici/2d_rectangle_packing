@@ -28,12 +28,33 @@ class DatabaseManager(object):
 
         self.backup_path = '/home/' + username + '/Documents/2d_rectangle_packing/rectangle_packing/database_backups/'
 
+    def listUsedGridNames(self):
+        names = []
+        cursor = self.grids_collection.find({})
+        
+        for document in cursor:
+            name = document['name']
+            names.append(name)
+        
+        return names
+
+    def createUniqueGrid(self):
+        used_names = self.listUsedGridNames()
+        sorted_names = sorted(used_names)
+
+        unique_name = int(sorted_names[-1] + 1)
+        grid = StackedGrid(200, 1500, unique_name)
+
+        self.addGrid(grid)
+
+        return grid
+
     def createGridDocument(self, grid):
         width = grid.getWidth()
         height = grid.getHeight()
         num_rectangles = grid.getNumStackedRectangles()
         name = grid.getName()
-        is_full = grid.isFull()
+        # is_full = grid.isFull()
         is_cut = grid.isCut()
 
         return { "name": name, "width": width, "height": height, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
@@ -116,6 +137,15 @@ class DatabaseManager(object):
     def addRectangle(self, rectangle):
         document = self.createRectangleDocument(rectangle)
         self.rectangles_collection.insert(document)
+
+    def getRectangle(self, rectangle_number):
+        query = {"name" : rectangle_number}
+
+        cursor = self.rectangles_collection.find(query)
+        for document in cursor:
+            rectangle = Rectangle(document['width'], document['height'], document['name'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
+        
+        return rectangle
 
     def getRectangles(self, grid):
         print("Loading rectangles within grid " + str(grid.getName()) + " from database")

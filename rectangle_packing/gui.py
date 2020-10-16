@@ -73,6 +73,8 @@ class RectanglePackingGui(QWidget):
         self.grid_drawing.setPixmap(self.canvas)
 
         self.buttons_layout.addWidget(self.grid_drawing)
+        
+        self.createGridOrdersEvents()
 
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.addLayout(self.grid_orders_layout)
@@ -86,10 +88,10 @@ class RectanglePackingGui(QWidget):
         for rectangle in rectangles:
             self.drawRectangle(rectangle)
 
-    def drawRectangle(self, rectangle):
+    def drawRectangle(self, rectangle, color=Qt.green):
         painter = QPainter(self.grid_drawing.pixmap())
         painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
-        painter.setBrush(QBrush(Qt.green, Qt.DiagCrossPattern))
+        painter.setBrush(QBrush(color, Qt.DiagCrossPattern))
 
         x = rectangle.getPosition()[0] - rectangle.getWidth()/2
         y = rectangle.getPosition()[1] + rectangle.getHeight()/2
@@ -129,23 +131,18 @@ class RectanglePackingGui(QWidget):
         for rectangle in self.unstacked_rectangles:
             try:
                 self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                # grid.plot()
-                # self.buttons_layout.removeWidget(self.grid_html_viewer)
-                # self.createGridHtmlViewer(grid_number)
-                # self.drawRectangle(rectangle)
                 self.refreshGrid()
             except InvalidGridPositionError:
                 print("Rectangle does not fit")
 
     def refreshGrid(self):
-        # self.buttons_layout.removeWidget(self.grid_html_viewer)
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         
         grid = self.db_manager.getGrid(grid_number)
-        # self.createGridHtmlViewer(grid_number)
-        self.drawGrid(grid)
 
+        self.drawGrid(grid)
         self.removeAllOrderItems()
+
 
         for rectangle in grid.getStackedRectangles():
             list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
@@ -155,9 +152,7 @@ class RectanglePackingGui(QWidget):
 
 
     def removeAllOrderItems(self):
-        for i in range(self.list_widget_orders.count()):
-
-            self.list_widget_orders.takeItem(i)
+        self.list_widget_orders.clear()
 
     def onLoadGridClick(self):
         self.refreshGrid()
@@ -183,17 +178,59 @@ class RectanglePackingGui(QWidget):
         self.grid_orders_layout.addWidget(self.list_widget_grids)
         self.grid_orders_layout.addWidget(self.list_widget_orders)
 
+    def onCreateGridClick(self):
+        grid = self.db_manager.createUniqueGrid()
+
+        list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
+        self.list_widget_grids.addItem(list_widget_item) 
+
+        self.list_widget_grids.repaint()
+
     def createButtonEvents(self):
-        self.load_grid_button.clicked.connect(self.onLoadGridClick)
+        # self.load_grid_button.clicked.connect(self.onLoadGridClick)
+        self.create_grid_button.clicked.connect(self.onCreateGridClick)
+
         self.start_stacking_button.clicked.connect(self.onStartStackingClick)
+        self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
+        
+    def loadOrders(self):
+        n = 5
+        unstacked_rectangles = self.stacker.generateRandomRectangles(n)
+        self.stacker.addToDatabase(unstacked_rectangles)
+
+    def onLoadOrdersClick(self):
+        self.loadOrders()
+
+    def onDoubleClickOrder(self):
+        # item = self.list_widget_orders.findItems(self.current_rectangle, Qt.MatchExactly)
+        # self.list_widget_orders.takeItem(item)
+
+        rectangle_number = int(self.list_widget_orders.currentItem().text().split(' ')[1])
+        rectangle = self.db_manager.getRectangle(rectangle_number)
+
+        self.drawRectangle(rectangle, color=Qt.red)
+        self.current_rectangle = rectangle_number
+
+    def onDoubleClickGrid(self):
+        self.refreshGrid()
+
+
+    def createGridOrdersEvents(self):
+        self.list_widget_orders.itemDoubleClicked.connect(self.onDoubleClickOrder)
+        self.list_widget_grids.itemDoubleClicked.connect(self.onDoubleClickGrid)
 
     def createButtonsLayout(self):
 
         self.export_to_dxf_button = QPushButton("Export to DXF")
         self.buttons_layout.addWidget(self.export_to_dxf_button)
+        
+        self.load_orders_button = QPushButton("Load new orders")
+        # self.load_grid_button = QPushButton("Load")
+        self.create_grid_button = QPushButton("Create new grid")
 
-        self.load_grid_button = QPushButton("Load")
-        self.buttons_layout.addWidget(self.load_grid_button)
+        # self.buttons_layout.addWidget(self.load_grid_button)
+        self.buttons_layout.addWidget(self.create_grid_button)
+        self.buttons_layout.addWidget(self.load_orders_button)
 
         self.start_stacking_button = QPushButton("Start stacking")
         self.buttons_layout.addWidget(self.start_stacking_button)
