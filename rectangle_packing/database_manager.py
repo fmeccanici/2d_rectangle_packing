@@ -39,14 +39,20 @@ class DatabaseManager(object):
         return names
 
     def createUniqueGrid(self):
-        used_names = self.listUsedGridNames()
-        sorted_names = sorted(used_names)
+        try:
+            used_names = self.listUsedGridNames()
+            sorted_names = sorted(used_names)
+            unique_name = int(sorted_names[-1] + 1)
+            grid = StackedGrid(200, 1500, unique_name)
+            self.addGrid(grid)
 
-        unique_name = int(sorted_names[-1] + 1)
-        grid = StackedGrid(200, 1500, unique_name)
+        except IndexError:
+            print("No grids available yet")
+            print("Creating first grid")
 
-        self.addGrid(grid)
-
+            grid = StackedGrid(200, 1500, 1)
+            self.addGrid(grid)
+            
         return grid
 
     def createGridDocument(self, grid):
@@ -54,7 +60,7 @@ class DatabaseManager(object):
         height = grid.getHeight()
         num_rectangles = grid.getNumStackedRectangles()
         name = grid.getName()
-        # is_full = grid.isFull()
+        is_full = grid.isFull()
         is_cut = grid.isCut()
 
         return { "name": name, "width": width, "height": height, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}

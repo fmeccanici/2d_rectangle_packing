@@ -66,6 +66,8 @@ class RectanglePackingGui(QWidget):
         self.canvas_height = 800
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
+        
+        self.previous_rectangle = None
 
         self.canvas = QPixmap(self.canvas_width, self.canvas_height)
         color = QColor(255, 255, 255);
@@ -73,11 +75,11 @@ class RectanglePackingGui(QWidget):
         self.grid_drawing.setPixmap(self.canvas)
 
         self.buttons_layout.addWidget(self.grid_drawing)
-        
         self.createGridOrdersEvents()
 
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.addLayout(self.grid_orders_layout)
+        self.refreshNewOrders()
 
         self.setLayout(self.main_layout)
 
@@ -132,9 +134,12 @@ class RectanglePackingGui(QWidget):
             try:
                 self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
                 self.refreshGrid()
+                self.refreshNewOrders()
             except InvalidGridPositionError:
                 print("Rectangle does not fit")
 
+
+        
     def refreshGrid(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         
@@ -168,6 +173,7 @@ class RectanglePackingGui(QWidget):
     def createGridOrdersLayout(self):
         self.list_widget_grids = QListWidget() 
         self.list_widget_orders = QListWidget() 
+        self.list_widget_new_orders = QListWidget() 
 
         grids = self.db_manager.getGridsNotCut()
 
@@ -177,6 +183,19 @@ class RectanglePackingGui(QWidget):
 
         self.grid_orders_layout.addWidget(self.list_widget_grids)
         self.grid_orders_layout.addWidget(self.list_widget_orders)
+        self.grid_orders_layout.addWidget(self.list_widget_new_orders)
+
+    def refreshNewOrders(self):
+        self.removeAllNewOrderItems()
+        unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        
+        for rectangle in unstacked_rectangles:
+            list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
+            self.list_widget_new_orders.addItem(list_widget_item) 
+        
+
+    def removeAllNewOrderItems(self):
+        self.list_widget_new_orders.clear()
 
     def onCreateGridClick(self):
         grid = self.db_manager.createUniqueGrid()
@@ -192,28 +211,56 @@ class RectanglePackingGui(QWidget):
 
         self.start_stacking_button.clicked.connect(self.onStartStackingClick)
         self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
+        self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
+        self.export_to_dxf_button.clicked.connect(self.onExportDxfClick)
+        self.cut_button.clicked.connect(self.onCutClick)
         
     def loadOrders(self):
         n = 5
         unstacked_rectangles = self.stacker.generateRandomRectangles(n)
         self.stacker.addToDatabase(unstacked_rectangles)
+        self.refreshNewOrders()
 
     def onLoadOrdersClick(self):
         self.loadOrders()
 
+    def onMakeDatabaseBackupClick(self):
+        self.db_manager.makeBackup()
+
+    def onExportDxfClick(self):
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        grid = self.db_manager.getGrid(grid_number)
+        grid.toDxf()
+
+    def onCutClick(self):
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        grid = self.db_manager.getGrid(grid_number)
+        grid.setCut()
+        self.db_manager.updateGrid(grid)
+
+        item = self.list_widget_grids.findItems(self.list_widget_grids.currentItem().text(), Qt.MatchExactly)
+        row = self.list_widget_grids.row(item[0])
+        self.list_widget_grids.takeItem(row)
+
+        
     def onDoubleClickOrder(self):
         # item = self.list_widget_orders.findItems(self.current_rectangle, Qt.MatchExactly)
         # self.list_widget_orders.takeItem(item)
-
+        
         rectangle_number = int(self.list_widget_orders.currentItem().text().split(' ')[1])
         rectangle = self.db_manager.getRectangle(rectangle_number)
+
+        if self.previous_rectangle is not None:
+            self.drawRectangle(self.previous_rectangle)
 
         self.drawRectangle(rectangle, color=Qt.red)
         self.current_rectangle = rectangle_number
 
+        self.previous_rectangle = rectangle
+
+
     def onDoubleClickGrid(self):
         self.refreshGrid()
-
 
     def createGridOrdersEvents(self):
         self.list_widget_orders.itemDoubleClicked.connect(self.onDoubleClickOrder)
@@ -227,10 +274,12 @@ class RectanglePackingGui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         # self.load_grid_button = QPushButton("Load")
         self.create_grid_button = QPushButton("Create new grid")
+        self.make_database_backup_button = QPushButton("Make database backup")
 
         # self.buttons_layout.addWidget(self.load_grid_button)
         self.buttons_layout.addWidget(self.create_grid_button)
         self.buttons_layout.addWidget(self.load_orders_button)
+        self.buttons_layout.addWidget(self.make_database_backup_button)
 
         self.start_stacking_button = QPushButton("Start stacking")
         self.buttons_layout.addWidget(self.start_stacking_button)
