@@ -23,7 +23,7 @@ class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
         
-        grid = StackedGrid(width=200, height=1500, name=996)
+        grid = StackedGrid(width=200, height=1500, name=991)
         self.db_manager.addGrid(grid)
         
         # self.grids = self.db_manager.getGridsNotFull()

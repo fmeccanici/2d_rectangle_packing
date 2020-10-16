@@ -109,6 +109,7 @@ class RectanglePackingGui(QWidget):
         painter.end()
         
         self.grid_drawing.update()
+        QApplication.processEvents()
 
     def useMultithread(self, function):
         worker = Worker(function)
@@ -131,10 +132,27 @@ class RectanglePackingGui(QWidget):
                 # grid.plot()
                 # self.buttons_layout.removeWidget(self.grid_html_viewer)
                 # self.createGridHtmlViewer(grid_number)
-                self.drawRectangle(rectangle)
-                # self.drawGrid(grid)
+                # self.drawRectangle(rectangle)
+                self.refreshGrid()
             except InvalidGridPositionError:
                 print("Rectangle does not fit")
+
+    def refreshGrid(self):
+        # self.buttons_layout.removeWidget(self.grid_html_viewer)
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        
+        grid = self.db_manager.getGrid(grid_number)
+        # self.createGridHtmlViewer(grid_number)
+        self.drawGrid(grid)
+
+        self.removeAllOrderItems()
+
+        for rectangle in grid.getStackedRectangles():
+            list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
+            self.list_widget_orders.addItem(list_widget_item) 
+        
+        QApplication.processEvents()
+
 
     def removeAllOrderItems(self):
         for i in range(self.list_widget_orders.count()):
@@ -142,18 +160,8 @@ class RectanglePackingGui(QWidget):
             self.list_widget_orders.takeItem(i)
 
     def onLoadGridClick(self):
-        self.buttons_layout.removeWidget(self.grid_html_viewer)
-        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        self.refreshGrid()
         
-        grid = self.db_manager.getGrid(grid_number)
-        # self.createGridHtmlViewer(grid_number)
-        self.drawGrid(grid)
-        self.removeAllOrderItems()
-
-        for rectangle in grid.getStackedRectangles():
-            list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
-            self.list_widget_orders.addItem(list_widget_item) 
-
     def createGridHtmlViewer(self, grid_number):
         self.grid_html_viewer = QtWebEngineWidgets.QWebEngineView()
         self.grid_html_viewer.load(QUrl().fromLocalFile(
