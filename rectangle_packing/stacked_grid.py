@@ -117,6 +117,7 @@ class StackedGrid(object):
             height = rectangle.getHeight()
             bgcolor = random.randint(1,255)
             
+            print(x, y, width, height)
             self.drawing.add(dxf.rectangle((x,y), width, height,
                                   bgcolor=bgcolor))
 

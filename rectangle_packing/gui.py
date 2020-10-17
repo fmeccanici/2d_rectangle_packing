@@ -75,7 +75,7 @@ class RectanglePackingGui(QWidget):
         self.grid_drawing.setPixmap(self.canvas)
 
         self.buttons_layout.addWidget(self.grid_drawing)
-        
+
         self.createGridOrdersEvents()
 
         self.main_layout.addLayout(self.buttons_layout)
@@ -93,7 +93,7 @@ class RectanglePackingGui(QWidget):
 
     def drawRectangle(self, rectangle, color=Qt.green):
         painter = QPainter(self.grid_drawing.pixmap())
-        painter.setPen(QPen(Qt.black, 5, Qt.SolidLine))
+        painter.setPen(QPen(Qt.black, 1, Qt.SolidLine))
         painter.setBrush(QBrush(color, Qt.DiagCrossPattern))
 
         x = rectangle.getPosition()[0] - rectangle.getWidth()/2
@@ -290,6 +290,8 @@ class RectanglePackingGui(QWidget):
             grid.toDxf()
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
+        elif self.export_html_radio_button.isChecked():
+            grid.plot()
 
     def onCutClick(self):
 
@@ -349,10 +351,13 @@ class RectanglePackingGui(QWidget):
         self.export_button = QPushButton("Export")
         self.export_dxf_radio_button = QRadioButton("DXF")
         self.export_pdf_radio_button = QRadioButton("PDF")
+        self.export_html_radio_button = QRadioButton("HTML")
+
         export_grid = QGridLayout()
         export_grid.addWidget(self.export_button, 0, 0)
         export_grid.addWidget(self.export_dxf_radio_button, 1, 0)
         export_grid.addWidget(self.export_pdf_radio_button, 2, 0)
+        export_grid.addWidget(self.export_html_radio_button, 1, 1)
 
         group_box.setLayout(export_grid)
 
