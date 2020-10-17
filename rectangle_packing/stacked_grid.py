@@ -10,6 +10,9 @@ import os
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
 
+from ezdxf import recover
+from ezdxf.addons.drawing import matplotlib
+
 class Error(Exception):
     """Base class for other exceptions"""
     pass
@@ -117,7 +120,10 @@ class StackedGrid(object):
         self.drawing.save()
     
     def toPdf(self):
-        pass
+        self.toDxf()
+        dox, auditor = recover.readfile(self.grid_dxf)
+        if not auditor.has_errors:
+            matplotlib.qsave(dox.modelspace(), './pdf/grid_' + str(self.getName()) + '.png')
 
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
