@@ -120,25 +120,27 @@ class RectanglePackingGui(QWidget):
         self.threadpool.start(worker)
 
     def onStartStackingClick(self):
+        self.stacker.startStacking()
 
-        # n = 5
-        # self.unstacked_rectangles = self.stacker.generateRandomRectangles(n)
-        # self.stacker.addToDatabase(self.unstacked_rectangles)
-        
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
 
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
 
         for rectangle in self.unstacked_rectangles:
-            try:
-                self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                self.refreshGrid()
-                self.refreshNewOrders()
-            except InvalidGridPositionError:
-                print("Rectangle does not fit")
 
+            if not self.stacker.stackingStopped():
+                try:
+                    self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                    self.refreshGrid()
+                    self.refreshNewOrders()
+                except InvalidGridPositionError:
+                    print("Rectangle does not fit")
+            else:
+                break
 
+    def onStopStackingClick(self):
+        self.stacker.stopStacking()
         
     def refreshGrid(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
@@ -175,14 +177,25 @@ class RectanglePackingGui(QWidget):
         self.list_widget_orders = QListWidget() 
         self.list_widget_new_orders = QListWidget() 
 
+
         grids = self.db_manager.getGridsNotCut()
 
         for grid in grids:
             list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
             self.list_widget_grids.addItem(list_widget_item) 
 
+
+        grids_label = QLabel("Uncut grids")
+        self.grid_orders_layout.addWidget(grids_label)
         self.grid_orders_layout.addWidget(self.list_widget_grids)
+        
+        grid_orders_label = QLabel("Orders in grid")
+        self.grid_orders_layout.addWidget(grid_orders_label)
         self.grid_orders_layout.addWidget(self.list_widget_orders)
+
+        unstacked_orders_label = QLabel("New orders")
+        self.grid_orders_layout.addWidget(unstacked_orders_label)
+
         self.grid_orders_layout.addWidget(self.list_widget_new_orders)
 
     def refreshNewOrders(self):
@@ -209,10 +222,12 @@ class RectanglePackingGui(QWidget):
         # self.load_grid_button.clicked.connect(self.onLoadGridClick)
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
 
-        self.start_stacking_button.clicked.connect(self.onStartStackingClick)
+        self.start_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingClick))
+        self.stop_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStopStackingClick))
+
         self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
         self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
-        self.export_to_dxf_button.clicked.connect(self.onExportDxfClick)
+        self.export_button.clicked.connect(self.onExportClick)
         self.cut_button.clicked.connect(self.onCutClick)
         
     def loadOrders(self):
@@ -227,10 +242,15 @@ class RectanglePackingGui(QWidget):
     def onMakeDatabaseBackupClick(self):
         self.db_manager.makeBackup()
 
-    def onExportDxfClick(self):
+    def onExportClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
-        grid.toDxf()
+        
+        if self.export_dxf_radio_button.isChecked():
+            grid.toDxf()
+        elif self.export_pdf_radio_button.isChecked():
+            #TODO to pdf function in grid class
+            grid.toPdf()
 
     def onCutClick(self):
 
@@ -241,7 +261,6 @@ class RectanglePackingGui(QWidget):
 
         self.db_manager.updateGrid(grid)
 
-        x = self.db_manager.getGridsNotCut()
         item = self.list_widget_grids.findItems(self.list_widget_grids.currentItem().text(), Qt.MatchExactly)
         row = self.list_widget_grids.row(item[0])
         self.list_widget_grids.takeItem(row)
@@ -271,9 +290,18 @@ class RectanglePackingGui(QWidget):
         self.list_widget_grids.itemDoubleClicked.connect(self.onDoubleClickGrid)
 
     def createButtonsLayout(self):
+        group_box = QGroupBox("Export grid")
+        self.export_button = QPushButton("Export")
+        self.export_dxf_radio_button = QRadioButton("DXF")
+        self.export_pdf_radio_button = QRadioButton("PDF")
+        export_grid = QGridLayout()
+        export_grid.addWidget(self.export_button, 0, 0)
+        export_grid.addWidget(self.export_dxf_radio_button, 1, 0)
+        export_grid.addWidget(self.export_pdf_radio_button, 2, 0)
 
-        self.export_to_dxf_button = QPushButton("Export to DXF")
-        self.buttons_layout.addWidget(self.export_to_dxf_button)
+        group_box.setLayout(export_grid)
+
+        self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
         # self.load_grid_button = QPushButton("Load")
@@ -285,8 +313,14 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(self.load_orders_button)
         self.buttons_layout.addWidget(self.make_database_backup_button)
 
-        self.start_stacking_button = QPushButton("Start stacking")
-        self.buttons_layout.addWidget(self.start_stacking_button)
+        group_box = QGroupBox("Stacking")
+        layout = QVBoxLayout()
+        self.start_stacking_button = QPushButton("Start")
+        self.stop_stacking_button = QPushButton("Stop")
+        layout.addWidget(self.start_stacking_button)
+        layout.addWidget(self.stop_stacking_button)
+        group_box.setLayout(layout)
+        self.buttons_layout.addWidget(group_box)
 
         self.cut_button = QPushButton("Cut")
 

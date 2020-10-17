@@ -38,6 +38,17 @@ class Stacker(object):
 
         self.min_grid_buffer_size = 50
 
+        self.stop_stacking = False
+
+    def stackingStopped(self):
+        return self.stop_stacking
+    
+    def stopStacking(self):
+        self.stop_stacking = True
+
+    def startStacking(self):
+        self.stop_stacking = False
+
     def addToDatabase(self, rectangles):
         for rectangle in rectangles:
             self.db_manager.addRectangle(rectangle)

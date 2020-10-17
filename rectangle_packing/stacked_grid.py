@@ -115,7 +115,10 @@ class StackedGrid(object):
                                   bgcolor=bgcolor))
 
         self.drawing.save()
-        
+    
+    def toPdf(self):
+        pass
+
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
 
