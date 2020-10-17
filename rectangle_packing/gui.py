@@ -75,6 +75,7 @@ class RectanglePackingGui(QWidget):
         self.grid_drawing.setPixmap(self.canvas)
 
         self.buttons_layout.addWidget(self.grid_drawing)
+        
         self.createGridOrdersEvents()
 
         self.main_layout.addLayout(self.buttons_layout)
@@ -156,6 +157,19 @@ class RectanglePackingGui(QWidget):
         
         QApplication.processEvents()
 
+    def refreshCutGrid(self):
+        grid_number = int(self.list_widget_cut_grids.currentItem().text().split(' ')[1])
+        
+        grid = self.db_manager.getGrid(grid_number)
+
+        self.drawGrid(grid)
+        self.removeAllOrderItems()
+
+        for rectangle in grid.getStackedRectangles():
+            list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
+            self.list_widget_orders.addItem(list_widget_item) 
+        
+        QApplication.processEvents()
 
     def removeAllOrderItems(self):
         self.list_widget_orders.clear()
@@ -173,6 +187,8 @@ class RectanglePackingGui(QWidget):
 
     def createGridOrdersLayout(self):
         self.list_widget_grids = QListWidget() 
+        self.list_widget_cut_grids = QListWidget() 
+
         self.list_widget_orders = QListWidget() 
         self.list_widget_new_orders = QListWidget() 
 
@@ -183,18 +199,33 @@ class RectanglePackingGui(QWidget):
             list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
             self.list_widget_grids.addItem(list_widget_item) 
 
+        cut_grids = self.db_manager.getGridsCut()
 
+        for grid in cut_grids:
+            list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
+            self.list_widget_cut_grids.addItem(list_widget_item) 
+
+        cut_uncut_group_box = QGroupBox("")
+
+        self.cut_uncut_layout = QGridLayout()
         grids_label = QLabel("Uncut grids")
-        self.grid_orders_layout.addWidget(grids_label)
-        self.grid_orders_layout.addWidget(self.list_widget_grids)
+        self.cut_uncut_layout.addWidget(grids_label, 0, 0)
+        self.cut_uncut_layout.addWidget(self.list_widget_grids, 1, 0)
         
+        cut_grids_label = QLabel("Cut grids")
+        self.cut_uncut_layout.addWidget(cut_grids_label, 0, 1)
+        self.cut_uncut_layout.addWidget(self.list_widget_cut_grids, 1, 1)
+        
+        cut_uncut_group_box.setLayout(self.cut_uncut_layout)
+
+        self.grid_orders_layout.addWidget(cut_uncut_group_box)
+
         grid_orders_label = QLabel("Orders in grid")
         self.grid_orders_layout.addWidget(grid_orders_label)
         self.grid_orders_layout.addWidget(self.list_widget_orders)
 
         unstacked_orders_label = QLabel("New orders")
         self.grid_orders_layout.addWidget(unstacked_orders_label)
-
         self.grid_orders_layout.addWidget(self.list_widget_new_orders)
 
     def refreshNewOrders(self):
@@ -229,6 +260,7 @@ class RectanglePackingGui(QWidget):
         self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
         self.export_button.clicked.connect(self.onExportClick)
         self.cut_button.clicked.connect(self.onCutClick)
+        self.uncut_button.clicked.connect(self.onUncutClick)
 
     def onEmptyGridClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
@@ -257,7 +289,6 @@ class RectanglePackingGui(QWidget):
         if self.export_dxf_radio_button.isChecked():
             grid.toDxf()
         elif self.export_pdf_radio_button.isChecked():
-            #TODO to pdf function in grid class
             grid.toPdf()
 
     def onCutClick(self):
@@ -272,8 +303,21 @@ class RectanglePackingGui(QWidget):
         item = self.list_widget_grids.findItems(self.list_widget_grids.currentItem().text(), Qt.MatchExactly)
         row = self.list_widget_grids.row(item[0])
         self.list_widget_grids.takeItem(row)
+        self.list_widget_cut_grids.addItem(item[0])
 
-        
+    def onUncutClick(self):
+
+        grid_number = int(self.list_widget_cut_grids.currentItem().text().split(' ')[1])
+        grid = self.db_manager.getGrid(grid_number)
+        grid.setUncut()
+
+        self.db_manager.updateGrid(grid)
+
+        item = self.list_widget_cut_grids.findItems(self.list_widget_cut_grids.currentItem().text(), Qt.MatchExactly)
+        row = self.list_widget_cut_grids.row(item[0])
+        self.list_widget_cut_grids.takeItem(row)
+        self.list_widget_grids.addItem(item[0])
+
     def onDoubleClickOrder(self):
         # item = self.list_widget_orders.findItems(self.current_rectangle, Qt.MatchExactly)
         # self.list_widget_orders.takeItem(item)
@@ -292,9 +336,13 @@ class RectanglePackingGui(QWidget):
     def onDoubleClickGrid(self):
         self.refreshGrid()
 
+    def onDoubleClickCutGrid(self):
+        self.refreshCutGrid()
+
     def createGridOrdersEvents(self):
         self.list_widget_orders.itemDoubleClicked.connect(self.onDoubleClickOrder)
         self.list_widget_grids.itemDoubleClicked.connect(self.onDoubleClickGrid)
+        self.list_widget_cut_grids.itemDoubleClicked.connect(self.onDoubleClickCutGrid)
 
     def createButtonsLayout(self):
         group_box = QGroupBox("Export grid")
@@ -334,8 +382,10 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
 
         self.cut_button = QPushButton("Cut")
+        self.uncut_button = QPushButton("Uncut")
 
         self.buttons_layout.addWidget(self.cut_button)
+        self.buttons_layout.addWidget(self.uncut_button)
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

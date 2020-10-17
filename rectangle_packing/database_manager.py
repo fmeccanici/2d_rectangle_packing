@@ -86,6 +86,22 @@ class DatabaseManager(object):
 
         return grids
 
+    def getGridsCut(self):
+        grids = []
+
+        cursor = self.grids_collection.find({})
+        for document in cursor:
+            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            rectangles = self.getRectangles(grid)
+            grid.setStackedRectangles(rectangles)
+            
+            if grid.isCut():
+                print("Loaded grid " + str(document["name"]) + " from database")
+
+                grids.append(grid)
+
+        return grids
+
     def getAllGrids(self):
         grids = []
         cursor = self.grids_collection.find({})
@@ -237,7 +253,7 @@ class DatabaseManager(object):
         grid.setStackedRectangles([])
         grid.setUncut()
         self.updateGrid(grid)
-        
+
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()
