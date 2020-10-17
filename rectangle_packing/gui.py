@@ -150,7 +150,6 @@ class RectanglePackingGui(QWidget):
         self.drawGrid(grid)
         self.removeAllOrderItems()
 
-
         for rectangle in grid.getStackedRectangles():
             list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
             self.list_widget_orders.addItem(list_widget_item) 
@@ -221,6 +220,7 @@ class RectanglePackingGui(QWidget):
     def createButtonEvents(self):
         # self.load_grid_button.clicked.connect(self.onLoadGridClick)
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
+        self.empty_grid_button.clicked.connect(self.onEmptyGridClick)
 
         self.start_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingClick))
         self.stop_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStopStackingClick))
@@ -229,7 +229,15 @@ class RectanglePackingGui(QWidget):
         self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
         self.export_button.clicked.connect(self.onExportClick)
         self.cut_button.clicked.connect(self.onCutClick)
+
+    def onEmptyGridClick(self):
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        grid = self.db_manager.getGrid(grid_number)
+
+        self.db_manager.emptyGrid(grid)
         
+        self.refreshNewOrders()
+
     def loadOrders(self):
         n = 5
         unstacked_rectangles = self.stacker.generateRandomRectangles(n)
@@ -281,7 +289,6 @@ class RectanglePackingGui(QWidget):
 
         self.previous_rectangle = rectangle
 
-
     def onDoubleClickGrid(self):
         self.refreshGrid()
 
@@ -306,10 +313,14 @@ class RectanglePackingGui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         # self.load_grid_button = QPushButton("Load")
         self.create_grid_button = QPushButton("Create new grid")
+        self.empty_grid_button = QPushButton("Empty grid")
+
         self.make_database_backup_button = QPushButton("Make database backup")
 
         # self.buttons_layout.addWidget(self.load_grid_button)
         self.buttons_layout.addWidget(self.create_grid_button)
+        self.buttons_layout.addWidget(self.empty_grid_button)
+
         self.buttons_layout.addWidget(self.load_orders_button)
         self.buttons_layout.addWidget(self.make_database_backup_button)
 

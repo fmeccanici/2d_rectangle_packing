@@ -103,6 +103,9 @@ class StackedGrid(object):
     def setCut(self):
         self.is_cut = True
     
+    def setUncut(self):
+        self.is_cut = False
+
     def toDict(self):
         return {'name': self.name, 'width': self.width, 'height': self.height, 'stacked_rectangles': [rect.toDict() for rect in self.stacked_rectangles]}
 

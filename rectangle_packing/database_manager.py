@@ -9,7 +9,7 @@ from bson.json_util import dumps
 import time
 import os
 import getpass
-
+import numpy as np
 
 class DatabaseManager(object):
     def __init__(self, host='localhost', port=27017, database="stacked_rectangles_database", username="NA", password="NA"):
@@ -227,10 +227,17 @@ class DatabaseManager(object):
     
     def emptyGrid(self, grid):
         rectangles = self.getRectangles(grid)
+        
         for rectangle in rectangles:
             rectangle.setUnstacked()
+            rectangle.setGridNumber(-1)
+            rectangle.setPosition(np.array([-1, -1]))
             self.updateRectangle(rectangle)
-            
+
+        grid.setStackedRectangles([])
+        grid.setUncut()
+        self.updateGrid(grid)
+        
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()
