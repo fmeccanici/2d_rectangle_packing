@@ -25,6 +25,9 @@ class Rectangle(object):
     def setStacked(self):
         self.is_stacked = True
 
+    def setUnstacked(self):
+        self.is_stacked = False
+
     def getName(self):
         return self.name
     

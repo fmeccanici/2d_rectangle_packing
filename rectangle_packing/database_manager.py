@@ -225,6 +225,12 @@ class DatabaseManager(object):
         new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked(), 'width': rectangle.getWidth(), 'height': rectangle.getHeight() } }
         self.rectangles_collection.update_one(query, new_values)
     
+    def emptyGrid(self, grid):
+        rectangles = self.getRectangles(grid)
+        for rectangle in rectangles:
+            rectangle.setUnstacked()
+            self.updateRectangle(rectangle)
+            
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()
