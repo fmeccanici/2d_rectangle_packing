@@ -317,9 +317,6 @@ class RectanglePackingGui(QWidget):
         list_widget.addItem(item[0])
 
     def onDoubleClickOrder(self):
-        # item = self.list_widget_orders.findItems(self.current_rectangle, Qt.MatchExactly)
-        # self.list_widget_orders.takeItem(item)
-        
         rectangle_number = int(self.list_widget_orders.currentItem().text().split(' ')[1])
         rectangle = self.db_manager.getRectangle(rectangle_number)
 
