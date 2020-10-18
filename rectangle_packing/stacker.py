@@ -1,3 +1,4 @@
+
 from rectangle import Rectangle
 from stacked_grid import StackedGrid
 from database_manager import DatabaseManager
@@ -22,20 +23,12 @@ class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
         
-        # grid = StackedGrid(width=200, height=1500, name=1)
+        # grid = StackedGrid(width=200, height=1500, name=991)
         # self.db_manager.addGrid(grid)
-        self.grids = self.db_manager.getGridsNotFull()
-        """
-        all_grids = self.db_manager.getGrids()
-        self.grids = []
         
-        for grid in all_grids:
-            if not grid.isFull():
-                print("Grid " + str(grid.getName()) + " is not full")
-                self.grids.append(grid)
-            else:
-                print("Grid " + str(grid.getName()) + " is full")
-        """
+        # self.grids = self.db_manager.getGridsNotFull()
+        
+
         self.unstacked_rectangles = []
         
         self.min_rectangle_width = 100 #cm
@@ -44,6 +37,17 @@ class Stacker(object):
         self.max_rectangle_height = 1500 #cm
         
         self.min_grid_buffer_size = 50
+
+        self.stop_stacking = False
+
+    def stackingStopped(self):
+        return self.stop_stacking
+    
+    def stopStacking(self):
+        self.stop_stacking = True
+
+    def startStacking(self):
+        self.stop_stacking = False
 
     def addToDatabase(self, rectangles):
         for rectangle in rectangles:
@@ -117,7 +121,7 @@ class Stacker(object):
         return rectangles
 
     def start(self):        
-        n = 60
+        n = 5
         self.unstacked_rectangles = self.generateRandomRectangles(n)
         self.addToDatabase(self.unstacked_rectangles)
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
@@ -172,12 +176,14 @@ class Stacker(object):
 
 if __name__ == "__main__":
     stacker = Stacker()
-
+    # stacker.db_manager.convertGridsNotCutToDxf()
+    
     while True:
         t_start = time.time()
         stacker.start()
+        stacker.db_manager.makeBackup()
         t_stop = time.time() - t_start
-        
+
         print("Time: " + str(round(t_stop)) + " seconds")
-  
+    
 

@@ -1,5 +1,5 @@
 # my own classes
-from rectangle_packing.rectangle import Rectangle
+from rectangle import Rectangle
 
 # external dependencies
 import numpy as np
@@ -9,6 +9,9 @@ import random
 import os
 import dxfwrite
 from dxfwrite import DXFEngine as dxf
+
+from ezdxf import recover
+from ezdxf.addons.drawing import matplotlib
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -29,7 +32,7 @@ class StackedGrid(object):
 
         self.unstacked_rectangles = []
         
-        self.grid_dxf = "grid" + str(name) + ".dxf"
+        self.grid_dxf = "./dxf/grid" + str(name) + ".dxf"
         self.drawing = dxf.drawing(self.grid_dxf)
         self.base_path = os.path.abspath(os.getcwd())
 
@@ -100,6 +103,9 @@ class StackedGrid(object):
     def setCut(self):
         self.is_cut = True
     
+    def setUncut(self):
+        self.is_cut = False
+
     def toDict(self):
         return {'name': self.name, 'width': self.width, 'height': self.height, 'stacked_rectangles': [rect.toDict() for rect in self.stacked_rectangles]}
 
@@ -111,11 +117,18 @@ class StackedGrid(object):
             height = rectangle.getHeight()
             bgcolor = random.randint(1,255)
             
+            print(x, y, width, height)
             self.drawing.add(dxf.rectangle((x,y), width, height,
                                   bgcolor=bgcolor))
 
         self.drawing.save()
-        
+    
+    def toPdf(self):
+        self.toDxf()
+        dox, auditor = recover.readfile(self.grid_dxf)
+        if not auditor.has_errors:
+            matplotlib.qsave(dox.modelspace(), './pdf/grid_' + str(self.getName()) + '.png')
+
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
 
@@ -135,7 +148,7 @@ class StackedGrid(object):
         print("Plotting grid " + str(self.getName()))
 
         # file to save the model  
-        output_file("grids/stacked_grid_" + str(self.getName()) + ".html")  
+        output_file("plots/stacked_grid_" + str(self.getName()) + ".html")  
             
         # instantiating the figure object  
         graph = figure(title = "Stacked grid " + str(self.getName()), x_range=(0, self.width), y_range=(0, self.height))  
@@ -174,4 +187,3 @@ class StackedGrid(object):
         # displaying the model  
         # show(graph) 
         save(graph)
-

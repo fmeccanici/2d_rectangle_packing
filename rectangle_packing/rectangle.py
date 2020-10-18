@@ -13,9 +13,6 @@ class Rectangle(object):
         self.grid_number = grid_number
         self.is_stacked = is_stacked
 
-    def setPicklePath(self, path):
-        self.path = path
-
     def getGridNumber(self):
         return self.grid_number
 
@@ -27,6 +24,9 @@ class Rectangle(object):
 
     def setStacked(self):
         self.is_stacked = True
+
+    def setUnstacked(self):
+        self.is_stacked = False
 
     def getName(self):
         return self.name
@@ -79,21 +79,5 @@ class Rectangle(object):
     
     def toDict(self):
         return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
-
-    def loadFromPickle(self):
-        with open(self.path + str(self.name) + '.pickle', 'rb') as f:
-            rectangle = pickle.load(f)
-            self.name = rectangle['name']
-            self.width = rectangle['width']
-            self.height = rectangle['height']
-            self.position = rectangle['position']
-
-    def saveAsPickle(self):
-        rectangle_dict = self.toDict()
-        with open(self.path + str(self.name) + '.pickle', 'wb') as f:
-            pickle.dump(rectangle_dict, f)
-
-    def removePickle(self):
-        os.remove(self.path + str(self.name) + '.pickle')
 
     
