@@ -1,0 +1,7 @@
+*.html
+__init__.py
+__pycache__/.
+*.pickle
+databases/
+*.pyc
+*.dxf
