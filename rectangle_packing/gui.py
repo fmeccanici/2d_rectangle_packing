@@ -294,31 +294,27 @@ class RectanglePackingGui(QWidget):
             grid.plot()
 
     def onCutClick(self):
+        self.removeGridItem('uncut')
 
-        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
-        grid = self.db_manager.getGrid(grid_number)
-        grid.setCut()
-        grid.toDxf()
+    def removeGridItem(self, current_grid_state='uncut'):
+        if current_grid_state == 'cut':
+            list_widget = self.list_widget_cut_grids
+        elif current_grid_state == 'uncut':
+            list_widget = self.list_widget_grids
 
-        self.db_manager.updateGrid(grid)
-
-        item = self.list_widget_grids.findItems(self.list_widget_grids.currentItem().text(), Qt.MatchExactly)
-        row = self.list_widget_grids.row(item[0])
-        self.list_widget_grids.takeItem(row)
-        self.list_widget_cut_grids.addItem(item[0])
-
-    def onUncutClick(self):
-
-        grid_number = int(self.list_widget_cut_grids.currentItem().text().split(' ')[1])
+        grid_number = int(list_widget.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
         grid.setUncut()
 
         self.db_manager.updateGrid(grid)
 
-        item = self.list_widget_cut_grids.findItems(self.list_widget_cut_grids.currentItem().text(), Qt.MatchExactly)
-        row = self.list_widget_cut_grids.row(item[0])
-        self.list_widget_cut_grids.takeItem(row)
-        self.list_widget_grids.addItem(item[0])
+        item = list_widget.findItems(self.list_widget_cut_grids.currentItem().text(), Qt.MatchExactly)
+        row = list_widget.row(item[0])
+        list_widget.takeItem(row)
+        list_widget.addItem(item[0])
+
+    def onUncutClick(self):
+        self.removeGridItem('cut')
 
     def onDoubleClickOrder(self):
         # item = self.list_widget_orders.findItems(self.current_rectangle, Qt.MatchExactly)
@@ -352,6 +348,7 @@ class RectanglePackingGui(QWidget):
         self.export_dxf_radio_button = QRadioButton("DXF")
         self.export_pdf_radio_button = QRadioButton("PDF")
         self.export_html_radio_button = QRadioButton("HTML")
+        self.export_pdf_radio_button.setChecked(True)
 
         export_grid = QGridLayout()
         export_grid.addWidget(self.export_button, 0, 0)
