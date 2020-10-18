@@ -129,6 +129,7 @@ class RectanglePackingGui(QWidget):
         grid = self.db_manager.getGrid(grid_number)
 
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
 
         for rectangle in self.unstacked_rectangles:
 
@@ -145,6 +146,8 @@ class RectanglePackingGui(QWidget):
             else:
                 self.updateCodeStatus("Stacking stopped")
                 break
+
+        self.updateCodeStatus("Stacking stopped")
 
     def onStopStackingClick(self):
         self.stacker.stopStacking()
