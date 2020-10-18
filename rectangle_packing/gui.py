@@ -11,6 +11,7 @@ from PyQt5.QtGui import QPainter, QBrush, QPen, QPixmap, QColor
 from database_manager import DatabaseManager
 from stacked_grid import StackedGrid
 from stacker import Stacker, InvalidGridPositionError
+from rectangle import Rectangle
 
 # class that enables multithreading with Qt
 class Worker(QRunnable):
@@ -122,6 +123,7 @@ class RectanglePackingGui(QWidget):
 
     def onStartStackingClick(self):
         self.stacker.startStacking()
+        self.updateCodeStatus("Stacking started")
 
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
@@ -135,9 +137,13 @@ class RectanglePackingGui(QWidget):
                     self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
                     self.refreshGrid()
                     self.refreshNewOrders()
+                    self.updateCodeStatus("Order " + str(rectangle.getName()) + " stacked")
+
                 except InvalidGridPositionError:
                     print("Rectangle does not fit")
+                    self.updateCodeStatus("Order " + str(rectangle.getName()) + " does not fit")
             else:
+                self.updateCodeStatus("Stacking stopped")
                 break
 
     def onStopStackingClick(self):
@@ -217,16 +223,47 @@ class RectanglePackingGui(QWidget):
         self.cut_uncut_layout.addWidget(self.list_widget_cut_grids, 1, 1)
         
         cut_uncut_group_box.setLayout(self.cut_uncut_layout)
-
         self.grid_orders_layout.addWidget(cut_uncut_group_box)
 
-        grid_orders_label = QLabel("Orders in grid")
-        self.grid_orders_layout.addWidget(grid_orders_label)
-        self.grid_orders_layout.addWidget(self.list_widget_orders)
+        grid_orders_groupbox = QGroupBox("Orders in grid")
+        grid_orders_layout = QGridLayout()
 
-        unstacked_orders_label = QLabel("New orders")
-        self.grid_orders_layout.addWidget(unstacked_orders_label)
-        self.grid_orders_layout.addWidget(self.list_widget_new_orders)
+        grid_orders_layout.addWidget(self.list_widget_orders, 0, 0)
+
+        order_width_label = QLabel("Width")
+        order_height_label = QLabel("Height")
+
+        self.width_line_edit = QLineEdit()
+        self.height_line_edit = QLineEdit()
+
+        grid_orders_layout.addWidget(order_width_label, 1, 0)
+        grid_orders_layout.addWidget(self.width_line_edit, 2, 0)
+
+        grid_orders_layout.addWidget(order_height_label, 3, 0)
+        grid_orders_layout.addWidget(self.height_line_edit, 4, 0)
+
+        grid_orders_groupbox.setLayout(grid_orders_layout)
+
+
+        self.grid_orders_layout.addWidget(grid_orders_groupbox)
+
+        self.unstacked_orders_group_box = QGroupBox("New orders")
+        unstacked_order_width_label = QLabel("Width")
+        unstacked_order_height_label = QLabel("Height")
+        
+        self.unstacked_orders_layout = QGridLayout()
+        self.unstacked_orders_layout.addWidget(self.list_widget_new_orders, 0, 0)
+
+        self.unstacked_order_width_line_edit = QLineEdit()
+        self.unstacked_order_height_line_edit = QLineEdit()
+
+        self.unstacked_orders_layout.addWidget(unstacked_order_width_label, 1, 0)
+        self.unstacked_orders_layout.addWidget(self.unstacked_order_width_line_edit, 2, 0)        
+        self.unstacked_orders_layout.addWidget(unstacked_order_height_label, 3, 0)
+        self.unstacked_orders_layout.addWidget(self.unstacked_order_height_line_edit, 4, 0)
+
+        self.unstacked_orders_group_box.setLayout(self.unstacked_orders_layout)
+        self.grid_orders_layout.addWidget(self.unstacked_orders_group_box)
 
     def refreshNewOrders(self):
         self.removeAllNewOrderItems()
@@ -317,27 +354,56 @@ class RectanglePackingGui(QWidget):
         list_widget.addItem(item[0])
 
     def onDoubleClickOrder(self):
-        rectangle_number = int(self.list_widget_orders.currentItem().text().split(' ')[1])
+        self.updateOrder('stacked')
+
+    def onDoubleClickNewOrder(self):
+        self.updateOrder('unstacked')
+    
+    def updateOrder(self, order_state='stacked'):
+        if order_state == 'stacked':
+            list_widget = self.list_widget_orders
+        elif order_state == 'unstacked':
+            list_widget = self.list_widget_new_orders
+
+        rectangle_number = int(list_widget.currentItem().text().split(' ')[1])
         rectangle = self.db_manager.getRectangle(rectangle_number)
 
-        if self.previous_rectangle is not None:
-            self.drawRectangle(self.previous_rectangle)
+        if rectangle.isStacked():
+            if self.previous_rectangle is not None:
+                self.drawRectangle(self.previous_rectangle)
 
-        self.drawRectangle(rectangle, color=Qt.red)
-        self.current_rectangle = rectangle_number
-        self.previous_rectangle = rectangle
+            self.drawRectangle(rectangle, color=Qt.red)
+            self.current_rectangle = rectangle_number
+            self.previous_rectangle = rectangle
+
+        self.updateWidthHeight(rectangle)
+
+    def updateWidthHeight(self, rectangle):
+        if rectangle.isStacked():
+            self.width_line_edit.setText(str(rectangle.getWidth()) + 'cm')
+            self.height_line_edit.setText(str(rectangle.getHeight()) + 'cm')
+        else:
+            self.unstacked_order_width_line_edit.setText(str(rectangle.getWidth()) + 'cm')
+            self.unstacked_order_height_line_edit.setText(str(rectangle.getHeight()) + 'cm')
 
     def onDoubleClickGrid(self):
         self.refreshGrid()
         self.previous_rectangle = None
-    
+        self.width_line_edit.setText("")
+        self.height_line_edit.setText("")
+        
     def onDoubleClickCutGrid(self):
         self.refreshCutGrid()
 
     def createGridOrdersEvents(self):
         self.list_widget_orders.itemDoubleClicked.connect(self.onDoubleClickOrder)
+        self.list_widget_new_orders.itemDoubleClicked.connect(self.onDoubleClickNewOrder)
+
         self.list_widget_grids.itemDoubleClicked.connect(self.onDoubleClickGrid)
         self.list_widget_cut_grids.itemDoubleClicked.connect(self.onDoubleClickCutGrid)
+
+    def updateCodeStatus(self, text):
+        self.code_status_line_edit.setText(text)
 
     def createButtonsLayout(self):
         group_box = QGroupBox("Export grid")
@@ -377,6 +443,12 @@ class RectanglePackingGui(QWidget):
         self.stop_stacking_button = QPushButton("Stop")
         layout.addWidget(self.start_stacking_button)
         layout.addWidget(self.stop_stacking_button)
+        code_status_label = QLabel("Status")
+        self.code_status_line_edit = QLineEdit()
+
+        layout.addWidget(code_status_label)
+        layout.addWidget(self.code_status_line_edit)
+
         group_box.setLayout(layout)
         self.buttons_layout.addWidget(group_box)
 
