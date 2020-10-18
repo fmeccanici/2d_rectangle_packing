@@ -296,6 +296,9 @@ class RectanglePackingGui(QWidget):
     def onCutClick(self):
         self.removeGridItem('uncut')
 
+    def onUncutClick(self):
+        self.removeGridItem('cut')
+
     def removeGridItem(self, current_grid_state='uncut'):
         if current_grid_state == 'cut':
             list_widget = self.list_widget_cut_grids
@@ -312,9 +315,6 @@ class RectanglePackingGui(QWidget):
         row = list_widget.row(item[0])
         list_widget.takeItem(row)
         list_widget.addItem(item[0])
-
-    def onUncutClick(self):
-        self.removeGridItem('cut')
 
     def onDoubleClickOrder(self):
         # item = self.list_widget_orders.findItems(self.current_rectangle, Qt.MatchExactly)
@@ -333,7 +333,8 @@ class RectanglePackingGui(QWidget):
 
     def onDoubleClickGrid(self):
         self.refreshGrid()
-
+        self.previous_rectangle = None
+    
     def onDoubleClickCutGrid(self):
         self.refreshCutGrid()
 
