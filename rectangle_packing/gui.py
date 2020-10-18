@@ -147,6 +147,8 @@ class RectanglePackingGui(QWidget):
                 self.updateCodeStatus("Stacking stopped")
                 break
 
+        self.updateCodeStatus("Stacking stopped")
+
     def onStopStackingClick(self):
         self.stacker.stopStacking()
         
