@@ -338,20 +338,27 @@ class RectanglePackingGui(QWidget):
 
     def removeGridItem(self, current_grid_state='uncut'):
         if current_grid_state == 'cut':
-            list_widget = self.list_widget_cut_grids
-        elif current_grid_state == 'uncut':
-            list_widget = self.list_widget_grids
+            list_widget_current = self.list_widget_cut_grids
+            list_widget_next = self.list_widget_grids
 
-        grid_number = int(list_widget.currentItem().text().split(' ')[1])
+        elif current_grid_state == 'uncut':
+            list_widget_current = self.list_widget_grids
+            list_widget_next = self.list_widget_cut_grids
+
+        grid_number = int(list_widget_current.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
-        grid.setUncut()
+        
+        if current_grid_state == 'cut':
+            grid.setUncut()
+        elif current_grid_state == 'uncut':
+            grid.setCut()
 
         self.db_manager.updateGrid(grid)
 
-        item = list_widget.findItems(self.list_widget_cut_grids.currentItem().text(), Qt.MatchExactly)
-        row = list_widget.row(item[0])
-        list_widget.takeItem(row)
-        list_widget.addItem(item[0])
+        item = list_widget_current.findItems(list_widget_current.currentItem().text(), Qt.MatchExactly)
+        row = list_widget_current.row(item[0])
+        list_widget_current.takeItem(row)
+        list_widget_next.addItem(item[0])
 
     def onDoubleClickOrder(self):
         self.updateOrder('stacked')
