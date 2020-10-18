@@ -328,7 +328,6 @@ class RectanglePackingGui(QWidget):
 
         self.drawRectangle(rectangle, color=Qt.red)
         self.current_rectangle = rectangle_number
-
         self.previous_rectangle = rectangle
 
     def onDoubleClickGrid(self):
