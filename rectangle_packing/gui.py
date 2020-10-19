@@ -74,7 +74,7 @@ class RectanglePackingGui(QWidget):
         self.previous_rectangle = None
 
         self.canvas = QPixmap(self.canvas_width, self.canvas_height)
-        color = QColor(255, 255, 255);
+        color = QColor(255, 255, 255)
         self.canvas.fill(color)
         self.grid_drawing.setPixmap(self.canvas)
 

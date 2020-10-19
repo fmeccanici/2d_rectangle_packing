@@ -136,6 +136,7 @@ class DatabaseManager(object):
                     rectangles = self.getRectangles(grid)
                     grid.setStackedRectangles(rectangles)
                     
+                    grid.checkAndSetFull()
                     if not grid.isFull():
                         grids.append(grid)
         except:

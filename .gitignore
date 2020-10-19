@@ -6,3 +6,6 @@ databases/
 *.pyc
 *.dxf
 venv/
+demos/
+documents/
+
