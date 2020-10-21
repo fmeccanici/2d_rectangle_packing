@@ -138,7 +138,8 @@ class RectanglePackingGui(QWidget):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
         self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
 
-        for rectangle in self.unstacked_rectangles:
+        for i, rectangle in enumerate(self.unstacked_rectangles):
+            print("Stacking rectangle " + str(i) + " out of " + str(len(self.unstacked_rectangles)))
 
             if not self.stacker.stackingStopped():
                 try:

@@ -179,7 +179,7 @@ class StackedGrid(object):
         self.drawing.save()
     
     def toPdf(self):
-        self.toDxf()
+        self.toPrimeCenterFormatDxf()
         dox, auditor = recover.readfile(self.grid_dxf)
         if not auditor.has_errors:
             matplotlib.qsave(dox.modelspace(), './pdf/grid_' + str(self.getName()) + '.png')
