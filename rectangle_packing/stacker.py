@@ -86,7 +86,11 @@ class Stacker(object):
             print("Created and added initial grid to database")
 
     def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
-        stacking_position = self.computeStackingPosition(rectangle, grid)
+        
+        floored_width, floored_height = rectangle.getFlooredWidthHeight()
+        rectangle_floored = Rectangle(floored_width, floored_height, rectangle.getName())
+
+        stacking_position = self.computeStackingPosition(rectangle_floored, grid)
         rectangle.setPosition(stacking_position)
 
         if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():

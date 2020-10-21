@@ -338,32 +338,49 @@ class RectanglePackingGui(QWidget):
         unstacked_rectangles = []
         for index, row in orders.iterrows():
 
-            try:
-                width = int(row['Breedte'])
+            # try:
+            #     width = float(row['Breedte'])
 
-            except ValueError:
+            # except ValueError:
+            #     width = row['Breedte']
+
+            #     print("Width string has comma")
+            #     behind_comma = width.split(',')[0]
+            #     after_comma = width.split(',')[1]
+            #     width = float(behind_comma + '.' + after_comma)
+            
+            # try:
+            #     height = float(row['Lengte'])
+
+            # except ValueError:
+                
+            #     height = str(row['Lengte'])
+            #     print("Height string has comma")
+
+            #     behind_comma = height.split(',')[0]
+            #     after_comma = height.split(',')[1]
+            #     width = float(behind_comma + '.' + after_comma)
+
+            try:
+                width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
+                print(width)
+            except IndexError:
+                width = row['Breedte'].split(',')[0]
+            except AttributeError:
                 width = row['Breedte']
 
-                print("Width string has comma")
-                behind_comma = width.split(',')[0]
-                after_comma = width.split(',')[1]
-                width = int(behind_comma)
-            
             try:
-                height = int(row['Lengte'])
-
-            except ValueError:
-                
-                height = str(row['Lengte'])
-                print("Height string has comma")
-
-                behind_comma = height.split(',')[0]
-                after_comma = height.split(',')[1]
-                height = int(behind_comma)
-
+                height = row['Lengte'].split(',')[0] + '.' + row['Lengte'].split(',')[1]
+                print(height)
+            except IndexError:
+                height = row['Lengte'].split(',')[0]
+            except AttributeError:
+                height = row['Lengte']
 
             name = row['Ordernummer']
 
+            width = float(width)
+            height = float(height)
             rectangle = Rectangle(width, height, name)
             unstacked_rectangles.append(rectangle)
 

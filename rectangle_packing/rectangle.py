@@ -80,4 +80,9 @@ class Rectangle(object):
     def toDict(self):
         return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
 
+    def getFlooredWidthHeight(self):
+        return np.floor(self.width), np.floor(self.height)
+    
+    
+
     
