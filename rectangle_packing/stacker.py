@@ -34,7 +34,7 @@ class Stacker(object):
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 320 #cm
+        self.max_rectangle_height = 1500 #cm
         
         self.min_grid_buffer_size = 50
 
@@ -107,7 +107,7 @@ class Stacker(object):
 
     def generateRandomRectangles(self, amount):
         rectangles = []
-        random.seed(41)
+        # random.seed(41)
         for i in range(amount):
             width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
             height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)

@@ -14,6 +14,7 @@ from stacker import Stacker, InvalidGridPositionError
 from rectangle import Rectangle
 
 import pandas as pd
+import numpy as np
 
 # class that enables multithreading with Qt
 class Worker(QRunnable):
@@ -66,17 +67,12 @@ class RectanglePackingGui(QWidget):
         self.createGridOrdersLayout()
 
         self.grid_drawing = QtWidgets.QLabel()
-<<<<<<< HEAD
-        self.canvas_width = 200
-        self.canvas_height = 400
-=======
 
         # TODO relative to window size
         self.canvas_width = 450
         self.canvas_height = 900
->>>>>>> 726b5f488329521ac9e8adbd97821872d730dbbb
         self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 320 #cm
+        self.max_rectangle_height = 1500 #cm
         
         self.previous_rectangle = None
 
@@ -322,7 +318,13 @@ class RectanglePackingGui(QWidget):
         self.refreshNewOrders()
 
     def loadOrders(self):
-
+        """
+        n = 5
+        unstacked_rectangles = self.stacker.generateRandomRectangles(n)
+        self.stacker.addToDatabase(unstacked_rectangles)
+        self.refreshNewOrders()
+        """
+        
         file_name = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/paklijst.xlsx"
 
         df = pd.read_excel(file_name, sheet_name=None)
@@ -334,15 +336,44 @@ class RectanglePackingGui(QWidget):
 
         unstacked_rectangles = []
         for index, row in orders.iterrows():
-            width = float(row['Breedte'])
+
+            try:
+                width = int(row['Breedte'])
+
+            except ValueError:
+                width = row['Breedte']
+
+                print("Width string has comma")
+                behind_comma = width.split(',')[0]
+                after_comma = width.split(',')[1]
+                width = int(behind_comma)
             
-            height = int(row['Lengte'])
+            try:
+                height = int(row['Lengte'])
+
+            except ValueError:
+                
+                height = str(row['Lengte'])
+                print("Height string has comma")
+
+                behind_comma = height.split(',')[0]
+                after_comma = height.split(',')[1]
+                height = int(behind_comma)
+
+
             name = row['Ordernummer']
+
             rectangle = Rectangle(width, height, name)
             unstacked_rectangles.append(rectangle)
 
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
+
+        # names = [x.getName() for x in unstacked_rectangles]
+        # print(sorted(names))
+        # print(len(names))
+        # print(len(np.unique(names)))
+        
 
     def onLoadOrdersClick(self):
         self.loadOrders()
