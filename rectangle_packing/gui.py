@@ -347,6 +347,7 @@ class RectanglePackingGui(QWidget):
                 print("Width string has comma")
                 behind_comma = width.split(',')[0]
                 after_comma = width.split(',')[1]
+                
                 width = int(behind_comma)
             
             try:
