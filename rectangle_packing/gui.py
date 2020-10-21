@@ -343,11 +343,13 @@ class RectanglePackingGui(QWidget):
 
             except ValueError:
                 width = row['Breedte']
+
                 print("Width string has comma")
                 behind_comma = width.split(',')[0]
                 after_comma = width.split(',')[1]
-                width = int(behind_comma)
                 
+                width = int(behind_comma)
+            
             try:
                 height = int(row['Lengte'])
 
@@ -359,6 +361,7 @@ class RectanglePackingGui(QWidget):
                 behind_comma = height.split(',')[0]
                 after_comma = height.split(',')[1]
                 height = int(behind_comma)
+
 
             name = row['Ordernummer']
 
