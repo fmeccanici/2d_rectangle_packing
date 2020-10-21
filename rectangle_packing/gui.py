@@ -401,10 +401,12 @@ class RectanglePackingGui(QWidget):
 
     def onExportClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
-        grid = self.db_manager.getGrid(grid_number)
+        grid = self.db_manager.getGrid(grid_number, for_cutting=True)
         
         if self.export_dxf_radio_button.isChecked():
-            grid.toPrimeCenterFormatDxf()
+            # grid.toPrimeCenterFormatDxf()
+            grid.toDxf()
+
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
         elif self.export_html_radio_button.isChecked():

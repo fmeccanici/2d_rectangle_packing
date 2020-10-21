@@ -113,13 +113,17 @@ class DatabaseManager(object):
                 grid.setStackedRectangles(rectangles)
                 grids.append(grid)
 
-    def getGrid(self, grid_number):
+    def getGrid(self, grid_number, for_cutting=False):
         query = {"name" : grid_number}
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
             grid = StackedGrid(document['width'], document['height'], document['name'])
-            rectangles = self.getRectangles(grid)
+            if for_cutting == True:
+                rectangles = self.getRectangles(grid, for_cutting)
+            else:
+                rectangles = self.getRectangles(grid)
+
             grid.setStackedRectangles(rectangles)
         
         return grid
@@ -152,7 +156,7 @@ class DatabaseManager(object):
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
 
-        return { "name": name, "width": width, "height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
+        return { "name": name, "width": np.floor(width), "height": np.floor(height), "exact_width": width, "exact_height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)
@@ -171,7 +175,7 @@ class DatabaseManager(object):
         
         return rectangle
 
-    def getRectangles(self, grid):
+    def getRectangles(self, grid, for_cutting = False):
         print("Loading rectangles within grid " + str(grid.getName()) + " from database")
 
         rectangles_dict = self.rectangles_collection.find({
@@ -180,7 +184,10 @@ class DatabaseManager(object):
         
         rectangles = []
         for rectangle in rectangles_dict:
-            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
+            if for_cutting == True:
+                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
+            else:
+                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
             print("Rectangle " + str(rectangle['name']) + " loaded from database")
         return rectangles
     
