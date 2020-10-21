@@ -90,7 +90,7 @@ class StackedGrid(object):
 
         return stacking_position
 
-    def isFull(self):
+    def checkAndSetFull(self):
         print("Checking if grid " + str(self.getName()) + " is full")
         min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
         min_rectangle.setPosition(self.computeStackingPosition(min_rectangle))
@@ -106,6 +106,9 @@ class StackedGrid(object):
             self.is_full = True
             print("Grid " + str(self.getName()) + " is full")
             return True
+
+    def isFull(self):
+        return self.is_full
     
     def isCut(self):
         return self.is_cut

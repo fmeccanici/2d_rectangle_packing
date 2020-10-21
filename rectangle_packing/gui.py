@@ -54,6 +54,7 @@ class RectanglePackingGui(QWidget):
 
         # GUI related stuff
         self.main_layout = QHBoxLayout()
+        self.left_side_layout = QHBoxLayout()
         self.buttons_layout = QVBoxLayout()
         self.grid_orders_layout = QVBoxLayout()
         
@@ -65,8 +66,15 @@ class RectanglePackingGui(QWidget):
         self.createGridOrdersLayout()
 
         self.grid_drawing = QtWidgets.QLabel()
+<<<<<<< HEAD
         self.canvas_width = 200
         self.canvas_height = 400
+=======
+
+        # TODO relative to window size
+        self.canvas_width = 450
+        self.canvas_height = 900
+>>>>>>> 726b5f488329521ac9e8adbd97821872d730dbbb
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 320 #cm
         
@@ -77,10 +85,11 @@ class RectanglePackingGui(QWidget):
         self.canvas.fill(color)
         self.grid_drawing.setPixmap(self.canvas)
 
-        self.buttons_layout.addWidget(self.grid_drawing)
+        # self.left_side_layout.addWidget(self.grid_drawing)
 
         self.createGridOrdersEvents()
 
+        self.main_layout.addWidget(self.grid_drawing)
         self.main_layout.addLayout(self.buttons_layout)
         self.main_layout.addLayout(self.grid_orders_layout)
         self.refreshNewOrders()
@@ -487,6 +496,8 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(self.cut_button)
         self.buttons_layout.addWidget(self.uncut_button)
 
+
+        self.buttons_layout.addStretch()
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     clock = RectanglePackingGui()
