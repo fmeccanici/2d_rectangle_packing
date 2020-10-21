@@ -19,6 +19,11 @@ class GridFullError(Error):
     """Raised when grid is full"""
     pass
 
+
+"""
+Contains algorithm for stacking rectangles in a 2D grid. First the rectangles should be sorted
+using computeRectangleOrderArea, after which they can be stacked using computeStackingPosition
+"""
 class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
