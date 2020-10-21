@@ -13,6 +13,8 @@ from stacked_grid import StackedGrid
 from stacker import Stacker, InvalidGridPositionError
 from rectangle import Rectangle
 
+import pandas as pd
+
 # class that enables multithreading with Qt
 class Worker(QRunnable):
     '''
@@ -63,15 +65,15 @@ class RectanglePackingGui(QWidget):
         self.createGridOrdersLayout()
 
         self.grid_drawing = QtWidgets.QLabel()
-        self.canvas_width = 400
-        self.canvas_height = 800
+        self.canvas_width = 200
+        self.canvas_height = 400
         self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
+        self.max_rectangle_height = 320 #cm
         
         self.previous_rectangle = None
 
         self.canvas = QPixmap(self.canvas_width, self.canvas_height)
-        color = QColor(255, 255, 255);
+        color = QColor(255, 255, 255)
         self.canvas.fill(color)
         self.grid_drawing.setPixmap(self.canvas)
 
@@ -311,8 +313,25 @@ class RectanglePackingGui(QWidget):
         self.refreshNewOrders()
 
     def loadOrders(self):
-        n = 5
-        unstacked_rectangles = self.stacker.generateRandomRectangles(n)
+
+        file_name = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/paklijst.xlsx"
+
+        df = pd.read_excel(file_name, sheet_name=None)
+        df = df['Paklijst']
+        df = df.drop([0, 1, 2, 3])
+        df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam']
+
+        orders = df[['Breedte', 'Lengte', 'Ordernummer']]
+
+        unstacked_rectangles = []
+        for index, row in orders.iterrows():
+            width = float(row['Breedte'])
+            
+            height = int(row['Lengte'])
+            name = row['Ordernummer']
+            rectangle = Rectangle(width, height, name)
+            unstacked_rectangles.append(rectangle)
+
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
 
@@ -327,7 +346,7 @@ class RectanglePackingGui(QWidget):
         grid = self.db_manager.getGrid(grid_number)
         
         if self.export_dxf_radio_button.isChecked():
-            grid.toDxf()
+            grid.toPrimeCenterFormatDxf()
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
         elif self.export_html_radio_button.isChecked():

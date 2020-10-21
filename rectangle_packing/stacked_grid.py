@@ -13,6 +13,8 @@ from dxfwrite import DXFEngine as dxf
 from ezdxf import recover
 from ezdxf.addons.drawing import matplotlib
 
+import pandas as pd
+
 class Error(Exception):
     """Base class for other exceptions"""
     pass
@@ -39,7 +41,15 @@ class StackedGrid(object):
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
+        self.max_rectangle_height = 320 #cm
+
+    @classmethod
+    def fromExcel(cls, file_name):
+        df = pd.read_excel(file_name, sheet_name=None)
+        df = df['Paklijst']
+
+        df = df.drop([0, 1, 2, 3])
+        df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam']
 
     def getWidth(self):
         return self.width
@@ -109,12 +119,54 @@ class StackedGrid(object):
     def toDict(self):
         return {'name': self.name, 'width': self.width, 'height': self.height, 'stacked_rectangles': [rect.toDict() for rect in self.stacked_rectangles]}
 
+    def toMillimeters(self, variable):
+        return variable * 10
+
+    def swap(self, x, y):
+        t = x 
+        x = y
+        y = t
+
+        return x, y
+
+    def toPrimeCenterFormatDxf(self):
+        for rectangle in self.stacked_rectangles:
+            x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+            y = rectangle.getPosition()[1] - rectangle.getHeight()/2
+            width = rectangle.getWidth()
+            height = rectangle.getHeight()
+
+            print(x, y, width, height)
+            print()
+
+            x, y = self.swap(x, y)
+            width, height = self.swap(width, height)
+                        
+            bgcolor = random.randint(1,255)
+            
+            print(x, y, width, height)
+            print()
+            x = self.toMillimeters(x)
+            y = self.toMillimeters(y)
+
+            width = self.toMillimeters(width)
+            height = self.toMillimeters(height)
+
+            print(x, y, width, height)
+            print()
+
+            self.drawing.add(dxf.rectangle((x,y), width, height,
+                                  bgcolor=bgcolor))
+
+        self.drawing.save()
+
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
             y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()
             height = rectangle.getHeight()
+
             bgcolor = random.randint(1,255)
             
             print(x, y, width, height)

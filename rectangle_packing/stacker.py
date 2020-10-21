@@ -34,7 +34,7 @@ class Stacker(object):
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
+        self.max_rectangle_height = 320 #cm
         
         self.min_grid_buffer_size = 50
 
