@@ -38,8 +38,8 @@ class StackedGrid(object):
         self.drawing = dxf.drawing(self.grid_dxf)
         self.base_path = os.path.abspath(os.getcwd())
 
-        self.min_rectangle_width = 1000 #cm
-        self.min_rectangle_height = 500 #cm
+        self.min_rectangle_width = 100 #cm
+        self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
 
