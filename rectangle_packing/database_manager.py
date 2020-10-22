@@ -159,7 +159,17 @@ class DatabaseManager(object):
         print(width)
         print(int(np.ceil(width)))
         print()
-        return { "name": name, "width": int(np.ceil(width)), "height": int(np.ceil(height)), "exact_width": width, "exact_height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
+
+        w = int(np.ceil(width))
+        h = int(np.ceil(height))
+        
+        if w % 2 > 0:
+            w += 1
+        
+        if h % 2 > 0:
+            h += 1
+        
+        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)
