@@ -61,6 +61,9 @@ class Stacker(object):
     def computeStackingPosition(self, rectangle, grid):
         stacking_position = [grid.getWidth(), grid.getHeight()]
 
+        print(list(reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2)))))
+        print((reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2)))))
+
         for x in reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2))):
             for y in reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2))):
                 
@@ -68,7 +71,11 @@ class Stacker(object):
                 rectangle.setPosition(position)
                 if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
-
+        
+        print(stacking_position)
+        print(rectangle.getWidth()/2)
+        print(rectangle.getHeight()/2)
+        
         return stacking_position
 
     def createAndAddNewGrid(self):
