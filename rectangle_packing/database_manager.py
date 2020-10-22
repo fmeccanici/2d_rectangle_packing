@@ -156,7 +156,10 @@ class DatabaseManager(object):
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
 
-        return { "name": name, "width": np.floor(width), "height": np.floor(height), "exact_width": width, "exact_height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
+        print(width)
+        print(int(np.ceil(width)))
+        print()
+        return { "name": name, "width": int(np.ceil(width)), "height": int(np.ceil(height)), "exact_width": width, "exact_height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)

@@ -14,6 +14,7 @@ from ezdxf import recover
 from ezdxf.addons.drawing import matplotlib
 
 import pandas as pd
+import math 
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -134,6 +135,7 @@ class StackedGrid(object):
 
     def toPrimeCenterFormatDxf(self):
         for rectangle in self.stacked_rectangles:
+
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
             y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()
@@ -165,6 +167,16 @@ class StackedGrid(object):
 
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
+            print(rectangle.getPosition()[0])
+            print(rectangle.getWidth()/2)
+            print(math.ceil(rectangle.getWidth())/2)
+
+            print(rectangle.getPosition()[1])
+            print(rectangle.getHeight()/2)
+            print(math.ceil(rectangle.getHeight())/2)
+
+            print()
+
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
             y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()

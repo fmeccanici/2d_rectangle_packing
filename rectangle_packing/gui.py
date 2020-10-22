@@ -401,7 +401,7 @@ class RectanglePackingGui(QWidget):
 
     def onExportClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
-        grid = self.db_manager.getGrid(grid_number, for_cutting=True)
+        grid = self.db_manager.getGrid(grid_number)
         
         if self.export_dxf_radio_button.isChecked():
             # grid.toPrimeCenterFormatDxf()
