@@ -60,10 +60,12 @@ class DatabaseManager(object):
         height = grid.getHeight()
         num_rectangles = grid.getNumStackedRectangles()
         name = grid.getName()
+        brand = grid.getBrand()
+        color = grid.getColor()
         is_full = grid.isFull()
         is_cut = grid.isCut()
 
-        return { "name": name, "width": width, "height": height, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+        return { "name": name, "width": width, "height": height, "brand": brand, "color": color, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
     def convertGridsNotCutToDxf(self):
         grids_not_cut = self.getGridsNotCut()

@@ -25,10 +25,13 @@ class InvalidGridPositionError(Error):
     pass
 
 class StackedGrid(object):
-    def __init__(self, width, height, name, stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width, height, name, brand = "kokos", color = "zwart", stacked_rectangles = [], is_full = False, is_cut = False):
         self.width = width
         self.height = height
         self.name = name
+        self.brand = brand
+        self.color = color
+
         self.stacked_rectangles = stacked_rectangles
         self.is_full = is_full
         self.is_cut = is_cut
@@ -70,6 +73,18 @@ class StackedGrid(object):
     def setName(self, name):
         self.name = name
 
+    def getBrand(self):
+        return self.brand
+
+    def setBrand(self, brand):
+        self.brand = brand
+
+    def getColor(self):
+        return self.color
+    
+    def setColor(self, color):
+        self.color = color
+        
     def getNumStackedRectangles(self):
         return len(self.stacked_rectangles)
 
@@ -167,16 +182,6 @@ class StackedGrid(object):
 
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
-            print("should be 0: " + str(rectangle.getPosition()[0] - rectangle.getWidth()/2))
-            # print(rectangle.getWidth()/2)
-            # print(math.ceil(rectangle.getWidth())/2)
-
-            print("should be 0: " + str(rectangle.getPosition()[1] - rectangle.getHeight()/2))
-            # print(rectangle.getHeight()/2)
-            # print(math.ceil(rectangle.getHeight())/2)
-
-            print()
-
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
             y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()
@@ -207,18 +212,6 @@ class StackedGrid(object):
                 break
 
     def isOutOfGrid(self, rectangle):
-        # print('check')
-        # print("top left x = " + str(rectangle.getTopLeft()[0]))
-        # print("top left y = " + str(rectangle.getTopLeft()[1]))
-        # print("bottom right x = " + str(rectangle.getBottomRight()[0]))
-        # print("bottom right y = " + str(rectangle.getBottomRight()[1]))
-
-        # print(rectangle.getTopLeft()[0] < 0 or rectangle.getBottomRight()[0] > self.getWidth())
-        # print(rectangle.getBottomRight()[1] < 0 or rectangle.getTopLeft()[1] > self.getHeight())
-        # print('check2')
-        print("< 0: " + str(rectangle.getPosition()[0] - rectangle.getWidth()/2))
-        print("< 0: " + str(rectangle.getPosition()[1] - rectangle.getHeight()/2))
-        print(rectangle.getPosition()[1])
         if rectangle.getPosition()[0] - rectangle.getWidth()/2 < 0:
             return True
         if rectangle.getPosition()[1] + rectangle.getHeight()/2 > self.getHeight():
@@ -232,15 +225,10 @@ class StackedGrid(object):
 
     def isValidPosition(self, rectangle):
         if self.isOutOfGrid(rectangle):
-            print("Out of grid")
             return False
 
         for i, stacked_rectangle in enumerate(self.stacked_rectangles):
-            # print(rectangle.intersection(stacked_rectangle))
-            # self.isOutOfGrid(rectangle)
-            # print("condition = " + str(rectangle.intersection(stacked_rectangle) or self.isOutOfGrid(rectangle)))
             if rectangle.intersection(stacked_rectangle):
-                print('collision')
                 return False
 
         return True

@@ -12,6 +12,7 @@ from database_manager import DatabaseManager
 from stacked_grid import StackedGrid
 from stacker import Stacker, InvalidGridPositionError
 from rectangle import Rectangle
+from excel_parser import ExcelParser
 
 import pandas as pd
 import numpy as np
@@ -49,6 +50,10 @@ class RectanglePackingGui(QWidget):
         # Other classes
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
+        path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
+        file_name = "paklijst.xlsx"
+
+        self.excel_parser = ExcelParser(path, file_name)
 
         # Multithreading
         self.threadpool = QThreadPool()
@@ -325,65 +330,8 @@ class RectanglePackingGui(QWidget):
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
         """
-        
-        file_name = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/paklijst.xlsx"
 
-        df = pd.read_excel(file_name, sheet_name=None)
-        df = df['Paklijst']
-        df = df.drop([0, 1, 2, 3])
-        df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam']
-
-        orders = df[['Breedte', 'Lengte', 'Ordernummer']]
-
-        unstacked_rectangles = []
-        for index, row in orders.iterrows():
-
-            # try:
-            #     width = float(row['Breedte'])
-
-            # except ValueError:
-            #     width = row['Breedte']
-
-            #     print("Width string has comma")
-            #     behind_comma = width.split(',')[0]
-            #     after_comma = width.split(',')[1]
-            #     width = float(behind_comma + '.' + after_comma)
-            
-            # try:
-            #     height = float(row['Lengte'])
-
-            # except ValueError:
-                
-            #     height = str(row['Lengte'])
-            #     print("Height string has comma")
-
-            #     behind_comma = height.split(',')[0]
-            #     after_comma = height.split(',')[1]
-            #     width = float(behind_comma + '.' + after_comma)
-
-            try:
-                width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
-                print(width)
-            except IndexError:
-                width = row['Breedte'].split(',')[0]
-            except AttributeError:
-                width = row['Breedte']
-
-            try:
-                height = row['Lengte'].split(',')[0] + '.' + row['Lengte'].split(',')[1]
-                print(height)
-            except IndexError:
-                height = row['Lengte'].split(',')[0]
-            except AttributeError:
-                height = row['Lengte']
-
-            name = row['Ordernummer']
-
-            width = float(width)
-            height = float(height)
-            rectangle = Rectangle(width, height, name)
-            unstacked_rectangles.append(rectangle)
-
+        unstacked_rectangles = self.excel_parser.getOrders()
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
 
