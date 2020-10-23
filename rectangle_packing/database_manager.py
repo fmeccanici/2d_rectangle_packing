@@ -179,14 +179,17 @@ class DatabaseManager(object):
         document = self.createRectangleDocument(rectangle)
         self.rectangles_collection.insert(document)
 
-    def getRectangle(self, rectangle_number):
+    def getRectangle(self, rectangle_number, for_cutting=False):
         query = {"name" : rectangle_number}
 
         cursor = self.rectangles_collection.find(query)
         for document in cursor:
-            rectangle = Rectangle(document['width'], document['height'], document['name'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
-        
-        return rectangle
+            if not for_cutting:
+                rectangle = Rectangle(document['width'], document['height'], document['name'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
+            else: 
+                rectangle = Rectangle(document['exact_width'], document['exact_height'], document['name'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
+
+        return rectangle        
 
     def getRectangles(self, grid, for_cutting = False):
         print("Loading rectangles within grid " + str(grid.getName()) + " from database")

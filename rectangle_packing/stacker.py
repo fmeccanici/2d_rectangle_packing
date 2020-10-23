@@ -45,6 +45,16 @@ class Stacker(object):
 
         self.stop_stacking = False
 
+    def optimizeGrid(self, grid):
+        exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True)
+        rectangles_for_stacking = self.db_manager.getRectangles(grid, for_cutting=False)
+        
+        for exact_rectangle in exact_rectangles:
+            for rectangles_for_stacking in rectangles_for_stacking:
+
+    def getDifferenceExactAndStackingRectangle(self, rectangle_number):
+                 
+
     def stackingStopped(self):
         return self.stop_stacking
     
