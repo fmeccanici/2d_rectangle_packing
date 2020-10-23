@@ -404,8 +404,9 @@ class RectanglePackingGui(QWidget):
         grid = self.db_manager.getGrid(grid_number, for_cutting=True)
         
         if self.export_dxf_radio_button.isChecked():
-            grid.toPrimeCenterFormatDxf()
+            # grid.toPrimeCenterFormatDxf()
             # grid.toDxf()
+            self.stacker.optimizeAndExportGrid(grid)
 
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
