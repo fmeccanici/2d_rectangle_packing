@@ -100,7 +100,7 @@ class Stacker(object):
         
     def optimizeAndExportGrid(self, grid):
             print("Optimizing grid and exporting to DXF...")
-            exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True)
+            exact_rectangles = self.db_manager.getRectanglesSortedMostUpperLeft(grid, for_cutting=True)
 
             
             for exact_rectangle in exact_rectangles:
