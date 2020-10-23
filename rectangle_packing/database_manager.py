@@ -187,13 +187,16 @@ class DatabaseManager(object):
 
         return rectangle        
 
-    def getRectangles(self, grid, for_cutting = False):
+    def getRectangles(self, grid, for_cutting = False, sort = False):
         print("Loading rectangles within grid " + str(grid.getName()) + " from database")
 
         rectangles_dict = self.rectangles_collection.find({
             "grid_number" : {"$eq" : grid.getName()}
         })
         
+        if sort == True:
+            rectangles_dict = sorted(rectangles_dict, key=lambda k: np.linalg.norm([k['x position'], k['y position']]))
+
         rectangles = []
         for rectangle in rectangles_dict:
             if for_cutting == True:
@@ -273,23 +276,6 @@ class DatabaseManager(object):
         grid.setStackedRectangles([])
         grid.setUncut()
         self.updateGrid(grid)
-
-    def getRectanglesSortedMostUpperLeft(self, grid, for_cutting=False):
-        print("Loading rectangles within grid " + str(grid.getName()) + " from database")
-
-        rectangles_dict = self.rectangles_collection.find({
-            "grid_number" : {"$eq" : grid.getName()}
-        })
-        rectangles_dict = sorted(rectangles_dict, key=lambda k: np.linalg.norm([k['x position'], k['y position']]))
-        
-        rectangles = []
-        for rectangle in rectangles_dict:
-            if for_cutting == True:
-                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
-            else:
-                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
-            print("Rectangle " + str(rectangle['name']) + " loaded from database")
-        return rectangles
 
 if __name__ == "__main__":
     db_manager = DatabaseManager()

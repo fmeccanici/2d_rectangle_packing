@@ -81,9 +81,6 @@ class Stacker(object):
     def computeStackingPosition(self, rectangle, grid):
         stacking_position = [grid.getWidth(), grid.getHeight()]
 
-        # print(list(reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2)))))
-        # print((reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2)))))
-
         for x in reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2))):
             for y in reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2))):
                 
@@ -92,17 +89,13 @@ class Stacker(object):
                 if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
         
-        # print(stacking_position)
-        # print(rectangle.getWidth()/2)
-        # print(rectangle.getHeight()/2)
-        
         return stacking_position
         
     def optimizeAndExportGrid(self, grid):
             print("Optimizing grid and exporting to DXF...")
-            exact_rectangles = self.db_manager.getRectanglesSortedMostUpperLeft(grid, for_cutting=True)
+            exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True, sort=True)
+            step_size = 0.01
 
-            
             for exact_rectangle in exact_rectangles:
                 is_optimized_x = False
                 is_optimized_y = False
@@ -115,13 +108,7 @@ class Stacker(object):
                     x = optimized_rectangle.getPosition()[0]
                     y = optimized_rectangle.getPosition()[1]
 
-                    x_new = x - 0.0001
-
-                    print("x_new = " + str(x_new))
-                    # print('check')
-                    # print(x_new)
-                    # print(x_new - optimized_rectangle.getWidth()/2)
-                    # print('check')
+                    x_new = x - step_size
 
                     optimized_rectangle.setPosition([x_new, y])
                     if not grid.isValidPosition(optimized_rectangle):
@@ -139,7 +126,7 @@ class Stacker(object):
                     x = optimized_rectangle.getPosition()[0]
                     y = optimized_rectangle.getPosition()[1]
 
-                    y_new = y - 0.0001
+                    y_new = y - step_size
 
                     optimized_rectangle.setPosition([x, y_new])
                     if not grid.isValidPosition(optimized_rectangle):
