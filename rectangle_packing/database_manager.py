@@ -156,10 +156,6 @@ class DatabaseManager(object):
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
 
-        print(width)
-        print(int(np.ceil(width)))
-        print()
-
         w = int(np.ceil(width))
         h = int(np.ceil(height))
         

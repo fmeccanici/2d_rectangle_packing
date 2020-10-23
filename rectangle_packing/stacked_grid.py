@@ -167,13 +167,13 @@ class StackedGrid(object):
 
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
-            print(rectangle.getPosition()[0])
-            print(rectangle.getWidth()/2)
-            print(math.ceil(rectangle.getWidth())/2)
+            print("should be 0: " + str(rectangle.getPosition()[0] - rectangle.getWidth()/2))
+            # print(rectangle.getWidth()/2)
+            # print(math.ceil(rectangle.getWidth())/2)
 
-            print(rectangle.getPosition()[1])
-            print(rectangle.getHeight()/2)
-            print(math.ceil(rectangle.getHeight())/2)
+            print("should be 0: " + str(rectangle.getPosition()[1] - rectangle.getHeight()/2))
+            # print(rectangle.getHeight()/2)
+            # print(math.ceil(rectangle.getHeight())/2)
 
             print()
 
@@ -191,7 +191,8 @@ class StackedGrid(object):
         self.drawing.save()
     
     def toPdf(self):
-        self.toPrimeCenterFormatDxf()
+        # self.toPrimeCenterFormatDxf()
+        self.toDxf()
         dox, auditor = recover.readfile(self.grid_dxf)
         if not auditor.has_errors:
             matplotlib.qsave(dox.modelspace(), './pdf/grid_' + str(self.getName()) + '.png')
@@ -199,10 +200,47 @@ class StackedGrid(object):
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
 
+    def deleteRectangle(self, rectangle):
+        for i, stacked_rectangle in enumerate(self.getStackedRectangles()):
+            if stacked_rectangle.getName() == rectangle.getName():
+                del self.stacked_rectangles[i]
+                break
+
+    def isOutOfGrid(self, rectangle):
+        # print('check')
+        # print("top left x = " + str(rectangle.getTopLeft()[0]))
+        # print("top left y = " + str(rectangle.getTopLeft()[1]))
+        # print("bottom right x = " + str(rectangle.getBottomRight()[0]))
+        # print("bottom right y = " + str(rectangle.getBottomRight()[1]))
+
+        # print(rectangle.getTopLeft()[0] < 0 or rectangle.getBottomRight()[0] > self.getWidth())
+        # print(rectangle.getBottomRight()[1] < 0 or rectangle.getTopLeft()[1] > self.getHeight())
+        # print('check2')
+        print("< 0: " + str(rectangle.getPosition()[0] - rectangle.getWidth()/2))
+        print("< 0: " + str(rectangle.getPosition()[1] - rectangle.getHeight()/2))
+        print(rectangle.getPosition()[1])
+        if rectangle.getPosition()[0] - rectangle.getWidth()/2 < 0:
+            return True
+        if rectangle.getPosition()[1] + rectangle.getHeight()/2 > self.getHeight():
+            return True
+        if rectangle.getPosition()[0] + rectangle.getWidth()/2 > self.getWidth():
+            return True
+        if rectangle.getPosition()[1] - rectangle.getHeight()/2 < 0:
+            return True
+    
+        return False
+
     def isValidPosition(self, rectangle):
+        if self.isOutOfGrid(rectangle):
+            print("Out of grid")
+            return False
+
         for i, stacked_rectangle in enumerate(self.stacked_rectangles):
-            
+            # print(rectangle.intersection(stacked_rectangle))
+            # self.isOutOfGrid(rectangle)
+            # print("condition = " + str(rectangle.intersection(stacked_rectangle) or self.isOutOfGrid(rectangle)))
             if rectangle.intersection(stacked_rectangle):
+                print('collision')
                 return False
 
         return True

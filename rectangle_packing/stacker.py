@@ -6,6 +6,7 @@ from database_manager import DatabaseManager
 import random
 import time
 import numpy as np
+import copy
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -45,24 +46,24 @@ class Stacker(object):
 
         self.stop_stacking = False
 
-    def optimizeAndExportGrid(self, grid):
-        exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True)
-        rectangles_for_stacking = self.db_manager.getRectangles(grid, for_cutting=False)
-        optimized_grid = StackedGrid(200, 1500, grid.getName())
+    # def optimizeAndExportGrid(self, grid):
+    #     exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True)
+    #     rectangles_for_stacking = self.db_manager.getRectangles(grid, for_cutting=False)
+    #     optimized_grid = StackedGrid(200, 1500, grid.getName())
 
 
-        for exact_rectangle in exact_rectangles:
-            for rectangle_for_stacking in rectangles_for_stacking:
-                if rectangle_for_stacking.getName() == exact_rectangle.getName():
-                    dx = rectangle_for_stacking.getWidth()/2 - exact_rectangle.getWidth()/2
-                    dy = rectangle_for_stacking.getHeight()/2 - exact_rectangle.getHeight()/2
-                    x_new = exact_rectangle.getPosition()[0] - dx
-                    y_new = exact_rectangle.getPosition()[1] - dy
-                    new_rectangle = Rectangle(exact_rectangle.getWidth(), exact_rectangle.getHeight(), exact_rectangle.getName(), grid_number=exact_rectangle.getGridNumber(), is_stacked=exact_rectangle.isStacked())
-                    new_rectangle.setPosition([x_new, y_new])
-                    optimized_grid.addRectangle(new_rectangle)
+    #     for exact_rectangle in exact_rectangles:
+    #         for rectangle_for_stacking in rectangles_for_stacking:
+    #             if rectangle_for_stacking.getName() == exact_rectangle.getName():
+    #                 dx = rectangle_for_stacking.getWidth()/2 - exact_rectangle.getWidth()/2
+    #                 dy = rectangle_for_stacking.getHeight()/2 - exact_rectangle.getHeight()/2
+    #                 x_new = exact_rectangle.getPosition()[0] - dx
+    #                 y_new = exact_rectangle.getPosition()[1] - dy
+    #                 new_rectangle = Rectangle(exact_rectangle.getWidth(), exact_rectangle.getHeight(), exact_rectangle.getName(), grid_number=exact_rectangle.getGridNumber(), is_stacked=exact_rectangle.isStacked())
+    #                 new_rectangle.setPosition([x_new, y_new])
+    #                 optimized_grid.addRectangle(new_rectangle)
         
-        optimized_grid.toDxf()
+    #     optimized_grid.toDxf()
 
     def stackingStopped(self):
         return self.stop_stacking
@@ -80,8 +81,8 @@ class Stacker(object):
     def computeStackingPosition(self, rectangle, grid):
         stacking_position = [grid.getWidth(), grid.getHeight()]
 
-        print(list(reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2)))))
-        print((reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2)))))
+        # print(list(reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2)))))
+        # print((reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2)))))
 
         for x in reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2))):
             for y in reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2))):
@@ -91,11 +92,66 @@ class Stacker(object):
                 if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
         
-        print(stacking_position)
-        print(rectangle.getWidth()/2)
-        print(rectangle.getHeight()/2)
+        # print(stacking_position)
+        # print(rectangle.getWidth()/2)
+        # print(rectangle.getHeight()/2)
         
         return stacking_position
+        
+    def optimizeAndExportGrid(self, grid):
+            print("Optimizing grid and exporting to DXF...")
+            exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True)
+
+            
+            for exact_rectangle in exact_rectangles:
+                is_optimized_x = False
+                is_optimized_y = False
+                print("Rectangle " + str(exact_rectangle.getName()))
+                optimized_rectangle = copy.deepcopy(exact_rectangle)
+
+                while is_optimized_x == False:
+                    grid.deleteRectangle(optimized_rectangle)
+
+                    x = optimized_rectangle.getPosition()[0]
+                    y = optimized_rectangle.getPosition()[1]
+
+                    x_new = x - 0.0001
+
+                    print("x_new = " + str(x_new))
+                    # print('check')
+                    # print(x_new)
+                    # print(x_new - optimized_rectangle.getWidth()/2)
+                    # print('check')
+
+                    optimized_rectangle.setPosition([x_new, y])
+                    if not grid.isValidPosition(optimized_rectangle):
+                        print("Cannot optimize further in x direction")
+                        optimized_rectangle.setPosition([x, y])
+                        is_optimized_x = True
+                    else:
+                        print("Moved x to " + str(x_new))
+
+
+
+                while is_optimized_y == False:                    
+                    grid.deleteRectangle(optimized_rectangle)
+
+                    x = optimized_rectangle.getPosition()[0]
+                    y = optimized_rectangle.getPosition()[1]
+
+                    y_new = y - 0.0001
+
+                    optimized_rectangle.setPosition([x, y_new])
+                    if not grid.isValidPosition(optimized_rectangle):
+                        print("Cannot optimize further in y direction")
+                        optimized_rectangle.setPosition([x, y])
+                        is_optimized_y = True
+                    else:
+                        print("Moved y to " + str(y_new))
+
+                grid.addRectangle(optimized_rectangle)
+
+            grid.toDxf()
 
     def createAndAddNewGrid(self):
         try:
