@@ -404,7 +404,7 @@ class RectanglePackingGui(QWidget):
             list_widget = self.list_widget_new_orders
 
         rectangle_number = int(list_widget.currentItem().text().split(' ')[1])
-        rectangle = self.db_manager.getRectangle(rectangle_number)
+        rectangle = self.db_manager.getRectangle(rectangle_number, for_cutting=True)
 
         if rectangle.isStacked():
             if self.previous_rectangle is not None:
@@ -418,11 +418,11 @@ class RectanglePackingGui(QWidget):
 
     def updateWidthHeight(self, rectangle):
         if rectangle.isStacked():
-            self.width_line_edit.setText(str(rectangle.getWidth()) + 'cm')
-            self.height_line_edit.setText(str(rectangle.getHeight()) + 'cm')
+            self.width_line_edit.setText(str(rectangle.getWidth() * 10) + 'mm')
+            self.height_line_edit.setText(str(rectangle.getHeight() * 10) + 'mm')
         else:
-            self.unstacked_order_width_line_edit.setText(str(rectangle.getWidth()) + 'cm')
-            self.unstacked_order_height_line_edit.setText(str(rectangle.getHeight()) + 'cm')
+            self.unstacked_order_width_line_edit.setText(str(rectangle.getWidth() * 10) + 'mm')
+            self.unstacked_order_height_line_edit.setText(str(rectangle.getHeight() * 10) + 'mm')
 
     def onDoubleClickGrid(self):
         self.refreshGrid()
