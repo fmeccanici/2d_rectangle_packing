@@ -224,8 +224,10 @@ class DatabaseManager(object):
 
     def addRectangle(self, rectangle):
         try:
+            print('check')
             document = self.createRectangleDocument(rectangle)
             if not self.isPresentInDatabase(rectangle):
+                print("Rectangle not present in database")
                 self.rectangles_collection.insert(document)
             else:
                 print("Rectangle already present in database")
@@ -260,9 +262,12 @@ class DatabaseManager(object):
             is_present = rectangle.getName() in unstacked_rectangles_names
         elif len(grids) > 0 and len(unstacked_rectangles) > 0:
             is_present = (rectangle.getName() in unstacked_rectangles_names) or (rectangle.getName() in stacked_rectangles_names)
+        elif len(grids) > 0 and len(unstacked_rectangles) == 0:
+            is_present = (rectangle.getName() in stacked_rectangles_names)
         elif len(grids) == 0 and len(unstacked_rectangles) == 0:
             raise EmptyDataBaseError
-
+        
+        print(is_present)
         return is_present
 
     def getRectangles(self, grid, for_cutting = False, sort = False):
