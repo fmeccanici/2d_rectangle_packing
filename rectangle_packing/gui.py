@@ -133,6 +133,62 @@ class RectanglePackingGui(QWidget):
         worker = Worker(function)
         self.threadpool.start(worker)
 
+    def onStartStackingAutomaticClick(self):
+        self.loadOrdersCreateNecessaryGridsAndStartStacking()
+
+    def loadOrdersCreateNecessaryGridsAndStartStacking(self):
+        self.updateCodeStatus("Creating grids, stacking and exporting. Please wait...")
+        self.stacker.start()
+        self.refreshGrids()
+        self.refreshNewOrders()
+        self.updateCodeStatus("Done with automatic stacking!")
+
+        # self.stacker.startStacking()
+        # self.loadOrders()
+        # self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        # self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
+
+        
+        # for rectangle in self.unstacked_rectangles:
+        #     if not self.stacker.isGridAvailable(rectangle):
+        #         self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
+
+        # self.grids = self.db_manager.getGridsNotCut()
+
+        # for grid in self.grids:
+        #     self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        #     self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
+
+        #     for rectangle in self.unstacked_rectangles:
+        #         if not self.stacker.stackingStopped():
+        #             if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
+        #                 try:
+        #                     self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+
+        #                 except InvalidGridPositionError:
+        #                     try:
+        #                         rectangle.rotate()
+        #                         self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                                    
+            
+        #                     except InvalidGridPositionError:
+        #                         self.updateCodeStatus("Order " + str(rectangle.getName()) + " does not fit")
+        #                         print("Cannot stack rectangle in this grid")
+        #                         continue
+                        
+        #                 self.refreshGrids()
+        #                 self.refreshGrid(grid.getName())
+        #                 self.refreshNewOrders()
+        #                 self.updateCodeStatus("Order " + str(rectangle.getName()) + " stacked")
+                        
+        #             else:
+        #                 print("Colors don't match")
+        #                 self.updateCodeStatus("Order has color " + str(rectangle.getColor()) + ", grid has color " + str(grid.getColor()))      
+                    
+        #         else:
+        #             self.updateCodeStatus("Stacking stopped")
+        #             break
+
     def onStartStackingClick(self):
         self.stacker.startStacking()
         self.updateCodeStatus("Stacking started")
@@ -146,13 +202,31 @@ class RectanglePackingGui(QWidget):
         for i, rectangle in enumerate(self.unstacked_rectangles):
             print("Stacking rectangle " + str(i) + " out of " + str(len(self.unstacked_rectangles)))
 
+            # print(grid.getColor() == rectangle.getColor())
+            # print(grid.getColor())
+            # print(rectangle.getColor())
+            # print()
+            # print(grid.getBrand() == rectangle.getBrand())
+            # print(grid.getBrand())
+            # print(rectangle.getBrand())
+            # print()
+            # print(grid.getWidth() == rectangle.getGridWidth())
+            # print(grid.getWidth())
+            # print(rectangle.getWidth())
+            # print()
             if not self.stacker.stackingStopped():
                 try:
-                    self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                    self.refreshGrid()
-                    self.refreshNewOrders()
-                    self.updateCodeStatus("Order " + str(rectangle.getName()) + " stacked")
 
+                    if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
+                        self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+
+                        self.refreshGrid(grid_number)
+                        self.refreshNewOrders()
+                        self.updateCodeStatus("Order " + str(rectangle.getName()) + " stacked")
+                    else:
+                        print("Colors don't match")
+                        self.updateCodeStatus("Order has color " + str(rectangle.getColor()) + ", grid has color " + str(grid.getColor()))
                 except InvalidGridPositionError:
                     print("Rectangle does not fit")
                     self.updateCodeStatus("Order " + str(rectangle.getName()) + " does not fit")
@@ -165,10 +239,11 @@ class RectanglePackingGui(QWidget):
     def onStopStackingClick(self):
         self.stacker.stopStacking()
         
-    def refreshGrid(self):
-        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
-        
+    def refreshGrid(self, grid_number):        
         grid = self.db_manager.getGrid(grid_number)
+
+        self.uncut_color_line_edit.setText(grid.getColor())
+        self.uncut_width_line_edit.setText(str(grid.getWidth()))
 
         self.drawGrid(grid)
         self.removeAllOrderItems()
@@ -184,6 +259,9 @@ class RectanglePackingGui(QWidget):
         
         grid = self.db_manager.getGrid(grid_number)
 
+        self.cut_color_line_edit.setText(grid.getColor())
+        self.cut_width_line_edit.setText(str(grid.getWidth()))
+
         self.drawGrid(grid)
         self.removeAllOrderItems()
 
@@ -197,7 +275,8 @@ class RectanglePackingGui(QWidget):
         self.list_widget_orders.clear()
 
     def onLoadGridClick(self):
-        self.refreshGrid()
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        self.refreshGrid(grid_number)
         
     def createGridHtmlViewer(self, grid_number):
         self.grid_html_viewer = QtWebEngineWidgets.QWebEngineView()
@@ -206,6 +285,15 @@ class RectanglePackingGui(QWidget):
         ))
 
         # self.buttons_layout.addWidget(self.grid_html_viewer)
+
+    def refreshGrids(self):
+        grids = self.db_manager.getGridsNotCut()
+
+        self.list_widget_grids.clear()
+
+        for grid in grids:
+            list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
+            self.list_widget_grids.addItem(list_widget_item) 
 
     def createGridOrdersLayout(self):
         self.list_widget_grids = QListWidget() 
@@ -238,6 +326,27 @@ class RectanglePackingGui(QWidget):
         self.cut_uncut_layout.addWidget(cut_grids_label, 0, 1)
         self.cut_uncut_layout.addWidget(self.list_widget_cut_grids, 1, 1)
         
+        cut_color_label = QLabel("Color")
+        cut_width_label = QLabel("Width")
+        self.cut_color_line_edit = QLineEdit()
+        self.cut_width_line_edit = QLineEdit()
+
+        uncut_color_label = QLabel("Color")
+        uncut_width_label = QLabel("Width")
+        self.uncut_color_line_edit = QLineEdit()
+        self.uncut_width_line_edit = QLineEdit()
+        
+        self.cut_uncut_layout.addWidget(cut_color_label, 2, 1)
+        self.cut_uncut_layout.addWidget(self.cut_color_line_edit, 3, 1)
+        self.cut_uncut_layout.addWidget(cut_width_label, 4, 1)        
+        self.cut_uncut_layout.addWidget(self.cut_width_line_edit, 5, 1)
+
+        self.cut_uncut_layout.addWidget(uncut_color_label, 2, 0)
+        self.cut_uncut_layout.addWidget(self.uncut_color_line_edit, 3, 0)
+        self.cut_uncut_layout.addWidget(uncut_width_label, 4, 0)
+        self.cut_uncut_layout.addWidget(self.uncut_width_line_edit, 5, 0)
+    
+        
         cut_uncut_group_box.setLayout(self.cut_uncut_layout)
         self.grid_orders_layout.addWidget(cut_uncut_group_box)
 
@@ -248,15 +357,26 @@ class RectanglePackingGui(QWidget):
 
         order_width_label = QLabel("Width")
         order_height_label = QLabel("Height")
+        order_color_label = QLabel("Color")
+        order_grid_width_label = QLabel("Grid width")
 
         self.width_line_edit = QLineEdit()
         self.height_line_edit = QLineEdit()
+        self.color_line_edit = QLineEdit()
+        self.grid_width_line_edit = QLineEdit()
 
         grid_orders_layout.addWidget(order_width_label, 1, 0)
         grid_orders_layout.addWidget(self.width_line_edit, 2, 0)
 
         grid_orders_layout.addWidget(order_height_label, 3, 0)
         grid_orders_layout.addWidget(self.height_line_edit, 4, 0)
+
+        grid_orders_layout.addWidget(order_color_label, 1, 1)
+        grid_orders_layout.addWidget(self.color_line_edit, 2, 1)
+
+        grid_orders_layout.addWidget(order_grid_width_label, 3, 1)
+        grid_orders_layout.addWidget(self.grid_width_line_edit, 4, 1)
+
 
         grid_orders_groupbox.setLayout(grid_orders_layout)
 
@@ -266,17 +386,26 @@ class RectanglePackingGui(QWidget):
         self.unstacked_orders_group_box = QGroupBox("New orders")
         unstacked_order_width_label = QLabel("Width")
         unstacked_order_height_label = QLabel("Height")
-        
+        unstacked_order_color_label = QLabel("Color")
+        unstacked_order_grid_width_label = QLabel("Grid width")
+
         self.unstacked_orders_layout = QGridLayout()
         self.unstacked_orders_layout.addWidget(self.list_widget_new_orders, 0, 0)
 
         self.unstacked_order_width_line_edit = QLineEdit()
         self.unstacked_order_height_line_edit = QLineEdit()
+        self.unstacked_order_color_line_edit = QLineEdit()
+        self.unstacked_order_grid_width_line_edit = QLineEdit()
 
         self.unstacked_orders_layout.addWidget(unstacked_order_width_label, 1, 0)
         self.unstacked_orders_layout.addWidget(self.unstacked_order_width_line_edit, 2, 0)        
         self.unstacked_orders_layout.addWidget(unstacked_order_height_label, 3, 0)
         self.unstacked_orders_layout.addWidget(self.unstacked_order_height_line_edit, 4, 0)
+
+        self.unstacked_orders_layout.addWidget(unstacked_order_color_label, 1, 1)
+        self.unstacked_orders_layout.addWidget(self.unstacked_order_color_line_edit, 2, 1)
+        self.unstacked_orders_layout.addWidget(unstacked_order_grid_width_label, 3, 1)
+        self.unstacked_orders_layout.addWidget(self.unstacked_order_grid_width_line_edit, 4, 1)
 
         self.unstacked_orders_group_box.setLayout(self.unstacked_orders_layout)
         self.grid_orders_layout.addWidget(self.unstacked_orders_group_box)
@@ -294,7 +423,39 @@ class RectanglePackingGui(QWidget):
         self.list_widget_new_orders.clear()
 
     def onCreateGridClick(self):
-        grid = self.db_manager.createUniqueGrid()
+        brand = 'kokos'
+        if self.grid_width1_radio_button.isChecked():
+            width = 100
+        elif self.grid_width2_radio_button.isChecked():
+            width = 200
+
+        if self.color_antraciet_radio_button.isChecked():
+            color = 'antraciet'
+        elif self.color_blauw_radio_button.isChecked():
+            color = 'blauw'
+        elif self.color_bordeaux_radio_button.isChecked():
+            color = 'bordeaux'
+        elif self.color_bruin_radio_button.isChecked():
+            color = 'bruin'
+        elif self.color_bruin_terra_radio_button.isChecked():
+            color = 'bruin-terra'
+        elif self.color_grijs_radio_button.isChecked():
+            color = 'grijs'
+        elif self.color_naturel_radio_button.isChecked():
+            color = 'naturel'
+        elif self.color_rood_bordeaux_radio_button.isChecked():
+            color = 'rood-bordeaux'
+        elif self.color_rood_radio_button.isChecked():
+            color = 'rood'
+        elif self.color_terra_radio_button.isChecked():
+            color = 'terra'
+        elif self.color_zwart_grijs_radio_button.isChecked():
+            color = 'zwart-grijs'
+        elif self.color_zwart_radio_button.isChecked():
+            color = 'zwart'
+
+        print("color = " + str(color))
+        grid = self.db_manager.createUniqueGrid(width=width, brand=brand, color=color)
 
         list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
         self.list_widget_grids.addItem(list_widget_item) 
@@ -308,6 +469,7 @@ class RectanglePackingGui(QWidget):
 
         self.start_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingClick))
         self.stop_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStopStackingClick))
+        self.start_stacking_automatic_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingAutomaticClick))
 
         self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
         self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
@@ -414,18 +576,24 @@ class RectanglePackingGui(QWidget):
             self.current_rectangle = rectangle_number
             self.previous_rectangle = rectangle
 
-        self.updateWidthHeight(rectangle)
-
-    def updateWidthHeight(self, rectangle):
+        self.updateWidthHeightColorGridWidth(rectangle)
+        
+    def updateWidthHeightColorGridWidth(self, rectangle):
         if rectangle.isStacked():
             self.width_line_edit.setText(str(rectangle.getWidth() * 10) + 'mm')
             self.height_line_edit.setText(str(rectangle.getHeight() * 10) + 'mm')
+            self.color_line_edit.setText(str(rectangle.getColor()))
+            self.grid_width_line_edit.setText(str(rectangle.getGridWidth()))
         else:
             self.unstacked_order_width_line_edit.setText(str(rectangle.getWidth() * 10) + 'mm')
             self.unstacked_order_height_line_edit.setText(str(rectangle.getHeight() * 10) + 'mm')
+            self.unstacked_order_color_line_edit.setText(str(rectangle.getColor()))
+            self.unstacked_order_grid_width_line_edit.setText(str(rectangle.getGridWidth()))
 
     def onDoubleClickGrid(self):
-        self.refreshGrid()
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+
+        self.refreshGrid(grid_number)
         self.previous_rectangle = None
         self.width_line_edit.setText("")
         self.height_line_edit.setText("")
@@ -464,12 +632,53 @@ class RectanglePackingGui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         # self.load_grid_button = QPushButton("Load")
         self.create_grid_button = QPushButton("Create new grid")
+        self.color_naturel_radio_button = QRadioButton("Naturel")
+        self.color_naturel_radio_button.setChecked(True)
+        self.color_zwart_radio_button = QRadioButton("Zwart")
+        self.color_antraciet_radio_button = QRadioButton("Antraciet")
+        self.color_grijs_radio_button = QRadioButton("Grijs")
+        self.color_rood_radio_button = QRadioButton("Rood")
+        self.color_bruin_terra_radio_button = QRadioButton("Bruin-Terra")
+        self.color_zwart_grijs_radio_button = QRadioButton("Zwart-Grijs")
+        self.color_rood_bordeaux_radio_button = QRadioButton("Rood-Bordeaux")
+        self.color_terra_radio_button = QRadioButton("Terra")
+        self.color_bordeaux_radio_button = QRadioButton("Bordeaux")
+        self.color_blauw_radio_button = QRadioButton("Blauw")
+        self.color_bruin_radio_button = QRadioButton("Bruin")
+        self.color_buttons_layout = QGridLayout()
+        self.color_buttons_layout.addWidget(self.color_naturel_radio_button, 0, 0)
+        self.color_buttons_layout.addWidget(self.color_zwart_radio_button, 1, 0)
+        self.color_buttons_layout.addWidget(self.color_antraciet_radio_button, 2, 0)
+        self.color_buttons_layout.addWidget(self.color_grijs_radio_button, 0, 1)
+        self.color_buttons_layout.addWidget(self.color_rood_radio_button, 1, 1)
+        self.color_buttons_layout.addWidget(self.color_bruin_terra_radio_button, 2, 1)
+        self.color_buttons_layout.addWidget(self.color_zwart_grijs_radio_button, 0, 2)
+        self.color_buttons_layout.addWidget(self.color_rood_bordeaux_radio_button, 1, 2)
+        self.color_buttons_layout.addWidget(self.color_terra_radio_button, 2, 2)
+        self.color_buttons_layout.addWidget(self.color_bordeaux_radio_button, 0, 3)
+        self.color_buttons_layout.addWidget(self.color_blauw_radio_button, 1, 3)
+        self.color_buttons_layout.addWidget(self.color_bruin_radio_button, 2, 3)
+        self.color_buttons_groupbox = QGroupBox("Colors")
+        self.color_buttons_groupbox.setLayout(self.color_buttons_layout)
+        
+        self.grid_width_groupbox = QGroupBox("Width")
+        self.grid_width_layout = QGridLayout()
+        self.grid_width1_radio_button = QRadioButton("100cm")
+        self.grid_width2_radio_button = QRadioButton("200cm")
+        self.grid_width1_radio_button.setChecked(True)
+        self.grid_width_layout.addWidget(self.grid_width1_radio_button, 0, 0)
+        self.grid_width_layout.addWidget(self.grid_width2_radio_button, 1, 0)
+        self.grid_width_groupbox.setLayout(self.grid_width_layout)
+
         self.empty_grid_button = QPushButton("Empty grid")
 
         self.make_database_backup_button = QPushButton("Make database backup")
 
         # self.buttons_layout.addWidget(self.load_grid_button)
         self.buttons_layout.addWidget(self.create_grid_button)
+        self.buttons_layout.addWidget(self.color_buttons_groupbox)
+        self.buttons_layout.addWidget(self.grid_width_groupbox)
+
         self.buttons_layout.addWidget(self.empty_grid_button)
 
         self.buttons_layout.addWidget(self.load_orders_button)
@@ -479,8 +688,12 @@ class RectanglePackingGui(QWidget):
         layout = QVBoxLayout()
         self.start_stacking_button = QPushButton("Start")
         self.stop_stacking_button = QPushButton("Stop")
+        self.start_stacking_automatic_button = QPushButton("Automatic")
+
         layout.addWidget(self.start_stacking_button)
         layout.addWidget(self.stop_stacking_button)
+        layout.addWidget(self.start_stacking_automatic_button)
+
         code_status_label = QLabel("Status")
         self.code_status_line_edit = QLineEdit()
 

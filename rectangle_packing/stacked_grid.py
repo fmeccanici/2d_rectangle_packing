@@ -25,7 +25,7 @@ class InvalidGridPositionError(Error):
     pass
 
 class StackedGrid(object):
-    def __init__(self, width, height, name, brand = "kokos", color = "zwart", stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width, height, name, brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.width = width
         self.height = height
         self.name = name
@@ -38,7 +38,12 @@ class StackedGrid(object):
 
         self.unstacked_rectangles = []
         
-        self.grid_dxf = "./dxf/grid" + str(name) + ".dxf"
+        self.path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
+        self.grid_dxf = self.path + "/grid" + str(name) + ".dxf"
+
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
+
         self.drawing = dxf.drawing(self.grid_dxf)
         self.base_path = os.path.abspath(os.getcwd())
 
@@ -200,7 +205,7 @@ class StackedGrid(object):
         self.toDxf()
         dox, auditor = recover.readfile(self.grid_dxf)
         if not auditor.has_errors:
-            matplotlib.qsave(dox.modelspace(), './pdf/grid_' + str(self.getName()) + '.png')
+            matplotlib.qsave(dox.modelspace(), './pdf/' + self.getBrand() + '/' + self.getColor() + '/' + str(self.getWidth()) + '/grid_' + str(self.getName()) + '.png')
 
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))

@@ -2,6 +2,7 @@
 from rectangle import Rectangle
 from stacked_grid import StackedGrid
 from database_manager import DatabaseManager
+from excel_parser import ExcelParser
 
 import random
 import time
@@ -28,13 +29,16 @@ using computeRectangleOrderArea, after which they can be stacked using computeSt
 class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
-        
+        path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
+        file_name = "paklijst.xlsx"
+
+        self.excel_parser = ExcelParser(path, file_name)
+
         # grid = StackedGrid(width=200, height=1500, name=991)
         # self.db_manager.addGrid(grid)
         
-        # self.grids = self.db_manager.getGridsNotFull()
+        # self.grids = self.db_manager.getGridsNotCut()
         
-
         self.unstacked_rectangles = []
         
         self.min_rectangle_width = 100 #cm
@@ -45,25 +49,6 @@ class Stacker(object):
         self.min_grid_buffer_size = 50
 
         self.stop_stacking = False
-
-    # def optimizeAndExportGrid(self, grid):
-    #     exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True)
-    #     rectangles_for_stacking = self.db_manager.getRectangles(grid, for_cutting=False)
-    #     optimized_grid = StackedGrid(200, 1500, grid.getName())
-
-
-    #     for exact_rectangle in exact_rectangles:
-    #         for rectangle_for_stacking in rectangles_for_stacking:
-    #             if rectangle_for_stacking.getName() == exact_rectangle.getName():
-    #                 dx = rectangle_for_stacking.getWidth()/2 - exact_rectangle.getWidth()/2
-    #                 dy = rectangle_for_stacking.getHeight()/2 - exact_rectangle.getHeight()/2
-    #                 x_new = exact_rectangle.getPosition()[0] - dx
-    #                 y_new = exact_rectangle.getPosition()[1] - dy
-    #                 new_rectangle = Rectangle(exact_rectangle.getWidth(), exact_rectangle.getHeight(), exact_rectangle.getName(), grid_number=exact_rectangle.getGridNumber(), is_stacked=exact_rectangle.isStacked())
-    #                 new_rectangle.setPosition([x_new, y_new])
-    #                 optimized_grid.addRectangle(new_rectangle)
-        
-    #     optimized_grid.toDxf()
 
     def stackingStopped(self):
         return self.stop_stacking
@@ -77,6 +62,11 @@ class Stacker(object):
     def addToDatabase(self, rectangles):
         for rectangle in rectangles:
             self.db_manager.addRectangle(rectangle)
+
+    def isGridAvailable(self, rectangle):
+        grid_width = rectangle.getGridWidth()
+        color = rectangle.getColor()
+        return len(self.db_manager.getGridsNotCutByWidthBrandColor(width=grid_width, color=color)) > 0
 
     def computeStackingPosition(self, rectangle, grid):
         stacking_position = [grid.getWidth(), grid.getHeight()]
@@ -140,9 +130,9 @@ class Stacker(object):
 
             grid.toDxf()
 
-    def createAndAddNewGrid(self):
+    def createAndAddNewGrid(self, width=100, brand='kokos', color='naturel'):
         try:
-            grid = StackedGrid(width=200, height=1500, name=self.grids[-1].getName() + 1, stacked_rectangles=[])
+            grid = StackedGrid(width=width, height=1500, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
             self.grids.append(grid)
 
             self.db_manager.addGrid(grid)
@@ -155,8 +145,6 @@ class Stacker(object):
             print("Created and added initial grid to database")
 
     def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
-        
-
         stacking_position = self.computeStackingPosition(rectangle, grid)
         rectangle.setPosition(stacking_position)
 
@@ -196,70 +184,62 @@ class Stacker(object):
 
         return rectangles
 
+    def loadOrders(self):
+        unstacked_rectangles = self.excel_parser.getOrders()
+        self.addToDatabase(unstacked_rectangles)
+
     def start(self):        
-        n = 5
-        self.unstacked_rectangles = self.generateRandomRectangles(n)
-        self.addToDatabase(self.unstacked_rectangles)
+        self.startStacking()
+        self.loadOrders()
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
-        # minimum amount of rectangles such that we can sort the rectangles based on area
-        while len(self.unstacked_rectangles) > self.min_grid_buffer_size:
-            
-            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        for rectangle in self.unstacked_rectangles:
+            if not self.isGridAvailable(rectangle):
+                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
 
-            # print([x.getName() for x in self.unstacked_rectangles])
-            # print([x.getName() for x in self.grids])
+        self.grids = self.db_manager.getGridsNotCut()
 
+        for grid in self.grids:
+            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=grid.getColor())
             self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
-
             for i, rectangle in enumerate(self.unstacked_rectangles):
-                print("Amount of unstacked rectangles = " + str(len(self.unstacked_rectangles)))
-                print("Rectangle " + str(rectangle.getName()))
+                if not self.stackingStopped():
 
-                for grid in self.grids:
-                    print("Grid " + str(grid.getName()))
-                    grid.plot()
-
-                    try:
-                        print("Original rectangle")
-                        print(rectangle.getWidth(), rectangle.getHeight())
-                        self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                        del self.unstacked_rectangles[i]
-                        break
-
-                    except InvalidGridPositionError:
-                        print("Failed to stack original rectangle")
-                        print("Try rotated")
+                    if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
                         try:
-                            rectangle.rotate()
-                            print("Rotated rectangle")
-                            print(rectangle.getWidth(), rectangle.getHeight())
-
                             self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                            del self.unstacked_rectangles[i]
-                            break
-
-                        except InvalidGridPositionError:
-                            print("Invalid grid position")
-                            continue
                         
-                if not rectangle.isStacked():
-                    self.createAndAddNewGrid()
-            
-        for grid in self.grids:
-            grid.plot()
+                        except InvalidGridPositionError:
+                            try:
+                                print("Cannot stack rectangle")
+                                print("Try rotated rectangle")
+                                rectangle.rotate()
+                                self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                                continue
+
+                            except InvalidGridPositionError:
+                                print("Cannot stack rectangle in this grid")
+                                continue
+                    else: 
+                        print("Colors don't match")
+                else:
+                    print("Stacking stopped")
+                    break
+                
+            self.optimizeAndExportGrid(grid)
 
 if __name__ == "__main__":
     stacker = Stacker()
     # stacker.db_manager.convertGridsNotCutToDxf()
-    
-    while True:
-        t_start = time.time()
-        stacker.start()
-        stacker.db_manager.makeBackup()
-        t_stop = time.time() - t_start
+    stacker.start()    
+    # while True:
+    #     t_start = time.time()
+    #     stacker.start()
+    #     stacker.db_manager.makeBackup()
+    #     t_stop = time.time() - t_start
 
-        print("Time: " + str(round(t_stop)) + " seconds")
+    #     print("Time: " + str(round(t_stop)) + " seconds")
     
 
