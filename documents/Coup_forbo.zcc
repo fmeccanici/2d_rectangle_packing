@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ZCC_cmd MessageID="2063" CommandID="jobdescription" xsi:noNamespaceSchemaLocation="file:ZCC_cmd.xsd" Version="3026" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:zcc="www.zund.com/ZCC">
+ <Job Name="Coup_forbo.zcc">
+  <Meta Reserved="13176">
+   <Description>Nieuwe opdracht</Description>
+   <Priority>Low</Priority>
+   <Creation Name="Cut Editor" Version="3.2.6.9" Date="2020-01-24T09:10:26"/>
+  </Meta>
+  <Material Name="Forbo Coral Classic" GUID="{8323b713-b552-4e06-974a-d41fc21723e2}">
+   <MaterialSettings Thickness="9">
+    <Parameter Id="VacuumLevel" TypeId="98" Value="0"/>
+    <Parameter Id="UsePrevPageTrans" TypeId="189" Value="0"/>
+    <Parameter Id="FeedCompensation" TypeId="166" Value="0"/>
+   </MaterialSettings>
+  </Material>
+  <Geometry>
+   <Outline>
+    <MoveTo X="825.000" Y="25.001"/>
+    <LineTo X="1625.000" Y="25.001"/>
+    <LineTo X="1625.000" Y="960.000"/>
+    <LineTo X="825.000" Y="960.000"/>
+    <LineTo X="825.000" Y="25.001"/>
+    <LineTo X="25.000" Y="25.000"/>
+    <LineTo X="25.000" Y="960.000"/>
+    <LineTo X="825.000" Y="960.000"/>
+    <Method Type="Thru-cut"/>
+   </Outline>
+   <Outline>
+    <MoveTo X="1625.001" Y="860.001"/>
+    <LineTo X="2275.001" Y="860.001"/>
+    <LineTo X="2275.001" Y="25.001"/>
+    <LineTo X="1625.000" Y="25.001"/>
+    <Method Type="Thru-cut"/>
+   </Outline>
+   <Outline>
+    <MoveTo X="2275.001" Y="25.001"/>
+    <LineTo X="2799.000" Y="25.001"/>
+    <LineTo X="2799.000" Y="827.201"/>
+    <LineTo X="2275.000" Y="827.201"/>
+    <Method Type="Thru-cut"/>
+   </Outline>
+  </Geometry>
+  <Copies>
+   <NCopies>1</NCopies>
+   <DoneCopies>0</DoneCopies>
+   <DonePages>0</DonePages>
+   <NRepetitionX>1</NRepetitionX>
+   <NRepetitionY>1</NRepetitionY>
+   <MinDistanceX>0.000</MinDistanceX>
+   <MinDistanceY>0.000</MinDistanceY>
+   <PageDistance>20.000</PageDistance>
+  </Copies>
+  <Orientation>1</Orientation>
+  <JobProcessing Name="Manual feed" GUID="{963da40c-5b83-4781-b96d-dc39567bb375}" AutoPagePos="1">
+   <FeedType>manual</FeedType>
+   <StartOfProduction>
+    <Vacuum>Suck</Vacuum>
+   </StartOfProduction>
+   <EndOfProduction>
+    <MoveToPark/>
+    <Vacuum>Off</Vacuum>
+   </EndOfProduction>
+   <StartOfPage>
+    <Vacuum>Suck</Vacuum>
+   </StartOfPage>
+   <EndOfPage>
+    <MoveToPark/>
+    <Vacuum>Blow</Vacuum>
+    <Vacuum>Off</Vacuum>
+   </EndOfPage>
+  </JobProcessing>
+  <Feed>
+   <BoundingBox>
+    <BottomLeft X="0.000" Y="0.000"/>
+    <TopRight X="2051.999" Y="860.000"/>
+   </BoundingBox>
+  </Feed>
+  <Methods>
+   <Method Type="Register" Color="000000" AllowReverseDirection="false" RegistrationType="borderFrontRight">
+    <ToolConfig ToolID="14" Tool="Register" CuttingMode="standard" Generation="All">
+     <ToolInsert Insert="Camera ICC" InsertID="1">
+      <Parameter Id="XYAccelerationUp" TypeId="2" Value="4"/>
+      <Parameter Id="XYSpeedUp" TypeId="14" Value="1000"/>
+      <Parameter Id="BorderMasterAxis" TypeId="138" Value="0"/>
+     </ToolInsert>
+    </ToolConfig>
+   </Method>
+   <Method Type="Thru-cut" Color="0000ff" AllowReverseDirection="false" CuttingMode="standard" OffsetSide="outside">
+    <ToolConfig ToolID="2" Tool="UCT" CuttingMode="standard" Generation="G3">
+     <ToolInsert Insert="Z44" InsertID="28">
+      <Parameter Id="XYAccelerationDown" TypeId="1" Value="3"/>
+      <Parameter Id="XYAccelerationUp" TypeId="2" Value="4"/>
+      <Parameter Id="XYSpeedDown" TypeId="15" Value="800"/>
+      <Parameter Id="XYSpeedUp" TypeId="14" Value="1000"/>
+      <Parameter Id="ZSpeedDown" TypeId="18" Value="500"/>
+      <Parameter Id="ZSpeedUp" TypeId="17" Value="500"/>
+      <Parameter Id="TangentialLiftAngle" TypeId="3" Value="40"/>
+      <Parameter Id="AutoClearingDistance" TypeId="101" Value="1"/>
+      <Parameter Id="ZClearingDistance" TypeId="19" Value="5"/>
+      <Parameter Id="DoMultiPass" TypeId="27" Value="0"/>
+      <Parameter Id="MaxMultiPassDepth" TypeId="30" Value="0.1"/>
+      <Parameter Id="LastMultiPassDepth" TypeId="29" Value="0"/>
+      <Parameter Id="MultipassReverseDirection" TypeId="151" Value="1"/>
+      <Parameter Id="ZOverDepth" TypeId="20" Value="0.2"/>
+      <Parameter Id="DoOvercut" TypeId="34" Value="0"/>
+      <Parameter Id="StartOvercut" TypeId="35" Value="0"/>
+      <Parameter Id="StopOvercut" TypeId="36" Value="0"/>
+      <Parameter Id="DoBladeCompensation" TypeId="116" Value="0"/>
+      <Parameter Id="BladeCompFactorX" TypeId="122" Value="100"/>
+      <Parameter Id="BladeCompCorrectY" TypeId="123" Value="0"/>
+      <Parameter Id="OptTangentialRotation" TypeId="104" Value="0"/>
+      <Parameter Id="GenericParameter" TypeId="38" Value=""/>
+     </ToolInsert>
+    </ToolConfig>
+   </Method>
+  </Methods>
+ </Job>
+</ZCC_cmd>
