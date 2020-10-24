@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 class Rectangle(object):
-    def __init__(self, width, height, name, position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
+    def __init__(self, width, height, name, brand='kokos', color='zwart', position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
         self.position = np.asarray(position)
         self.width = width
         self.height = height

@@ -72,12 +72,13 @@ class DatabaseManager(object):
         for grid in grids_not_cut:
             grid.toDxf()
 
-    def getGridsNotCut(self):
+    def getGridsNotCut(self, width=100, brand='kokos', color='zwart'):
         grids = []
+        query = {"width": width, "brand": brand, "color": color}
 
-        cursor = self.grids_collection.find({})
+        cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -88,12 +89,13 @@ class DatabaseManager(object):
 
         return grids
 
-    def getGridsCut(self):
+    def getGridsCut(self, width=100, brand='kokos', color='zwart'):
         grids = []
+        query = {"width": width, "brand": brand, "color": color}
 
-        cursor = self.grids_collection.find({})
+        cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -120,7 +122,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(document['width'], document['height'], document['name'])
+            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             if for_cutting == True:
                 rectangles = self.getRectangles(grid, for_cutting)
             else:
@@ -130,15 +132,16 @@ class DatabaseManager(object):
         
         return grid
 
-    def getGridsNotFull(self):
+    def getGridsNotFull(self, width=100, brand='kokos', color='zwart'):
         try:
             grids = []
+            query = {"width": width, "brand": brand, "color": color}
 
-            cursor = self.grids_collection.find({})
+            cursor = self.grids_collection.find(query)
 
             for document in cursor:
                     print("Loaded grid " + str(document["name"]) + " from database")
-                    grid = StackedGrid(document['width'], document['height'], document['name'])
+                    grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                     rectangles = self.getRectangles(grid)
                     grid.setStackedRectangles(rectangles)
                     
