@@ -51,7 +51,7 @@ class RectanglePackingGui(QWidget):
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
         path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
-        file_name = "paklijst.xlsx"
+        file_name = "paklijst2.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
 
@@ -111,6 +111,7 @@ class RectanglePackingGui(QWidget):
 
         x = rectangle.getPosition()[0] - rectangle.getWidth()/2
         y = rectangle.getPosition()[1] + rectangle.getHeight()/2
+        print(x,y)
         width = rectangle.getWidth() 
         height = rectangle.getHeight() 
 

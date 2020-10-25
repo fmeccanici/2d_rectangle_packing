@@ -30,7 +30,7 @@ class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
         path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
-        file_name = "paklijst.xlsx"
+        file_name = "paklijst2.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
 
@@ -147,7 +147,7 @@ class Stacker(object):
     def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
         stacking_position = self.computeStackingPosition(rectangle, grid)
         rectangle.setPosition(stacking_position)
-
+        
         if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
             rectangle.setStacked()
             rectangle.setGridNumber(grid.getName())
@@ -185,51 +185,75 @@ class Stacker(object):
         return rectangles
 
     def loadOrders(self):
+        self.excel_parser.reloadExcel()
         unstacked_rectangles = self.excel_parser.getOrders()
         self.addToDatabase(unstacked_rectangles)
 
     def start(self):        
         self.startStacking()
         self.loadOrders()
+
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
-        print(len(self.unstacked_rectangles))
-        for rectangle in self.unstacked_rectangles:
-            if not self.isGridAvailable(rectangle):
-                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
+        while len(self.unstacked_rectangles) > 0:
+            for rectangle in self.unstacked_rectangles:
+                if not self.isGridAvailable(rectangle):
+                    self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
 
-        self.grids = self.db_manager.getGridsNotCut()
+            self.grids = self.db_manager.getGridsNotCut()
 
-        for grid in self.grids:
-            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=grid.getColor())
-            self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+            for grid in self.grids:
+                self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=grid.getColor())
+                self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
-            for i, rectangle in enumerate(self.unstacked_rectangles):
-                if not self.stackingStopped():
+                for i, rectangle in enumerate(self.unstacked_rectangles):
+                    if not self.stackingStopped():
 
-                    if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
-                        try:
-                            self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                        
-                        except InvalidGridPositionError:
+                        if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
                             try:
-                                print("Cannot stack rectangle")
-                                print("Try rotated rectangle")
-                                rectangle.rotate()
                                 self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                                continue
-
+                            
                             except InvalidGridPositionError:
-                                print("Cannot stack rectangle in this grid")
-                                continue
-                    else: 
-                        print("Colors don't match")
-                else:
-                    print("Stacking stopped")
-                    break
-                
-            self.optimizeAndExportGrid(grid)
+                                try:
+                                    print("Cannot stack rectangle")
+                                    print("Try rotated rectangle")
+                                    rectangle.rotate()
+                                    self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                                    continue
+
+                                except InvalidGridPositionError:
+                                    print("Rotate rectangle back to original")
+                                    rectangle.rotate()
+                                    print("Cannot stack rectangle in this grid")
+                                    print("Creating new grid and stack this rectangle")
+                                    new_grid = self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), brand=rectangle.getBrand(),
+                                            color=rectangle.getColor())
+                                    
+                                    # for some reason new_grid starts out filled in an iteration
+                                    self.db_manager.emptyGrid(new_grid)
+
+                                    print(rectangle.getWidth())
+                                    print(grid.getWidth())
+                                    print(rectangle.getName())
+                                    print(grid.getName())
+                                    print(new_grid.getName())
+                                    print([x.getName() for x in new_grid.getStackedRectangles()])
+
+                                    input("wait")
+
+                                    self.computeStackingPositionAndUpdateDatabase(rectangle, new_grid)
+                                    continue
+                        else: 
+                            print("Colors don't match")
+                    else:
+                        print("Stacking stopped")
+                        break
+                    
+                self.optimizeAndExportGrid(grid)
+            
+            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+            self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
 if __name__ == "__main__":
     stacker = Stacker()
