@@ -185,6 +185,49 @@ class StackedGrid(object):
 
         self.drawing.save()
 
+    def toDxfRemoveDuplicateLines(self):
+        upper_horizontal_lines = []
+        lower_horizontal_lines = []
+        left_vertical_lines = []
+        right_vertical_lines = []
+        
+        for rectangle in self.stacked_rectangles:
+            upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line = rectangle.toDxf()
+            
+            upper_horizontal_lines_start_points = [x['start'] for x in upper_horizontal_lines]
+
+            if upper_horizontal_line['start'] not in upper_horizontal_lines_start_points:
+                upper_horizontal_lines.append(upper_horizontal_line)
+
+            lower_horizontal_lines_start_points = [x['start'] for x in lower_horizontal_lines]
+
+            if lower_horizontal_line['start'] not in lower_horizontal_lines_start_points:
+                lower_horizontal_lines.append(lower_horizontal_line)
+
+            left_vertical_lines_start_points = [x['start'] for x in lower_horizontal_lines]
+
+            if left_vertical_line['start'] not in left_vertical_lines_start_points:
+                left_vertical_lines.append(left_vertical_line)
+
+            right_vertical_lines_start_points = [x['start'] for x in lower_horizontal_lines]
+
+            if right_vertical_line['start'] not in right_vertical_lines_start_points:
+                right_vertical_lines.append(right_vertical_line)
+
+        for upper_horizontal_line in upper_horizontal_lines:
+            self.drawing.add(upper_horizontal_line)
+
+        for lower_horizontal_line in lower_horizontal_lines:
+            self.drawing.add(lower_horizontal_line)
+            
+        for left_vertical_line in left_vertical_lines:
+            self.drawing.add(left_vertical_line)
+
+        for right_vertical_line in right_vertical_lines:
+            self.drawing.add(right_vertical_line)
+
+        self.drawing.save()
+    
     def toDxf(self):
         for rectangle in self.stacked_rectangles:
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
@@ -194,7 +237,6 @@ class StackedGrid(object):
 
             bgcolor = random.randint(1,255)
             
-            print(x, y, width, height)
             self.drawing.add(dxf.rectangle((x,y), width, height,
                                   bgcolor=bgcolor))
 

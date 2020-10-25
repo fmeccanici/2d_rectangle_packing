@@ -128,7 +128,7 @@ class Stacker(object):
 
                 grid.addRectangle(optimized_rectangle)
 
-            grid.toDxf()
+            grid.toDxfRemoveDuplicateLines()
 
     def createAndAddNewGrid(self, width=100, brand='kokos', color='naturel'):
         try:
@@ -233,14 +233,12 @@ class Stacker(object):
                                     # for some reason new_grid starts out filled in an iteration
                                     self.db_manager.emptyGrid(new_grid)
 
-                                    print(rectangle.getWidth())
-                                    print(grid.getWidth())
-                                    print(rectangle.getName())
-                                    print(grid.getName())
-                                    print(new_grid.getName())
-                                    print([x.getName() for x in new_grid.getStackedRectangles()])
-
-                                    input("wait")
+                                    # print(rectangle.getWidth())
+                                    # print(grid.getWidth())
+                                    # print(rectangle.getName())
+                                    # print(grid.getName())
+                                    # print(new_grid.getName())
+                                    # print([x.getName() for x in new_grid.getStackedRectangles()])
 
                                     self.computeStackingPositionAndUpdateDatabase(rectangle, new_grid)
                                     continue

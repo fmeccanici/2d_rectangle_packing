@@ -3,6 +3,7 @@ import pickle
 import os 
 
 from pathlib import Path
+from dxfwrite import DXFEngine as dxf
 
 class Rectangle(object):
     def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
@@ -77,8 +78,14 @@ class Rectangle(object):
     def getTopLeft(self):   
         return self.getPosition() + np.array([-self.getWidth()/2, self.getHeight()/2])
     
+    def getTopRight(self):   
+        return self.getPosition() + np.array([self.getWidth()/2, self.getHeight()/2])
+    
     def getBottomRight(self):
         return self.getPosition() + np.array([self.getWidth()/2, -self.getHeight()/2])
+
+    def getBottomLeft(self):
+        return self.getPosition() + np.array([-self.getWidth()/2, -self.getHeight()/2])
     
     def getArea(self):
         return self.width * self.height
@@ -102,6 +109,19 @@ class Rectangle(object):
     def toDict(self):
         return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
 
+    def toDxf(self):
+        top_left = self.getTopLeft()
+        top_right = self.getTopRight()
+        bottom_left = self.getBottomLeft()
+        bottom_right = self.getBottomRight()
+
+        upper_horizontal_line = dxf.line((top_left[0], top_left[1]), (top_right[0], top_right[1]))
+        lower_horizontal_line = dxf.line((bottom_left[0], bottom_left[1]), (bottom_right[0], bottom_right[1]))
+        left_vertical_line = dxf.line((top_left[0], top_left[1]), (bottom_left[0], bottom_left[1]))
+        right_vertical_line = dxf.line((top_right[0], top_right[1]), (bottom_right[0], bottom_right[1]))
+
+        return upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line
+        
     def getFlooredWidthHeight(self):
         return np.floor(self.width), np.floor(self.height)
     
