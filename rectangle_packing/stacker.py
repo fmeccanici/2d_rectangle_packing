@@ -194,6 +194,7 @@ class Stacker(object):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
+        print(len(self.unstacked_rectangles))
         for rectangle in self.unstacked_rectangles:
             if not self.isGridAvailable(rectangle):
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())

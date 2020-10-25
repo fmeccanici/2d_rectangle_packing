@@ -224,17 +224,41 @@ class DatabaseManager(object):
 
     def addRectangle(self, rectangle):
         try:
-            print('check')
             document = self.createRectangleDocument(rectangle)
             if not self.isPresentInDatabase(rectangle):
                 print("Rectangle not present in database")
                 self.rectangles_collection.insert(document)
             else:
                 print("Rectangle already present in database")
+
         except EmptyDataBaseError as e:
             print(str(e) + "Database is empty!")
             document = self.createRectangleDocument(rectangle)
             self.rectangles_collection.insert(document)
+
+    def isPresentInDatabase(self, rectangle):
+        unstacked_rectangles = self.getUnstackedRectangles()
+        unstacked_rectangles_names = [r.getName() for r in unstacked_rectangles]
+
+        stacked_rectangles_names = []
+
+        grids = self.getAllGrids()
+        
+        for grid in grids:
+            stacked_rectangles = self.getRectangles(grid)
+            stacked_rectangles_names.extend([r.getName() for r in stacked_rectangles])
+
+        if len(grids) == 0 and len(unstacked_rectangles) > 0:
+            is_present = rectangle.getName() in unstacked_rectangles_names
+        elif len(grids) > 0 and len(unstacked_rectangles) > 0:
+            is_present = (rectangle.getName() in unstacked_rectangles_names) or (rectangle.getName() in stacked_rectangles_names)
+        elif len(grids) > 0 and len(unstacked_rectangles) == 0:
+            is_present = (rectangle.getName() in stacked_rectangles_names)
+        elif len(grids) == 0 and len(unstacked_rectangles) == 0:
+            raise EmptyDataBaseError
+        
+        print("order present in database: " + str(is_present))
+        return is_present
 
     def getRectangle(self, rectangle_number, for_cutting=False):
         query = {"name" : rectangle_number}
@@ -248,27 +272,6 @@ class DatabaseManager(object):
 
         return rectangle        
 
-    def isPresentInDatabase(self, rectangle):
-        unstacked_rectangles = self.getUnstackedRectangles()
-        unstacked_rectangles_names = [r.getName() for r in unstacked_rectangles]
-
-        grids = self.getAllGrids()
-        
-        for grid in grids:
-            stacked_rectangles = self.getRectangles(grid)
-            stacked_rectangles_names = [r.getName() for r in stacked_rectangles]
-
-        if len(grids) == 0 and len(unstacked_rectangles) > 0:
-            is_present = rectangle.getName() in unstacked_rectangles_names
-        elif len(grids) > 0 and len(unstacked_rectangles) > 0:
-            is_present = (rectangle.getName() in unstacked_rectangles_names) or (rectangle.getName() in stacked_rectangles_names)
-        elif len(grids) > 0 and len(unstacked_rectangles) == 0:
-            is_present = (rectangle.getName() in stacked_rectangles_names)
-        elif len(grids) == 0 and len(unstacked_rectangles) == 0:
-            raise EmptyDataBaseError
-        
-        print(is_present)
-        return is_present
 
     def getRectangles(self, grid, for_cutting = False, sort = False):
         print("Loading rectangles within grid " + str(grid.getName()) + " from database")
