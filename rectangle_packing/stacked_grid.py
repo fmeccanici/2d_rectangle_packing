@@ -184,47 +184,57 @@ class StackedGrid(object):
                                   bgcolor=bgcolor))
 
         self.drawing.save()
+    
+    """
+    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
+    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_1. If the value is lower
+    than the current start x value, this is chosen as starting value x_0.  
 
+    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_1. Use the point with the lowest
+    y value as y_0
+    """
     def toDxfRemoveDuplicateLines(self):
-        upper_horizontal_lines = []
-        lower_horizontal_lines = []
-        left_vertical_lines = []
-        right_vertical_lines = []
-        
+        lines = []
+        points = []
+
         for rectangle in self.stacked_rectangles:
-            upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line = rectangle.toDxf()
-            
-            upper_horizontal_lines_start_points = [x['start'] for x in upper_horizontal_lines]
+            top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
 
-            if upper_horizontal_line['start'] not in upper_horizontal_lines_start_points:
-                upper_horizontal_lines.append(upper_horizontal_line)
+            points.append(tuple(top_left))
+            points.append(tuple(top_right))
+            points.append(tuple(bottom_left))
+            points.append(tuple(bottom_right))
 
-            lower_horizontal_lines_start_points = [x['start'] for x in lower_horizontal_lines]
+        x_ = [k[0] for k in points]
+        y_ = [k[1] for k in points]
 
-            if lower_horizontal_line['start'] not in lower_horizontal_lines_start_points:
-                lower_horizontal_lines.append(lower_horizontal_line)
+        x_unique = np.unique(x_)
+        y_unique = np.unique(y_)
 
-            left_vertical_lines_start_points = [x['start'] for x in lower_horizontal_lines]
+        for y in y_unique:
+            x_0 = max(x_)
+            x_1 = 0
+            for point in points:
+                if point[1] == y and point[0] > x_1:
+                    x_1 = point[0]
+                if point[1] == y and point[0] < x_0:
+                    x_0 = point[0]
 
-            if left_vertical_line['start'] not in left_vertical_lines_start_points:
-                left_vertical_lines.append(left_vertical_line)
+            lines.append(dxf.line((x_0, y), (x_1, y)))
+                
+        for x in x_unique:
+            y_0 = max(y_)
+            y_1 = 0
+            for point in points:
+                if point[0] == x and point[1] > y_1:
+                    y_1 = point[1]
+                if point[0] == x and point[1] < y_0:
+                    y_0 = point[1]
 
-            right_vertical_lines_start_points = [x['start'] for x in lower_horizontal_lines]
-
-            if right_vertical_line['start'] not in right_vertical_lines_start_points:
-                right_vertical_lines.append(right_vertical_line)
-
-        for upper_horizontal_line in upper_horizontal_lines:
-            self.drawing.add(upper_horizontal_line)
-
-        for lower_horizontal_line in lower_horizontal_lines:
-            self.drawing.add(lower_horizontal_line)
-            
-        for left_vertical_line in left_vertical_lines:
-            self.drawing.add(left_vertical_line)
-
-        for right_vertical_line in right_vertical_lines:
-            self.drawing.add(right_vertical_line)
+            lines.append(dxf.line((x, y_0), (x, y_1)))
+                
+        for line in lines:
+            self.drawing.add(line)
 
         self.drawing.save()
     

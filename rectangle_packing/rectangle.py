@@ -121,6 +121,9 @@ class Rectangle(object):
         right_vertical_line = dxf.line((top_right[0], top_right[1]), (bottom_right[0], bottom_right[1]))
 
         return upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line
+    
+    def getVertices(self):
+        return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
         
     def getFlooredWidthHeight(self):
         return np.floor(self.width), np.floor(self.height)

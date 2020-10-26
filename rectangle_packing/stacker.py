@@ -30,7 +30,7 @@ class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
         path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
-        file_name = "paklijst2.xlsx"
+        file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
 
