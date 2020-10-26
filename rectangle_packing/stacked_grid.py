@@ -161,24 +161,16 @@ class StackedGrid(object):
             width = rectangle.getWidth()
             height = rectangle.getHeight()
 
-            print(x, y, width, height)
-            print()
-
             x, y = self.swap(x, y)
             width, height = self.swap(width, height)
                         
             bgcolor = random.randint(1,255)
             
-            print(x, y, width, height)
-            print()
             x = self.toMillimeters(x)
             y = self.toMillimeters(y)
 
             width = self.toMillimeters(width)
             height = self.toMillimeters(height)
-
-            print(x, y, width, height)
-            print()
 
             self.drawing.add(dxf.rectangle((x,y), width, height,
                                   bgcolor=bgcolor))
@@ -193,11 +185,24 @@ class StackedGrid(object):
     3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_1. Use the point with the lowest
     y value as y_0
     """
-    def toDxfRemoveDuplicateLines(self):
-        lines = []
+    def removeDuplicateLines(self, for_prime_center=False):            
+        
+        self.lines = []
         points = []
 
         for rectangle in self.stacked_rectangles:
+            if for_prime_center == True:
+                x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+                y = rectangle.getPosition()[1] - rectangle.getHeight()/2
+                width = rectangle.getWidth()
+                height = rectangle.getHeight()
+
+                x, y = self.swap(x, y)
+                width, height = self.swap(width, height)
+                name = rectangle.getName()
+
+                rectangle = Rectangle(width=width, height=height, name=name, position=[x,y])
+                
             top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
 
             points.append(tuple(top_left))
@@ -220,7 +225,7 @@ class StackedGrid(object):
                 if point[1] == y and point[0] < x_0:
                     x_0 = point[0]
 
-            lines.append(dxf.line((x_0, y), (x_1, y)))
+            self.lines.append(dxf.line((x_0, y), (x_1, y)))
                 
         for x in x_unique:
             y_0 = max(y_)
@@ -231,24 +236,31 @@ class StackedGrid(object):
                 if point[0] == x and point[1] < y_0:
                     y_0 = point[1]
 
-            lines.append(dxf.line((x, y_0), (x, y_1)))
-                
-        for line in lines:
-            self.drawing.add(line)
-
-        self.drawing.save()
+            self.lines.append(dxf.line((x, y_0), (x, y_1)))
     
-    def toDxf(self):
-        for rectangle in self.stacked_rectangles:
-            x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-            y = rectangle.getPosition()[1] - rectangle.getHeight()/2
-            width = rectangle.getWidth()
-            height = rectangle.getHeight()
+    def toDxf(self, remove_duplicates=False, for_prime_center=False):
+        if remove_duplicates == False:
+            for rectangle in self.stacked_rectangles:
+                x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+                y = rectangle.getPosition()[1] - rectangle.getHeight()/2
+                width = rectangle.getWidth()
+                height = rectangle.getHeight()
 
-            bgcolor = random.randint(1,255)
-            
-            self.drawing.add(dxf.rectangle((x,y), width, height,
-                                  bgcolor=bgcolor))
+                if for_prime_center == True:
+                    x = self.toMillimeters(x)
+                    y = self.toMillimeters(y)
+
+                    width = self.toMillimeters(width)
+                    height = self.toMillimeters(height)
+
+                bgcolor = random.randint(1,255)
+                
+                self.drawing.add(dxf.rectangle((x,y), width, height,
+                                    bgcolor=bgcolor))
+        else:
+            self.removeDuplicateLines(for_prime_center)
+            for line in self.lines:
+                self.drawing.add(line)
 
         self.drawing.save()
     
