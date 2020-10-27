@@ -199,8 +199,8 @@ class StackedGrid(object):
             points.append(tuple(bottom_left))
             points.append(tuple(bottom_right))
 
-        x_ = [k[0] for k in points]
-        y_ = [k[1] for k in points]
+        x_ = [round(k[0], 2) for k in points]
+        y_ = [round(k[1], 2) for k in points]
 
         x_unique = np.unique(x_)
         y_unique = np.unique(y_)
@@ -209,10 +209,10 @@ class StackedGrid(object):
             x_0 = max(x_)
             x_1 = 0
             for point in points:
-                if point[1] == y and point[0] > x_1:
-                    x_1 = point[0]
-                if point[1] == y and point[0] < x_0:
-                    x_0 = point[0]
+                if round(point[1], 2) == y and round(point[0], 2) > x_1:
+                    x_1 = round(point[0], 2)
+                if round(point[1], 2) == y and round(point[0], 2) < x_0:
+                    x_0 = round(point[0], 2)
 
             if for_prime_center == False:
                 self.lines.append(dxf.line((x_0, y), (x_1, y)))
@@ -228,10 +228,10 @@ class StackedGrid(object):
             y_0 = max(y_)
             y_1 = 0
             for point in points:
-                if point[0] == x and point[1] > y_1:
-                    y_1 = point[1]
-                if point[0] == x and point[1] < y_0:
-                    y_0 = point[1]
+                if round(point[0], 2) == x and round(point[1], 2) > y_1:
+                    y_1 = round(point[1], 2)
+                if round(point[0], 2) == x and round(point[1], 2) < y_0:
+                    y_0 = round(point[1], 2)
 
             if for_prime_center == False:
                 self.lines.append(dxf.line((x, y_0), (x, y_1)))

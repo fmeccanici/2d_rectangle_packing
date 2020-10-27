@@ -136,7 +136,7 @@ class Stacker(object):
 
                 grid.addRectangle(optimized_rectangle)
 
-            grid.toDxf(remove_duplicates=True, for_prime_center=True)
+            grid.toDxf(remove_duplicates=True, for_prime_center=False)
 
     def createAndAddNewGrid(self, width=100, brand='kokos', color='naturel'):
         try:
