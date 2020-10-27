@@ -216,6 +216,7 @@ class DatabaseManager(object):
         if h % 2 > 0:
             h += 1
         
+        print(width, height)
         return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width}
 
     def addGrid(self, grid):
@@ -359,7 +360,8 @@ class DatabaseManager(object):
         
         if h % 2 > 0:
             h += 1
-        
+
+        print(width, height)
         new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked(), 'width': w, 'height': h, 'exact_width': width, 'exact_height': height } }
         self.rectangles_collection.update_one(query, new_values)
     

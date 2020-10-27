@@ -84,12 +84,22 @@ class Stacker(object):
     def optimizeAndExportGrid(self, grid):
             print("Optimizing grid and exporting to DXF...")
             exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True, sort=True)
+            
+            for r in exact_rectangles:
+                if str(r.getName()) == "120337846":
+                    print("Should be float")
+                    print("Rectangle " + str(r.getName()))
+                    print("Width = " + str(r.getWidth()))
+                    print("Height = " + str(r.getHeight()))
             step_size = 0.01
 
             for exact_rectangle in exact_rectangles:
                 is_optimized_x = False
                 is_optimized_y = False
                 print("Rectangle " + str(exact_rectangle.getName()))
+                print("Width = " + str(exact_rectangle.getWidth()))
+                print("Height = " + str(exact_rectangle.getHeight()))
+
                 optimized_rectangle = copy.deepcopy(exact_rectangle)
 
                 while is_optimized_x == False:
@@ -107,8 +117,6 @@ class Stacker(object):
                         is_optimized_x = True
                     else:
                         print("Moved x to " + str(x_new))
-
-
 
                 while is_optimized_y == False:                    
                     grid.deleteRectangle(optimized_rectangle)
@@ -128,7 +136,7 @@ class Stacker(object):
 
                 grid.addRectangle(optimized_rectangle)
 
-            grid.toDxf(remove_duplicates=True, for_prime_center=True)
+            grid.toDxf(remove_duplicates=False, for_prime_center=False)
 
     def createAndAddNewGrid(self, width=100, brand='kokos', color='naturel'):
         try:
@@ -151,6 +159,29 @@ class Stacker(object):
         if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
             rectangle.setStacked()
             rectangle.setGridNumber(grid.getName())
+            
+            
+            # get exact rectangle width and height
+            rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
+
+            width_exact = rectangle_exact.getWidth()
+            height_exact = rectangle_exact.getHeight()
+            
+            # check if rectangle was rotated
+            w = int(np.ceil(width_exact))
+            if w % 2 > 0:
+                w += 1
+
+            if w == rectangle.getHeight():
+                print("RECTANGLE WAS ROTATED")
+                t = height_exact
+                height_exact = width_exact
+                width_exact = t
+                
+            # set rectangle width height back to the exact ones
+            rectangle.setWidth(width_exact)
+            rectangle.setHeight(height_exact)
+            
 
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)
@@ -209,7 +240,7 @@ class Stacker(object):
 
                 for i, rectangle in enumerate(self.unstacked_rectangles):
                     if not self.stackingStopped():
-
+                        
                         if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
                             try:
                                 self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
@@ -232,14 +263,6 @@ class Stacker(object):
                                     
                                     # for some reason new_grid starts out filled in an iteration
                                     self.db_manager.emptyGrid(new_grid)
-
-                                    # print(rectangle.getWidth())
-                                    # print(grid.getWidth())
-                                    # print(rectangle.getName())
-                                    # print(grid.getName())
-                                    # print(new_grid.getName())
-                                    # print([x.getName() for x in new_grid.getStackedRectangles()])
-
                                     self.computeStackingPositionAndUpdateDatabase(rectangle, new_grid)
                                     continue
                         else: 

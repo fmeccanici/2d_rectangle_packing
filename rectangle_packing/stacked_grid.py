@@ -191,17 +191,17 @@ class StackedGrid(object):
         points = []
 
         for rectangle in self.stacked_rectangles:
-            if for_prime_center == True:
-                x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-                y = rectangle.getPosition()[1] - rectangle.getHeight()/2
-                width = rectangle.getWidth()
-                height = rectangle.getHeight()
+            # if for_prime_center == True:
+            #     x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+            #     y = rectangle.getPosition()[1] - rectangle.getHeight()/2
+            #     width = rectangle.getWidth()
+            #     height = rectangle.getHeight()
 
-                x, y = self.swap(x, y)
-                width, height = self.swap(width, height)
-                name = rectangle.getName()
+            #     x, y = self.swap(x, y)
+            #     width, height = self.swap(width, height)
+            #     name = rectangle.getName()
 
-                rectangle = Rectangle(width=width, height=height, name=name, position=[x,y])
+            #     rectangle = Rectangle(width=width, height=height, name=name, position=[x,y])
                 
             top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
 
@@ -225,8 +225,16 @@ class StackedGrid(object):
                 if point[1] == y and point[0] < x_0:
                     x_0 = point[0]
 
-            self.lines.append(dxf.line((x_0, y), (x_1, y)))
-                
+            if for_prime_center == False:
+                self.lines.append(dxf.line((x_0, y), (x_1, y)))
+            else:
+                x_0 = self.toMillimeters(x_0)
+                x_1 = self.toMillimeters(x_1)
+                y = self.toMillimeters(y)
+                print(x_0, x_1, y)
+
+                self.lines.append(dxf.line((y, x_0), (y, x_1)))
+
         for x in x_unique:
             y_0 = max(y_)
             y_1 = 0
@@ -236,10 +244,18 @@ class StackedGrid(object):
                 if point[0] == x and point[1] < y_0:
                     y_0 = point[1]
 
-            self.lines.append(dxf.line((x, y_0), (x, y_1)))
-    
+            if for_prime_center == False:
+                self.lines.append(dxf.line((x, y_0), (x, y_1)))
+            else:
+                y_0 = self.toMillimeters(y_0)
+                y_1 = self.toMillimeters(y_1)
+                x = self.toMillimeters(x)
+                print(y_0, y_1, x)
+                self.lines.append(dxf.line((y_0, x), (y_1, x)))
+
     def toDxf(self, remove_duplicates=False, for_prime_center=False):
         if remove_duplicates == False:
+
             for rectangle in self.stacked_rectangles:
                 x = rectangle.getPosition()[0] - rectangle.getWidth()/2
                 y = rectangle.getPosition()[1] - rectangle.getHeight()/2
