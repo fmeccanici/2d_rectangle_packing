@@ -3,13 +3,18 @@ import pickle
 import os 
 
 from pathlib import Path
+from dxfwrite import DXFEngine as dxf
 
 class Rectangle(object):
-    def __init__(self, width, height, name, position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
+    def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
         self.position = np.asarray(position)
         self.width = width
         self.height = height
         self.name = name
+        self.brand = brand
+        self.color = color
+        self.grid_width = grid_width
+
         self.grid_number = grid_number
         self.is_stacked = is_stacked
 
@@ -33,6 +38,18 @@ class Rectangle(object):
     
     def setName(self, name):
         self.name = name
+    
+    def getBrand(self):
+        return self.brand
+
+    def setBrand(self, brand):
+        self.brand = brand
+
+    def getColor(self):
+        return self.color
+    
+    def setColor(self, color):
+        self.color = color
 
     def getWidth(self):
         return self.width
@@ -52,11 +69,23 @@ class Rectangle(object):
     def setPosition(self, position):
         self.position = position
 
+    def getGridWidth(self):
+        return self.grid_width
+    
+    def setGridWidth(self, width):
+        self.grid_width = width
+
     def getTopLeft(self):   
-        return self.getPosition() - np.array([self.getWidth()/2, self.getHeight()/2])
+        return self.getPosition() + np.array([-self.getWidth()/2, self.getHeight()/2])
+    
+    def getTopRight(self):   
+        return self.getPosition() + np.array([self.getWidth()/2, self.getHeight()/2])
     
     def getBottomRight(self):
-        return self.getPosition() + np.array([self.getWidth()/2, self.getHeight()/2])
+        return self.getPosition() + np.array([self.getWidth()/2, -self.getHeight()/2])
+
+    def getBottomLeft(self):
+        return self.getPosition() + np.array([-self.getWidth()/2, -self.getHeight()/2])
     
     def getArea(self):
         return self.width * self.height
@@ -72,12 +101,33 @@ class Rectangle(object):
         if self.getBottomRight()[0] <= other.getTopLeft()[0] or self.getTopLeft()[0] >= other.getBottomRight()[0]:
             return False
         
-        if self.getBottomRight()[1] <= other.getTopLeft()[1] or self.getTopLeft()[1] >= other.getBottomRight()[1]:
+        if self.getBottomRight()[1] >= other.getTopLeft()[1] or self.getTopLeft()[1] <= other.getBottomRight()[1]:
             return False
 
         return True
     
     def toDict(self):
         return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
+
+    def toDxf(self):
+        top_left = self.getTopLeft()
+        top_right = self.getTopRight()
+        bottom_left = self.getBottomLeft()
+        bottom_right = self.getBottomRight()
+
+        upper_horizontal_line = dxf.line((top_left[0], top_left[1]), (top_right[0], top_right[1]))
+        lower_horizontal_line = dxf.line((bottom_left[0], bottom_left[1]), (bottom_right[0], bottom_right[1]))
+        left_vertical_line = dxf.line((top_left[0], top_left[1]), (bottom_left[0], bottom_left[1]))
+        right_vertical_line = dxf.line((top_right[0], top_right[1]), (bottom_right[0], bottom_right[1]))
+
+        return upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line
+    
+    def getVertices(self):
+        return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
+        
+    def getFlooredWidthHeight(self):
+        return np.floor(self.width), np.floor(self.height)
+    
+    
 
     

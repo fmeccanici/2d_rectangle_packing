@@ -11,6 +11,14 @@ import os
 import getpass
 import numpy as np
 
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+
+class EmptyDataBaseError(Error):
+    """Raised when database is empty"""
+    pass
+
 class DatabaseManager(object):
     def __init__(self, host='localhost', port=27017, database="stacked_rectangles_database", username="NA", password="NA"):
         self.host = host
@@ -38,22 +46,34 @@ class DatabaseManager(object):
         
         return names
 
+<<<<<<< HEAD
     def createUniqueGrid(self):
         width = 200
         height = 1500
 
+=======
+    def createUniqueGrid(self, width=100, brand='kokos', color='naturel'):
+>>>>>>> develop
         try:
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
+<<<<<<< HEAD
             grid = StackedGrid(width, height, unique_name)
+=======
+            grid = StackedGrid(width=width, height=1500, name=unique_name, brand=brand, color=color)
+>>>>>>> develop
             self.addGrid(grid)
 
         except IndexError:
             print("No grids available yet")
             print("Creating first grid")
 
+<<<<<<< HEAD
             grid = StackedGrid(width, height, 1)
+=======
+            grid = StackedGrid(width=width, height=1500, name=1, brand=brand, color=color)
+>>>>>>> develop
             self.addGrid(grid)
             
         return grid
@@ -63,10 +83,12 @@ class DatabaseManager(object):
         height = grid.getHeight()
         num_rectangles = grid.getNumStackedRectangles()
         name = grid.getName()
+        brand = grid.getBrand()
+        color = grid.getColor()
         is_full = grid.isFull()
         is_cut = grid.isCut()
 
-        return { "name": name, "width": width, "height": height, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+        return { "name": name, "width": width, "height": height, "brand": brand, "color": color, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
     def convertGridsNotCutToDxf(self):
         grids_not_cut = self.getGridsNotCut()
@@ -78,7 +100,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -89,12 +111,47 @@ class DatabaseManager(object):
 
         return grids
 
+    def getGridsNotCutByWidthBrandColor(self, width=100, brand='kokos', color='naturel'):
+        grids = []
+        query = {"width": width, "brand": brand, "color": color}
+
+        cursor = self.grids_collection.find(query)
+        for document in cursor:
+            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            rectangles = self.getRectangles(grid)
+            grid.setStackedRectangles(rectangles)
+            
+            if not grid.isCut():
+                print("Loaded grid " + str(document["name"]) + " from database")
+
+                grids.append(grid)
+
+        return grids
+
+
     def getGridsCut(self):
         grids = []
 
         cursor = self.grids_collection.find({})
         for document in cursor:
             grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            rectangles = self.getRectangles(grid)
+            grid.setStackedRectangles(rectangles)
+            
+            if grid.isCut():
+                print("Loaded grid " + str(document["name"]) + " from database")
+
+                grids.append(grid)
+
+        return grids
+
+    def getGridsCutByWidthBrandColor(self, width=100, brand='kokos', color='naturel'):
+        grids = []
+        query = {"width": width, "brand": brand, "color": color}
+
+        cursor = self.grids_collection.find(query)
+        for document in cursor:
+            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -115,27 +172,34 @@ class DatabaseManager(object):
                 rectangles = self.getRectangles(grid)
                 grid.setStackedRectangles(rectangles)
                 grids.append(grid)
+        
+        return grids
 
-    def getGrid(self, grid_number):
+    def getGrid(self, grid_number, for_cutting=False):
         query = {"name" : grid_number}
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(document['width'], document['height'], document['name'])
-            rectangles = self.getRectangles(grid)
+            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            if for_cutting == True:
+                rectangles = self.getRectangles(grid, for_cutting)
+            else:
+                rectangles = self.getRectangles(grid)
+
             grid.setStackedRectangles(rectangles)
         
         return grid
 
-    def getGridsNotFull(self):
+    def getGridsNotFull(self, width=100, brand='kokos', color='naturel'):
         try:
             grids = []
+            query = {"width": width, "brand": brand, "color": color}
 
-            cursor = self.grids_collection.find({})
+            cursor = self.grids_collection.find(query)
 
             for document in cursor:
                     print("Loaded grid " + str(document["name"]) + " from database")
-                    grid = StackedGrid(document['width'], document['height'], document['name'])
+                    grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                     rectangles = self.getRectangles(grid)
                     grid.setStackedRectangles(rectangles)
                     
@@ -150,40 +214,97 @@ class DatabaseManager(object):
     def createRectangleDocument(self, rectangle):
         width = rectangle.getWidth()
         height = rectangle.getHeight()
+        brand = rectangle.getBrand()
+        color = rectangle.getColor()
+        grid_width = rectangle.getGridWidth()
         position = rectangle.getPosition()
         name = rectangle.getName()
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
 
-        return { "name": name, "width": width, "height": height, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number }
+        w = int(np.ceil(width))
+        h = int(np.ceil(height))
+        
+        if w % 2 > 0:
+            w += 1
+        
+        if h % 2 > 0:
+            h += 1
+        
+        print(width, height)
+        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width}
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)
         self.grids_collection.insert(document)
 
     def addRectangle(self, rectangle):
-        document = self.createRectangleDocument(rectangle)
-        self.rectangles_collection.insert(document)
+        try:
+            document = self.createRectangleDocument(rectangle)
+            if not self.isPresentInDatabase(rectangle):
+                print("Rectangle not present in database")
+                self.rectangles_collection.insert(document)
+            else:
+                print("Rectangle already present in database")
 
-    def getRectangle(self, rectangle_number):
+        except EmptyDataBaseError as e:
+            print(str(e) + "Database is empty!")
+            document = self.createRectangleDocument(rectangle)
+            self.rectangles_collection.insert(document)
+
+    def isPresentInDatabase(self, rectangle):
+        unstacked_rectangles = self.getUnstackedRectangles()
+        unstacked_rectangles_names = [r.getName() for r in unstacked_rectangles]
+
+        stacked_rectangles_names = []
+
+        grids = self.getAllGrids()
+        
+        for grid in grids:
+            stacked_rectangles = self.getRectangles(grid)
+            stacked_rectangles_names.extend([r.getName() for r in stacked_rectangles])
+
+        if len(grids) == 0 and len(unstacked_rectangles) > 0:
+            is_present = rectangle.getName() in unstacked_rectangles_names
+        elif len(grids) > 0 and len(unstacked_rectangles) > 0:
+            is_present = (rectangle.getName() in unstacked_rectangles_names) or (rectangle.getName() in stacked_rectangles_names)
+        elif len(grids) > 0 and len(unstacked_rectangles) == 0:
+            is_present = (rectangle.getName() in stacked_rectangles_names)
+        elif len(grids) == 0 and len(unstacked_rectangles) == 0:
+            raise EmptyDataBaseError
+        
+        print("order present in database: " + str(is_present))
+        return is_present
+
+    def getRectangle(self, rectangle_number, for_cutting=False):
         query = {"name" : rectangle_number}
 
         cursor = self.rectangles_collection.find(query)
         for document in cursor:
-            rectangle = Rectangle(document['width'], document['height'], document['name'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
-        
-        return rectangle
+            if not for_cutting:
+                rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
+            else: 
+                rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
 
-    def getRectangles(self, grid):
+        return rectangle        
+
+
+    def getRectangles(self, grid, for_cutting = False, sort = False):
         print("Loading rectangles within grid " + str(grid.getName()) + " from database")
 
         rectangles_dict = self.rectangles_collection.find({
             "grid_number" : {"$eq" : grid.getName()}
         })
         
+        if sort == True:
+            rectangles_dict = sorted(rectangles_dict, key=lambda k: np.linalg.norm([k['x position'], k['y position']]))
+
         rectangles = []
         for rectangle in rectangles_dict:
-            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
+            if for_cutting == True:
+                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
+            else:
+                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
             print("Rectangle " + str(rectangle['name']) + " loaded from database")
         return rectangles
     
@@ -215,15 +336,20 @@ class DatabaseManager(object):
 
         print("loading backup from " + str(datetime))
 
-    def getUnstackedRectangles(self):
-        rectangles_dict = self.rectangles_collection.find({
-            "isStacked" : {"$eq" : False}
-        })
+    def getUnstackedRectangles(self, brand='kokos', color='all'):
+        if color != 'all':
+            rectangles_dict = self.rectangles_collection.find({
+                "isStacked" : {"$eq" : False}, "color": color
+            })
+        else:
+            rectangles_dict = self.rectangles_collection.find({
+                "isStacked" : {"$eq" : False}
+            })
 
         rectangles = []
         for rectangle in rectangles_dict:
-            rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name']))
-
+            rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width']))
+    
         return rectangles
     
     def updateGrid(self, grid):
@@ -239,10 +365,19 @@ class DatabaseManager(object):
     def updateRectangle(self, rectangle):
         print("Updating rectangle in database")
         query = {"name" : rectangle.getName()}
-        print(rectangle.getWidth())
-        print(rectangle.getHeight())
+        width = rectangle.getWidth()
+        height = rectangle.getHeight()
+        w = int(np.ceil(width))
+        h = int(np.ceil(height))
+        
+        if w % 2 > 0:
+            w += 1
+        
+        if h % 2 > 0:
+            h += 1
 
-        new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked(), 'width': rectangle.getWidth(), 'height': rectangle.getHeight() } }
+        print(width, height)
+        new_values = { "$set": { "grid_number" : rectangle.getGridNumber(), "x position" : int(rectangle.getPosition()[0]), "y position": int(rectangle.getPosition()[1]), "isStacked": rectangle.isStacked(), 'width': w, 'height': h, 'exact_width': width, 'exact_height': height } }
         self.rectangles_collection.update_one(query, new_values)
     
     def emptyGrid(self, grid):

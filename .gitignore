@@ -7,5 +7,4 @@ databases/
 *.dxf
 venv/
 demos/
-documents/
 figures/

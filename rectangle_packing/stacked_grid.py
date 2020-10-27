@@ -14,6 +14,7 @@ from ezdxf import recover
 from ezdxf.addons.drawing import matplotlib
 
 import pandas as pd
+import math 
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -24,17 +25,25 @@ class InvalidGridPositionError(Error):
     pass
 
 class StackedGrid(object):
-    def __init__(self, width, height, name, stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width, height, name, brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.width = width
         self.height = height
         self.name = name
+        self.brand = brand
+        self.color = color
+
         self.stacked_rectangles = stacked_rectangles
         self.is_full = is_full
         self.is_cut = is_cut
 
         self.unstacked_rectangles = []
         
-        self.grid_dxf = "./dxf/grid" + str(name) + ".dxf"
+        self.path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
+        self.grid_dxf = self.path + "/grid" + str(name) + ".dxf"
+
+        if not os.path.exists(self.path):
+            os.makedirs(self.path)
+
         self.drawing = dxf.drawing(self.grid_dxf)
         self.base_path = os.path.abspath(os.getcwd())
 
@@ -69,6 +78,18 @@ class StackedGrid(object):
     def setName(self, name):
         self.name = name
 
+    def getBrand(self):
+        return self.brand
+
+    def setBrand(self, brand):
+        self.brand = brand
+
+    def getColor(self):
+        return self.color
+    
+    def setColor(self, color):
+        self.color = color
+        
     def getNumStackedRectangles(self):
         return len(self.stacked_rectangles)
 
@@ -135,62 +156,152 @@ class StackedGrid(object):
 
     def toPrimeCenterFormatDxf(self):
         for rectangle in self.stacked_rectangles:
+
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
             y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()
             height = rectangle.getHeight()
-
-            print(x, y, width, height)
-            print()
 
             x, y = self.swap(x, y)
             width, height = self.swap(width, height)
                         
             bgcolor = random.randint(1,255)
             
-            print(x, y, width, height)
-            print()
             x = self.toMillimeters(x)
             y = self.toMillimeters(y)
 
             width = self.toMillimeters(width)
             height = self.toMillimeters(height)
 
-            print(x, y, width, height)
-            print()
-
-            self.drawing.add(dxf.rectangle((x,y), width, height,
-                                  bgcolor=bgcolor))
-
-        self.drawing.save()
-
-    def toDxf(self):
-        for rectangle in self.stacked_rectangles:
-            x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-            y = rectangle.getPosition()[1] - rectangle.getHeight()/2
-            width = rectangle.getWidth()
-            height = rectangle.getHeight()
-
-            bgcolor = random.randint(1,255)
-            
-            print(x, y, width, height)
             self.drawing.add(dxf.rectangle((x,y), width, height,
                                   bgcolor=bgcolor))
 
         self.drawing.save()
     
+    """
+    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
+    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_1. If the value is lower
+    than the current start x value, this is chosen as starting value x_0.  
+
+    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_1. Use the point with the lowest
+    y value as y_0
+    """
+    def removeDuplicateLines(self, for_prime_center=False):            
+        
+        self.lines = []
+        points = []
+
+        for rectangle in self.stacked_rectangles:
+            top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
+
+            points.append(tuple(top_left))
+            points.append(tuple(top_right))
+            points.append(tuple(bottom_left))
+            points.append(tuple(bottom_right))
+
+        x_ = [k[0] for k in points]
+        y_ = [k[1] for k in points]
+
+        x_unique = np.unique(x_)
+        y_unique = np.unique(y_)
+
+        for y in y_unique:
+            x_0 = max(x_)
+            x_1 = 0
+            for point in points:
+                if point[1] == y and point[0] > x_1:
+                    x_1 = point[0]
+                if point[1] == y and point[0] < x_0:
+                    x_0 = point[0]
+
+            if for_prime_center == False:
+                self.lines.append(dxf.line((x_0, y), (x_1, y)))
+            else:
+                x_0 = self.toMillimeters(x_0)
+                x_1 = self.toMillimeters(x_1)
+                y = self.toMillimeters(y)
+                print(x_0, x_1, y)
+
+                self.lines.append(dxf.line((y, x_0), (y, x_1)))
+
+        for x in x_unique:
+            y_0 = max(y_)
+            y_1 = 0
+            for point in points:
+                if point[0] == x and point[1] > y_1:
+                    y_1 = point[1]
+                if point[0] == x and point[1] < y_0:
+                    y_0 = point[1]
+
+            if for_prime_center == False:
+                self.lines.append(dxf.line((x, y_0), (x, y_1)))
+            else:
+                y_0 = self.toMillimeters(y_0)
+                y_1 = self.toMillimeters(y_1)
+                x = self.toMillimeters(x)
+                print(y_0, y_1, x)
+                self.lines.append(dxf.line((y_0, x), (y_1, x)))
+
+    def toDxf(self, remove_duplicates=False, for_prime_center=False):
+        if remove_duplicates == False:
+
+            for rectangle in self.stacked_rectangles:
+                x = rectangle.getPosition()[0] - rectangle.getWidth()/2
+                y = rectangle.getPosition()[1] - rectangle.getHeight()/2
+                width = rectangle.getWidth()
+                height = rectangle.getHeight()
+
+                if for_prime_center == True:
+                    x = self.toMillimeters(x)
+                    y = self.toMillimeters(y)
+
+                    width = self.toMillimeters(width)
+                    height = self.toMillimeters(height)
+
+                bgcolor = random.randint(1,255)
+                
+                self.drawing.add(dxf.rectangle((x,y), width, height,
+                                    bgcolor=bgcolor))
+        else:
+            self.removeDuplicateLines(for_prime_center)
+            for line in self.lines:
+                self.drawing.add(line)
+
+        self.drawing.save()
+    
     def toPdf(self):
-        self.toPrimeCenterFormatDxf()
+        # self.toPrimeCenterFormatDxf()
+        self.toDxf()
         dox, auditor = recover.readfile(self.grid_dxf)
         if not auditor.has_errors:
-            matplotlib.qsave(dox.modelspace(), './pdf/grid_' + str(self.getName()) + '.png')
+            matplotlib.qsave(dox.modelspace(), './pdf/' + self.getBrand() + '/' + self.getColor() + '/' + str(self.getWidth()) + '/grid_' + str(self.getName()) + '.png')
 
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
 
+    def deleteRectangle(self, rectangle):
+        for i, stacked_rectangle in enumerate(self.getStackedRectangles()):
+            if stacked_rectangle.getName() == rectangle.getName():
+                del self.stacked_rectangles[i]
+                break
+
+    def isOutOfGrid(self, rectangle):
+        if rectangle.getPosition()[0] - rectangle.getWidth()/2 < 0:
+            return True
+        if rectangle.getPosition()[1] + rectangle.getHeight()/2 > self.getHeight():
+            return True
+        if rectangle.getPosition()[0] + rectangle.getWidth()/2 > self.getWidth():
+            return True
+        if rectangle.getPosition()[1] - rectangle.getHeight()/2 < 0:
+            return True
+    
+        return False
+
     def isValidPosition(self, rectangle):
+        if self.isOutOfGrid(rectangle):
+            return False
+
         for i, stacked_rectangle in enumerate(self.stacked_rectangles):
-            
             if rectangle.intersection(stacked_rectangle):
                 return False
 
