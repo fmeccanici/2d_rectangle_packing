@@ -191,18 +191,6 @@ class StackedGrid(object):
         points = []
 
         for rectangle in self.stacked_rectangles:
-            # if for_prime_center == True:
-            #     x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-            #     y = rectangle.getPosition()[1] - rectangle.getHeight()/2
-            #     width = rectangle.getWidth()
-            #     height = rectangle.getHeight()
-
-            #     x, y = self.swap(x, y)
-            #     width, height = self.swap(width, height)
-            #     name = rectangle.getName()
-
-            #     rectangle = Rectangle(width=width, height=height, name=name, position=[x,y])
-                
             top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
 
             points.append(tuple(top_left))
