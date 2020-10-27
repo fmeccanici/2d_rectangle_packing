@@ -46,34 +46,19 @@ class DatabaseManager(object):
         
         return names
 
-<<<<<<< HEAD
-    def createUniqueGrid(self):
-        width = 200
-        height = 1500
-
-=======
     def createUniqueGrid(self, width=100, brand='kokos', color='naturel'):
->>>>>>> develop
         try:
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
-<<<<<<< HEAD
-            grid = StackedGrid(width, height, unique_name)
-=======
             grid = StackedGrid(width=width, height=1500, name=unique_name, brand=brand, color=color)
->>>>>>> develop
             self.addGrid(grid)
 
         except IndexError:
             print("No grids available yet")
             print("Creating first grid")
 
-<<<<<<< HEAD
-            grid = StackedGrid(width, height, 1)
-=======
             grid = StackedGrid(width=width, height=1500, name=1, brand=brand, color=color)
->>>>>>> develop
             self.addGrid(grid)
             
         return grid

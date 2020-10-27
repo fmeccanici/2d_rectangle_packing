@@ -493,51 +493,6 @@ class RectanglePackingGui(QWidget):
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
         """
-<<<<<<< HEAD
-        
-        file_name = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/paklijst.xlsx"
-
-        df = pd.read_excel(file_name, sheet_name=None)
-        df = df['Paklijst']
-        df = df.drop([0, 1, 2, 3])
-        df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam']
-
-        orders = df[['Breedte', 'Lengte', 'Ordernummer']]
-
-        unstacked_rectangles = []
-        for index, row in orders.iterrows():
-
-            try:
-                width = int(row['Breedte'])
-
-            except ValueError:
-                width = row['Breedte']
-
-                print("Width string has comma")
-                behind_comma = width.split(',')[0]
-                after_comma = width.split(',')[1]
-                
-                width = int(behind_comma)
-            
-            try:
-                height = int(row['Lengte'])
-
-            except ValueError:
-                
-                height = str(row['Lengte'])
-                print("Height string has comma")
-
-                behind_comma = height.split(',')[0]
-                after_comma = height.split(',')[1]
-                height = int(behind_comma)
-
-
-            name = row['Ordernummer']
-
-            rectangle = Rectangle(width, height, name)
-            unstacked_rectangles.append(rectangle)
-=======
->>>>>>> develop
 
         unstacked_rectangles = self.excel_parser.getOrders()
         self.stacker.addToDatabase(unstacked_rectangles)

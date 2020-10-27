@@ -78,10 +78,6 @@ class Stacker(object):
                 rectangle.setPosition(position)
                 if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
-<<<<<<< HEAD
-    
-=======
->>>>>>> develop
         
         return stacking_position
         
