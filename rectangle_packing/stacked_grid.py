@@ -37,28 +37,22 @@ class StackedGrid(object):
         self.is_cut = is_cut
 
         self.unstacked_rectangles = []
-        
-        self.path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
-        self.grid_dxf = self.path + "/grid" + str(name) + ".dxf"
+        self.points = []
+        self.lines = []
 
-        if not os.path.exists(self.path):
-            os.makedirs(self.path)
+        self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
+        self.dxf_file_path = self.dxf_path + "/grid" + str(name) + ".dxf"
 
-        self.drawing = dxf.drawing(self.grid_dxf)
+        if not os.path.exists(self.dxf_file_path):
+            os.makedirs(self.dxf_file_path)
+
+        self.dxf_drawing = dxf.drawing(self.dxf_file_path)
         self.base_path = os.path.abspath(os.getcwd())
 
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 320 #cm
-
-    @classmethod
-    def fromExcel(cls, file_name):
-        df = pd.read_excel(file_name, sheet_name=None)
-        df = df['Paklijst']
-
-        df = df.drop([0, 1, 2, 3])
-        df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam']
 
     def getWidth(self):
         return self.width
@@ -99,17 +93,17 @@ class StackedGrid(object):
     def setStackedRectangles(self, rectangles):
         self.stacked_rectangles = rectangles
 
-    def computeStackingPosition(self, rectangle):
-        stacking_position = [self.getWidth(), self.getHeight()]
-
-        for x in reversed(range(int(rectangle.width/2), int(self.getWidth() - rectangle.width/2))):
-            for y in reversed(range(int(rectangle.height/2), int(self.getHeight() - rectangle.height/2))):
-                position = np.array([x,y])
-                rectangle.setPosition(position)
-                if self.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
-                    stacking_position = position
-
-        return stacking_position
+    def isFull(self):
+        return self.is_full
+    
+    def isCut(self):
+        return self.is_cut
+    
+    def setCut(self):
+        self.is_cut = True
+    
+    def setUncut(self):
+        self.is_cut = False
 
     def checkAndSetFull(self):
         print("Checking if grid " + str(self.getName()) + " is full")
@@ -128,20 +122,17 @@ class StackedGrid(object):
             print("Grid " + str(self.getName()) + " is full")
             return True
 
-    def isFull(self):
-        return self.is_full
-    
-    def isCut(self):
-        return self.is_cut
-    
-    def setCut(self):
-        self.is_cut = True
-    
-    def setUncut(self):
-        self.is_cut = False
+    def computeStackingPosition(self, rectangle):
+        stacking_position = [self.getWidth(), self.getHeight()]
 
-    def toDict(self):
-        return {'name': self.name, 'width': self.width, 'height': self.height, 'stacked_rectangles': [rect.toDict() for rect in self.stacked_rectangles]}
+        for x in reversed(range(int(rectangle.width/2), int(self.getWidth() - rectangle.width/2))):
+            for y in reversed(range(int(rectangle.height/2), int(self.getHeight() - rectangle.height/2))):
+                position = np.array([x,y])
+                rectangle.setPosition(position)
+                if self.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
+                    stacking_position = position
+
+        return stacking_position
 
     def toMillimeters(self, variable):
         return variable * 10
@@ -153,125 +144,116 @@ class StackedGrid(object):
 
         return x, y
 
-    def toPrimeCenterFormatDxf(self):
-        for rectangle in self.stacked_rectangles:
+    def toDxf(self, remove_duplicates=True, for_prime_center=False):
+        if remove_duplicates == True:
+            self.removeDuplicateLines(for_prime_center)
+            self.addLinesToDxf()            
+        else:
+            self.addRectanglesToDxf(for_prime_center)
 
+        self.dxf_drawing.save()
+
+    """
+    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
+    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
+    than the current start x value, this is chosen as starting value x_start.  
+
+    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_end. Use the point with the lowest
+    y value as y_start
+    """
+    def removeDuplicateLines(self, for_prime_center=False):            
+        self.lines = []        
+        self.points = []
+
+        self.convertRectanglesToPoints()
+        self.x_, self.y_ = self.getXYfromPointsAndRound()
+
+        self.x_unique = self.getUniqueValues(self.x_)
+        self.y_unique = self.getUniqueValues(self.y_)
+
+        self.removeDuplicateVerticalLines(for_prime_center)
+        self.removeDuplicateHorizontalLines(for_prime_center)
+
+    def convertRectanglesToPoints(self):
+        for rectangle in self.stacked_rectangles:
+            top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
+            self.points.append(tuple(top_left))
+            self.points.append(tuple(top_right))
+            self.points.append(tuple(bottom_left))
+            self.points.append(tuple(bottom_right))
+
+    def getXYfromPointsAndRound(self):
+        x_ = [round(k[0], 2) for k in self.points]
+        y_ = [round(k[1], 2) for k in self.points]
+
+        return x_, y_
+    
+    def getUniqueValues(self, array):
+        return np.unique(array)
+
+    def removeDuplicateVerticalLines(self, for_prime_center):
+
+        for y in self.y_unique:
+            x_start = max(self.x_)
+            x_end = 0
+            for point in self.points:
+                if round(point[1], 2) == y and round(point[0], 2) > x_end:
+                    x_end = round(point[0], 2)
+                if round(point[1], 2) == y and round(point[0], 2) < x_start:
+                    x_start = round(point[0], 2)
+
+            if for_prime_center == True:
+                x_start = self.toMillimeters(x_start)
+                x_end = self.toMillimeters(x_end)
+                y = self.toMillimeters(y)
+                self.lines.append(dxf.line((y, x_start), (y, x_end)))
+            else:
+                self.lines.append(dxf.line((x_start, y), (x_end, y)))
+            
+    def removeDuplicateHorizontalLines(self, for_prime_center):
+        for x in self.x_unique:
+            y_start = max(self.y_)
+            y_end = 0
+            for point in self.points:
+                if round(point[0], 2) == x and round(point[1], 2) > y_end:
+                    y_end = round(point[1], 2)
+                if round(point[0], 2) == x and round(point[1], 2) < y_start:
+                    y_start = round(point[1], 2)
+
+            if for_prime_center == True:
+                y_start = self.toMillimeters(y_start)
+                y_end = self.toMillimeters(y_end)
+                x = self.toMillimeters(x)
+                self.lines.append(dxf.line((y_start, x), (y_end, x)))
+            else:
+                self.lines.append(dxf.line((x, y_start), (x, y_end)))
+
+    def addLinesToDxf(self):
+        for line in self.lines:
+            self.dxf_drawing.add(line)
+
+    def addRectanglesToDxf(self, for_prime_center):
+        for rectangle in self.stacked_rectangles:
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
             y = rectangle.getPosition()[1] - rectangle.getHeight()/2
             width = rectangle.getWidth()
             height = rectangle.getHeight()
 
-            x, y = self.swap(x, y)
-            width, height = self.swap(width, height)
-                        
+            if for_prime_center == True:
+                x = self.toMillimeters(x)
+                y = self.toMillimeters(y)
+
+                width = self.toMillimeters(width)
+                height = self.toMillimeters(height)
+
             bgcolor = random.randint(1,255)
             
-            x = self.toMillimeters(x)
-            y = self.toMillimeters(y)
+            self.dxf_drawing.add(dxf.rectangle((x,y), width, height,
+                                bgcolor=bgcolor))
 
-            width = self.toMillimeters(width)
-            height = self.toMillimeters(height)
-
-            self.drawing.add(dxf.rectangle((x,y), width, height,
-                                  bgcolor=bgcolor))
-
-        self.drawing.save()
-    
-    """
-    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
-    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_1. If the value is lower
-    than the current start x value, this is chosen as starting value x_0.  
-
-    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_1. Use the point with the lowest
-    y value as y_0
-    """
-    def removeDuplicateLines(self, for_prime_center=False):            
-        
-        self.lines = []
-        points = []
-
-        for rectangle in self.stacked_rectangles:
-            top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
-
-            points.append(tuple(top_left))
-            points.append(tuple(top_right))
-            points.append(tuple(bottom_left))
-            points.append(tuple(bottom_right))
-
-        x_ = [round(k[0], 2) for k in points]
-        y_ = [round(k[1], 2) for k in points]
-
-        x_unique = np.unique(x_)
-        y_unique = np.unique(y_)
-
-        for y in y_unique:
-            x_0 = max(x_)
-            x_1 = 0
-            for point in points:
-                if round(point[1], 2) == y and round(point[0], 2) > x_1:
-                    x_1 = round(point[0], 2)
-                if round(point[1], 2) == y and round(point[0], 2) < x_0:
-                    x_0 = round(point[0], 2)
-
-            if for_prime_center == False:
-                self.lines.append(dxf.line((x_0, y), (x_1, y)))
-            else:
-                x_0 = self.toMillimeters(x_0)
-                x_1 = self.toMillimeters(x_1)
-                y = self.toMillimeters(y)
-                print(x_0, x_1, y)
-
-                self.lines.append(dxf.line((y, x_0), (y, x_1)))
-
-        for x in x_unique:
-            y_0 = max(y_)
-            y_1 = 0
-            for point in points:
-                if round(point[0], 2) == x and round(point[1], 2) > y_1:
-                    y_1 = round(point[1], 2)
-                if round(point[0], 2) == x and round(point[1], 2) < y_0:
-                    y_0 = round(point[1], 2)
-
-            if for_prime_center == False:
-                self.lines.append(dxf.line((x, y_0), (x, y_1)))
-            else:
-                y_0 = self.toMillimeters(y_0)
-                y_1 = self.toMillimeters(y_1)
-                x = self.toMillimeters(x)
-                print(y_0, y_1, x)
-                self.lines.append(dxf.line((y_0, x), (y_1, x)))
-
-    def toDxf(self, remove_duplicates=False, for_prime_center=False):
-        if remove_duplicates == False:
-
-            for rectangle in self.stacked_rectangles:
-                x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-                y = rectangle.getPosition()[1] - rectangle.getHeight()/2
-                width = rectangle.getWidth()
-                height = rectangle.getHeight()
-
-                if for_prime_center == True:
-                    x = self.toMillimeters(x)
-                    y = self.toMillimeters(y)
-
-                    width = self.toMillimeters(width)
-                    height = self.toMillimeters(height)
-
-                bgcolor = random.randint(1,255)
-                
-                self.drawing.add(dxf.rectangle((x,y), width, height,
-                                    bgcolor=bgcolor))
-        else:
-            self.removeDuplicateLines(for_prime_center)
-            for line in self.lines:
-                self.drawing.add(line)
-
-        self.drawing.save()
-    
     def toPdf(self):
-        # self.toPrimeCenterFormatDxf()
         self.toDxf()
-        dox, auditor = recover.readfile(self.grid_dxf)
+        dox, auditor = recover.readfile(self.dxf_file_path)
         if not auditor.has_errors:
             matplotlib.qsave(dox.modelspace(), './pdf/' + self.getBrand() + '/' + self.getColor() + '/' + str(self.getWidth()) + '/grid_' + str(self.getName()) + '.png')
 
