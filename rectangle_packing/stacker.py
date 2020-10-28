@@ -83,34 +83,22 @@ class Stacker(object):
                 self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=grid.getColor())
                 self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
-                for i, rectangle in enumerate(self.unstacked_rectangles):
+                for rectangle in self.unstacked_rectangles:
                     self.rectangle = rectangle
 
                     if not self.stackingStopped():
                         
                         if self.rectangleAndGridPropertiesMatch:
                             try:
-                                self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                                self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
                             
                             except InvalidGridPositionError:
                                 try:
-                                    print("Cannot stack rectangle")
-                                    print("Try rotated rectangle")
-                                    rectangle.rotate()
-                                    self.computeStackingPositionAndUpdateDatabase(rectangle, grid)
+                                    self.stackRotatedRectangle()
                                     continue
 
                                 except InvalidGridPositionError:
-                                    print("Rotate rectangle back to original")
-                                    rectangle.rotate()
-                                    print("Cannot stack rectangle in this grid")
-                                    print("Creating new grid and stack this rectangle")
-                                    new_grid = self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), brand=rectangle.getBrand(),
-                                            color=rectangle.getColor())
-                                    
-                                    # for some reason new_grid starts out filled in an iteration
-                                    self.db_manager.emptyGrid(new_grid)
-                                    self.computeStackingPositionAndUpdateDatabase(rectangle, new_grid)
+                                    self.rotateBackCreateNewGridAndStackRectangle()
                                     continue
                         else: 
                             print("Colors don't match")
@@ -153,6 +141,24 @@ class Stacker(object):
 
     def rectangleAndGridPropertiesMatch(self):
         return (self.grid.getBrand() == self.rectangle.getBrand()) and (self.grid.getColor() == self.rectangle.getColor()) and (self.grid.getWidth() == self.rectangle.getGridWidth())
+
+    def stackRotatedRectangle(self):
+        print("Cannot stack rectangle")
+        print("Try rotated rectangle")
+        self.rectangle.rotate()
+        self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
+
+    def rotateBackCreateNewGridAndStackRectangle(self):
+        print("Rotate rectangle back to original")
+        self.rectangle.rotate()
+        print("Cannot stack rectangle in this grid")
+        print("Creating new grid and stack this rectangle")
+        new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), brand=self.rectangle.getBrand(),
+                color=self.rectangle.getColor())
+        
+        # for some reason new_grid starts out filled in an iteration
+        self.db_manager.emptyGrid(new_grid)
+        self.computeStackingPositionAndUpdateDatabase(self.rectangle, new_grid)
 
     def optimizeAndExportGrid(self, grid):
         print("Optimizing grid and exporting to DXF...")

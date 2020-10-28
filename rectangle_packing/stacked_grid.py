@@ -43,8 +43,8 @@ class StackedGrid(object):
         self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
         self.dxf_file_path = self.dxf_path + "/grid" + str(name) + ".dxf"
 
-        if not os.path.exists(self.dxf_file_path):
-            os.makedirs(self.dxf_file_path)
+        if not os.path.exists(self.dxf_path):
+            os.makedirs(self.dxf_path)
 
         self.dxf_drawing = dxf.drawing(self.dxf_file_path)
         self.base_path = os.path.abspath(os.getcwd())
