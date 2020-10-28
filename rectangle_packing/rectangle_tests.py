@@ -44,26 +44,26 @@ class StackedGridTest(unittest.TestCase):
         self.rectangle_3.setPosition([99, 50])
 
         self.assertEqual(self.rectangle_1.getBottomRight()[0], 100)
-        self.assertEqual(self.rectangle_1.getBottomRight()[1], 100)
+        self.assertEqual(self.rectangle_1.getBottomRight()[1], 0)
 
         self.assertEqual(self.rectangle_2.getBottomRight()[0], 200)
-        self.assertEqual(self.rectangle_2.getBottomRight()[1], 150)
+        self.assertEqual(self.rectangle_2.getBottomRight()[1], 50)
 
         self.assertEqual(self.rectangle_3.getBottomRight()[0], 198)
-        self.assertEqual(self.rectangle_3.getBottomRight()[1], 100)
+        self.assertEqual(self.rectangle_3.getBottomRight()[1], 0)
 
         self.rectangle_1.setPosition([100, 100])
         self.rectangle_2.setPosition([200, 200])
         self.rectangle_3.setPosition([198, 100])
 
         self.assertEqual(self.rectangle_1.getBottomRight()[0], 150)
-        self.assertEqual(self.rectangle_1.getBottomRight()[1], 150)
+        self.assertEqual(self.rectangle_1.getBottomRight()[1], 50)
 
         self.assertEqual(self.rectangle_2.getBottomRight()[0], 300)
-        self.assertEqual(self.rectangle_2.getBottomRight()[1], 250)
+        self.assertEqual(self.rectangle_2.getBottomRight()[1], 150)
 
         self.assertEqual(self.rectangle_3.getBottomRight()[0], 297)
-        self.assertEqual(self.rectangle_3.getBottomRight()[1], 150)
+        self.assertEqual(self.rectangle_3.getBottomRight()[1], 50)
 
 
     def testGetTopLeft(self):
@@ -72,26 +72,26 @@ class StackedGridTest(unittest.TestCase):
         self.rectangle_3.setPosition([99, 50])
 
         self.assertEqual(self.rectangle_1.getTopLeft()[0], 0)
-        self.assertEqual(self.rectangle_1.getTopLeft()[1], 0)
+        self.assertEqual(self.rectangle_1.getTopLeft()[1], 100)
 
         self.assertEqual(self.rectangle_2.getTopLeft()[0], 0)
-        self.assertEqual(self.rectangle_2.getTopLeft()[1], 50)
+        self.assertEqual(self.rectangle_2.getTopLeft()[1], 150)
 
         self.assertEqual(self.rectangle_3.getTopLeft()[0], 0)
-        self.assertEqual(self.rectangle_3.getTopLeft()[1], 0)
+        self.assertEqual(self.rectangle_3.getTopLeft()[1], 100)
 
         self.rectangle_1.setPosition([100, 100])
         self.rectangle_2.setPosition([200, 200])
         self.rectangle_3.setPosition([198, 100])
 
         self.assertEqual(self.rectangle_1.getTopLeft()[0], 50)
-        self.assertEqual(self.rectangle_1.getTopLeft()[1], 50)
+        self.assertEqual(self.rectangle_1.getTopLeft()[1], 150)
 
         self.assertEqual(self.rectangle_2.getTopLeft()[0], 100)
-        self.assertEqual(self.rectangle_2.getTopLeft()[1], 150)
+        self.assertEqual(self.rectangle_2.getTopLeft()[1], 250)
 
         self.assertEqual(self.rectangle_3.getTopLeft()[0], 99)
-        self.assertEqual(self.rectangle_3.getTopLeft()[1], 50)
+        self.assertEqual(self.rectangle_3.getTopLeft()[1], 150)
 
     def testIntersection(self):
         self.rectangle_1.setPosition([50, 50])
