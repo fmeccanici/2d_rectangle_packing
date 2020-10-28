@@ -33,11 +33,6 @@ class Stacker(object):
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
-
-        # grid = StackedGrid(width=200, height=1500, name=991)
-        # self.db_manager.addGrid(grid)
-        
-        # self.grids = self.db_manager.getGridsNotCut()
         
         self.unstacked_rectangles = []
         
@@ -46,8 +41,6 @@ class Stacker(object):
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
         
-        self.min_grid_buffer_size = 50
-
         self.stop_stacking = False
 
     def stackingStopped(self):
@@ -159,7 +152,7 @@ class Stacker(object):
         if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
             rectangle.setStacked()
             rectangle.setGridNumber(grid.getName())
-            
+
             
             # get exact rectangle width and height
             rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
@@ -278,14 +271,7 @@ class Stacker(object):
 
 if __name__ == "__main__":
     stacker = Stacker()
-    # stacker.db_manager.convertGridsNotCutToDxf()
     stacker.start()    
-    # while True:
-    #     t_start = time.time()
-    #     stacker.start()
-    #     stacker.db_manager.makeBackup()
-    #     t_stop = time.time() - t_start
 
-    #     print("Time: " + str(round(t_stop)) + " seconds")
     
 
