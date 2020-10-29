@@ -50,18 +50,16 @@ class Stacker(object):
         self.startStacking()
         self.loadOrders()
 
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+        self.getAllUnstackedRectanglesSortedArea()
 
-        while len(self.unstacked_rectangles) > 0:
+        while self.anyUnstackedRectangles():
             self.createGridInDatabaseIfNotAvailable()
 
             self.grids = self.db_manager.getGridsNotCut()
 
             for grid in self.grids:
                 self.grid = grid
-                self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=grid.getColor())
-                self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+                self.getUnstackedRectanglesMatchingGridColorSortedArea()
 
                 for rectangle in self.unstacked_rectangles:
                     self.rectangle = rectangle
@@ -88,9 +86,8 @@ class Stacker(object):
                     
                 self.optimizeAndExportGrid(grid)
             
-            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-            self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
-    
+            self.getAllUnstackedRectanglesSortedArea()
+
     def loadOrders(self):
         self.excel_parser.reloadExcel()
         unstacked_rectangles = self.excel_parser.getOrders()
@@ -109,10 +106,21 @@ class Stacker(object):
 
         return list(reversed(rectangles_descending_area_order))
 
+    def anyUnstackedRectangles(self):
+        return len(self.unstacked_rectangles) > 0
+
     def createGridInDatabaseIfNotAvailable(self):
         for rectangle in self.unstacked_rectangles:
             if not self.isGridAvailable(rectangle):
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
+
+    def getUnstackedRectanglesMatchingGridColorSortedArea(self):
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor())
+        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+
+    def getAllUnstackedRectanglesSortedArea(self):
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
     def isGridAvailable(self, rectangle):
         grid_width = rectangle.getGridWidth()
