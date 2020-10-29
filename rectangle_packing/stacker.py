@@ -8,6 +8,7 @@ import random
 import time
 import numpy as np
 import copy
+import getpass
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -28,11 +29,10 @@ using computeRectangleOrderArea, after which they can be stacked using computeSt
 class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
-        path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
+        path = "../documents/"
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
-        
         self.unstacked_rectangles = []
         
         self.stop_stacking = False
@@ -54,7 +54,6 @@ class Stacker(object):
 
         while self.anyUnstackedRectangles():
             self.createGridInDatabaseIfNotAvailable()
-
             self.grids = self.db_manager.getGridsNotCut()
 
             for grid in self.grids:
@@ -68,8 +67,8 @@ class Stacker(object):
                         
                         if self.rectangleAndGridPropertiesMatch:
                             try:
-                                self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
-                            
+                                self.stackOriginalRectangle()
+
                             except InvalidGridPositionError:
                                 try:
                                     self.stackRotatedRectangle()
@@ -121,6 +120,9 @@ class Stacker(object):
     def getAllUnstackedRectanglesSortedArea(self):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+
+    def stackOriginalRectangle(self):
+        self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
 
     def isGridAvailable(self, rectangle):
         grid_width = rectangle.getGridWidth()
