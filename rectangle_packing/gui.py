@@ -564,7 +564,6 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
-        # self.load_grid_button = QPushButton("Load")
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")
         self.color_naturel_radio_button.setChecked(True)
