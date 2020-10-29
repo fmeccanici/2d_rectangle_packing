@@ -35,11 +35,6 @@ class Stacker(object):
         
         self.unstacked_rectangles = []
         
-        self.min_rectangle_width = 100 #cm
-        self.min_rectangle_height = 50 #cm
-        self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
-        
         self.stop_stacking = False
 
     def stackingStopped(self):
@@ -50,21 +45,6 @@ class Stacker(object):
 
     def startStacking(self):
         self.stop_stacking = False
-
-    def generateRandomRectangles(self, amount):
-        rectangles = []
-        # random.seed(41)
-        for i in range(amount):
-            width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
-            height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)
-
-            r = Rectangle(width, height, name=int(time.time()))
-            rectangles.append(r)
-            time.sleep(1)
-
-            print("Generated random rectangle " + str(r.getName()))
-
-        return rectangles
 
     def start(self):        
         self.startStacking()
@@ -247,13 +227,13 @@ class Stacker(object):
             width_exact = rectangle_exact.getWidth()
             height_exact = rectangle_exact.getHeight()
             
-            # check if rectangle was rotated
+            # check if rectangle was rotated in start function
             w = int(np.ceil(width_exact))
             if w % 2 > 0:
                 w += 1
 
             if w == rectangle.getHeight():
-                print("RECTANGLE WAS ROTATED")
+                print("Rectangle was rotated")
                 t = height_exact
                 height_exact = width_exact
                 width_exact = t
@@ -262,7 +242,6 @@ class Stacker(object):
             rectangle.setWidth(width_exact)
             rectangle.setHeight(height_exact)
             
-
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)
             self.db_manager.updateGrid(grid)
