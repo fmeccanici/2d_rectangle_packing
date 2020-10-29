@@ -50,7 +50,7 @@ class RectanglePackingGui(QWidget):
         # Other classes
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
-        path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
+        path = "../documents/"
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)

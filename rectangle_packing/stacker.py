@@ -8,6 +8,7 @@ import random
 import time
 import numpy as np
 import copy
+import getpass
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -28,17 +29,11 @@ using computeRectangleOrderArea, after which they can be stacked using computeSt
 class Stacker(object):
     def __init__(self):
         self.db_manager = DatabaseManager()
-        path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
+        path = "../documents/"
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
-        
         self.unstacked_rectangles = []
-        
-        self.min_rectangle_width = 100 #cm
-        self.min_rectangle_height = 50 #cm
-        self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
         
         self.stop_stacking = False
 
@@ -51,37 +46,19 @@ class Stacker(object):
     def startStacking(self):
         self.stop_stacking = False
 
-    def generateRandomRectangles(self, amount):
-        rectangles = []
-        # random.seed(41)
-        for i in range(amount):
-            width = random.randrange(self.min_rectangle_width, self.max_rectangle_width, 2)
-            height = random.randrange(self.min_rectangle_height, self.max_rectangle_height/2, 2)
-
-            r = Rectangle(width, height, name=int(time.time()))
-            rectangles.append(r)
-            time.sleep(1)
-
-            print("Generated random rectangle " + str(r.getName()))
-
-        return rectangles
-
     def start(self):        
         self.startStacking()
         self.loadOrders()
 
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+        self.getAllUnstackedRectanglesSortedArea()
 
-        while len(self.unstacked_rectangles) > 0:
+        while self.anyUnstackedRectangles():
             self.createGridInDatabaseIfNotAvailable()
-
             self.grids = self.db_manager.getGridsNotCut()
 
             for grid in self.grids:
                 self.grid = grid
-                self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=grid.getColor())
-                self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+                self.getUnstackedRectanglesMatchingGridColorSortedArea()
 
                 for rectangle in self.unstacked_rectangles:
                     self.rectangle = rectangle
@@ -90,8 +67,8 @@ class Stacker(object):
                         
                         if self.rectangleAndGridPropertiesMatch:
                             try:
-                                self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
-                            
+                                self.stackOriginalRectangle()
+
                             except InvalidGridPositionError:
                                 try:
                                     self.stackRotatedRectangle()
@@ -108,9 +85,8 @@ class Stacker(object):
                     
                 self.optimizeAndExportGrid(grid)
             
-            self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-            self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
-    
+            self.getAllUnstackedRectanglesSortedArea()
+
     def loadOrders(self):
         self.excel_parser.reloadExcel()
         unstacked_rectangles = self.excel_parser.getOrders()
@@ -129,10 +105,24 @@ class Stacker(object):
 
         return list(reversed(rectangles_descending_area_order))
 
+    def anyUnstackedRectangles(self):
+        return len(self.unstacked_rectangles) > 0
+
     def createGridInDatabaseIfNotAvailable(self):
         for rectangle in self.unstacked_rectangles:
             if not self.isGridAvailable(rectangle):
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
+
+    def getUnstackedRectanglesMatchingGridColorSortedArea(self):
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor())
+        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+
+    def getAllUnstackedRectanglesSortedArea(self):
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
+        self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
+
+    def stackOriginalRectangle(self):
+        self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
 
     def isGridAvailable(self, rectangle):
         grid_width = rectangle.getGridWidth()
@@ -247,13 +237,13 @@ class Stacker(object):
             width_exact = rectangle_exact.getWidth()
             height_exact = rectangle_exact.getHeight()
             
-            # check if rectangle was rotated
+            # check if rectangle was rotated in start function
             w = int(np.ceil(width_exact))
             if w % 2 > 0:
                 w += 1
 
             if w == rectangle.getHeight():
-                print("RECTANGLE WAS ROTATED")
+                print("Rectangle was rotated")
                 t = height_exact
                 height_exact = width_exact
                 width_exact = t
@@ -262,7 +252,6 @@ class Stacker(object):
             rectangle.setWidth(width_exact)
             rectangle.setHeight(height_exact)
             
-
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)
             self.db_manager.updateGrid(grid)

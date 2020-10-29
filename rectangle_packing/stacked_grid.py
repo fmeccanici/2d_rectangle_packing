@@ -36,7 +36,6 @@ class StackedGrid(object):
         self.is_full = is_full
         self.is_cut = is_cut
 
-        self.unstacked_rectangles = []
         self.points = []
         self.lines = []
 
@@ -47,7 +46,6 @@ class StackedGrid(object):
             os.makedirs(self.dxf_path)
 
         self.dxf_drawing = dxf.drawing(self.dxf_file_path)
-        self.base_path = os.path.abspath(os.getcwd())
 
         self.min_rectangle_width = 100 #cm
         self.min_rectangle_height = 50 #cm
@@ -107,13 +105,8 @@ class StackedGrid(object):
 
     def checkAndSetFull(self):
         print("Checking if grid " + str(self.getName()) + " is full")
-        min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
-        min_rectangle.setPosition(self.computeStackingPosition(min_rectangle))
 
-        min_rectangle_rotated = Rectangle(self.min_rectangle_height, self.min_rectangle_width, -1)
-        min_rectangle_rotated.setPosition(self.computeStackingPosition(min_rectangle_rotated))
-
-        if self.isValidPosition(min_rectangle) or self.isValidPosition(min_rectangle_rotated):
+        if self.minimumRectangleFits() or self.minimumRectangleRotatedFits():
             self.is_full = False
             print("Grid " + str(self.getName()) + " is not full")
             return False
@@ -121,6 +114,20 @@ class StackedGrid(object):
             self.is_full = True
             print("Grid " + str(self.getName()) + " is full")
             return True
+    
+    def minimumRectangleFits(self):
+        min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
+        stacking_position = self.computeStackingPosition(min_rectangle)
+        min_rectangle.setPosition(stacking_position)
+
+        return self.isValidPosition(min_rectangle)
+
+    def minimumRectangleRotatedFits(self):
+        min_rectangle_rotated = Rectangle(self.min_rectangle_height, self.min_rectangle_width, -1)
+        stacking_position = self.computeStackingPosition(min_rectangle_rotated)
+        min_rectangle_rotated.setPosition(stacking_position)
+
+        return self.isValidPosition(min_rectangle_rotated)
 
     def computeStackingPosition(self, rectangle):
         stacking_position = [self.getWidth(), self.getHeight()]
@@ -134,6 +141,28 @@ class StackedGrid(object):
 
         return stacking_position
 
+    def isValidPosition(self, rectangle):
+        if self.isOutOfGrid(rectangle):
+            return False
+
+        for stacked_rectangle in self.stacked_rectangles:
+            if rectangle.intersection(stacked_rectangle):
+                return False
+
+        return True
+    
+    def isOutOfGrid(self, rectangle):
+        if rectangle.getPosition()[0] - rectangle.getWidth()/2 < 0:
+            return True
+        if rectangle.getPosition()[1] + rectangle.getHeight()/2 > self.getHeight():
+            return True
+        if rectangle.getPosition()[0] + rectangle.getWidth()/2 > self.getWidth():
+            return True
+        if rectangle.getPosition()[1] - rectangle.getHeight()/2 < 0:
+            return True
+    
+        return False
+    
     def toMillimeters(self, variable):
         return variable * 10
 
@@ -266,27 +295,7 @@ class StackedGrid(object):
                 del self.stacked_rectangles[i]
                 break
 
-    def isOutOfGrid(self, rectangle):
-        if rectangle.getPosition()[0] - rectangle.getWidth()/2 < 0:
-            return True
-        if rectangle.getPosition()[1] + rectangle.getHeight()/2 > self.getHeight():
-            return True
-        if rectangle.getPosition()[0] + rectangle.getWidth()/2 > self.getWidth():
-            return True
-        if rectangle.getPosition()[1] - rectangle.getHeight()/2 < 0:
-            return True
-    
-        return False
 
-    def isValidPosition(self, rectangle):
-        if self.isOutOfGrid(rectangle):
-            return False
-
-        for i, stacked_rectangle in enumerate(self.stacked_rectangles):
-            if rectangle.intersection(stacked_rectangle):
-                return False
-
-        return True
 
     def printStackedRectangles(self):
         for r in self.stacked_rectangles:
