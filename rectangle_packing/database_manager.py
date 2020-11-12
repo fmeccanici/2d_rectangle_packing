@@ -201,6 +201,7 @@ class DatabaseManager(object):
         height = rectangle.getHeight()
         brand = rectangle.getBrand()
         color = rectangle.getColor()
+        quantity = rectangle.getQuantity()
         grid_width = rectangle.getGridWidth()
         position = rectangle.getPosition()
         name = rectangle.getName()
@@ -217,7 +218,7 @@ class DatabaseManager(object):
             h += 1
         
         print(width, height)
-        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width}
+        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity}
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)

@@ -428,6 +428,7 @@ class RectanglePackingGui(QWidget):
         """
 
         unstacked_rectangles = self.excel_parser.getOrders()
+
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
 

@@ -6,7 +6,7 @@ from pathlib import Path
 from dxfwrite import DXFEngine as dxf
 
 class Rectangle(object):
-    def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False):
+    def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1):
         self.position = np.asarray(position)
         self.width = width
         self.height = height
@@ -14,6 +14,7 @@ class Rectangle(object):
         self.brand = brand
         self.color = color
         self.grid_width = grid_width
+        self.quantity = quantity 
 
         self.grid_number = grid_number
         self.is_stacked = is_stacked
@@ -75,6 +76,12 @@ class Rectangle(object):
     def setGridWidth(self, width):
         self.grid_width = width
 
+    def getQuantity(self):
+        return self.quantity
+    
+    def setQuantity(self, quantity):
+        self.quantity = quantity
+        
     def getTopLeft(self):   
         return self.getPosition() + np.array([-self.getWidth()/2, self.getHeight()/2])
     

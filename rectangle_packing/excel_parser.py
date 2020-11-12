@@ -20,11 +20,10 @@ class ExcelParser():
    
     def getOrders(self):
         self.reloadExcel()
-        orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte']]
+        orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal']]
 
         unstacked_rectangles = []
         for index, row in orders.iterrows():
-
             try:
                 width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
             except IndexError:
@@ -39,8 +38,7 @@ class ExcelParser():
             except AttributeError:
                 height = row['Lengte']
 
-            name = row['Ordernummer']
-
+            name = str(row['Ordernummer'])
             width = float(width)
             height = float(height)
             brand = row["Merk"]
@@ -49,9 +47,16 @@ class ExcelParser():
             if brand == "Kokos" and coupage_batch == "Batch":
                 color = row['Kleur'].lower()
                 brand = brand.lower()
-                print(color)
+                quantity = int(row['Aantal'])
+                
+                    
                 grid_width = int(row['Rolbreedte'])
-                rectangle = Rectangle(width=width, height=height, name=name, brand=brand, color=color, grid_width=grid_width)
-                unstacked_rectangles.append(rectangle)
+                if quantity > 1:
+                    for i in range(1, quantity+1):
+                        rectangle = Rectangle(width=width, height=height, name=name+'-'+str(i), brand=brand, color=color, grid_width=grid_width, quantity=quantity)
+                        unstacked_rectangles.append(rectangle)
+                else:            
+                    rectangle = Rectangle(width=width, height=height, name=name, brand=brand, color=color, grid_width=grid_width, quantity=quantity)
+                    unstacked_rectangles.append(rectangle)
 
         return unstacked_rectangles
