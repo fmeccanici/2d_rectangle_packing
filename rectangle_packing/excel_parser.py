@@ -6,7 +6,8 @@ class ExcelParser():
     def __init__(self, path, file_name):
         self.path = path
         self.file_name = file_name
-        self.df = pd.read_excel(path + file_name, sheet_name=None)        
+        print(file_name)
+        self.df = pd.read_excel(path + file_name, sheet_name=None)  
         self.df = self.df['Paklijst']
         self.df = self.df.drop([0, 1, 2, 3])
         self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']

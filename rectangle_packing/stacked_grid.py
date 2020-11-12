@@ -183,6 +183,8 @@ class StackedGrid(object):
         self.dxf_drawing.save()
 
     """
+    tjeerd@homedesignshops.nl
+
     1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
     2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
     than the current start x value, this is chosen as starting value x_start.  
@@ -275,16 +277,26 @@ class StackedGrid(object):
                 width = self.toMillimeters(width)
                 height = self.toMillimeters(height)
 
-            bgcolor = random.randint(1,255)
-            
-            self.dxf_drawing.add(dxf.rectangle((x,y), width, height,
-                                bgcolor=bgcolor))
-
+                bgcolor = random.randint(1,255)
+                
+                self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
+                                    bgcolor=bgcolor))
+            else:
+                bgcolor = random.randint(1,255)
+                
+                self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
+                                    bgcolor=bgcolor))
+                
     def toPdf(self):
-        self.toDxf()
+        self.toDxf(remove_duplicates=False)
         dox, auditor = recover.readfile(self.dxf_file_path)
         if not auditor.has_errors:
-            matplotlib.qsave(dox.modelspace(), './pdf/' + self.getBrand() + '/' + self.getColor() + '/' + str(self.getWidth()) + '/grid_' + str(self.getName()) + '.png')
+            file_path = './pdf/' + self.getBrand() + '/' + self.getColor() + '/' + str(self.getWidth()) 
+            if not os.path.exists(file_path):
+                os.makedirs(file_path)
+            
+            file_name = '/grid_' + str(self.getName()) + '.png'
+            matplotlib.qsave(dox.modelspace(), file_path + file_name)
 
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))

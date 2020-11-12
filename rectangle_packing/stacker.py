@@ -75,8 +75,13 @@ class Stacker(object):
                                     continue
 
                                 except InvalidGridPositionError:
-                                    self.rotateBackCreateNewGridAndStackRectangle()
-                                    continue
+                                    try:
+                                        self.rotateBackCreateNewGridAndStackRectangle()
+                                        continue
+                                    except InvalidGridPositionError:
+                                        print("Something went wrong, rectangle does not fit in new grid...")
+                                        continue
+
                         else: 
                             print("Colors don't match")
                     else:
@@ -170,7 +175,7 @@ class Stacker(object):
             
             grid.addRectangle(self.optimized_rectangle)
 
-        grid.toDxf(remove_duplicates=True, for_prime_center=False)
+        grid.toDxf(remove_duplicates=False, for_prime_center=True)
     
     def getRectanglesExactWidthHeight(self, grid):
         self.exact_rectangles = self.db_manager.getRectangles(grid, for_cutting=True, sort=True)
