@@ -149,6 +149,7 @@ class StackedGrid(object):
             if rectangle.intersection(stacked_rectangle):
                 return False
 
+        
         return True
     
     def isOutOfGrid(self, rectangle):
