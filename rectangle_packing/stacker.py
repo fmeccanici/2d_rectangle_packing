@@ -32,11 +32,15 @@ class Stacker(object):
         path = "../documents/"
         file_name = "paklijst.xlsx"
 
-        self.excel_parser = ExcelParser(path, file_name)
+        self.setExcelParser(path, file_name)
+
         self.unstacked_rectangles = []
         
         self.stop_stacking = False
 
+    def setExcelParser(self, path, file_name):
+        self.excel_parser = ExcelParser(path, file_name)
+    
     def stackingStopped(self):
         return self.stop_stacking
     
@@ -48,7 +52,7 @@ class Stacker(object):
 
     def start(self):        
         self.startStacking()
-        self.loadOrders()
+        # self.loadOrders()
 
         self.getAllUnstackedRectanglesSortedArea()
 
@@ -148,15 +152,21 @@ class Stacker(object):
         self.db_manager.emptyGrid(new_grid)
 
         try:
+            print("RECTANGLE NAME = " + str(self.rectangle.getName()))
             print("GRID WIDTH = " + str(new_grid.getWidth()))
             print("RECTANGLE WIDTH = " + str(self.rectangle.getWidth()))
+            print("RECTANGLE HEIGHT = " + str(self.rectangle.getWidth()))
+            print("RECTANGLE GRID WIDTH = " + str(self.rectangle.getGridWidth()))
 
             self.computeStackingPositionAndUpdateDatabase(self.rectangle, new_grid)
         
         except InvalidGridPositionError:
             self.rectangle.rotate()
+            print("RECTANGLE NAME = " + str(self.rectangle.getName()))
             print("GRID WIDTH = " + str(new_grid.getWidth()))
             print("RECTANGLE WIDTH = " + str(self.rectangle.getWidth()))
+            print("RECTANGLE HEIGHT = " + str(self.rectangle.getWidth()))
+            print("RECTANGLE GRID WIDTH = " + str(self.rectangle.getGridWidth()))
 
             self.computeStackingPositionAndUpdateDatabase(self.rectangle, new_grid)
     

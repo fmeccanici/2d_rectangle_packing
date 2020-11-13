@@ -50,10 +50,11 @@ class RectanglePackingGui(QWidget):
         # Other classes
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
-        path = "../paklijsten/"
+        path = os.getcwd() + "/paklijsten/"
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
+        self.stacker.setExcelParser(path, file_name)
 
         # Multithreading
         self.threadpool = QThreadPool()
@@ -144,6 +145,7 @@ class RectanglePackingGui(QWidget):
         self.updateCodeStatus("Done with automatic stacking!")
 
     def onStartStackingClick(self):
+        self.loadOrders()
         self.stacker.startStacking()
         self.updateCodeStatus("Stacking started")
 
@@ -426,7 +428,12 @@ class RectanglePackingGui(QWidget):
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
         """
-        self.excel_parser.setFileName(self.excel_file_line_edit.text())
+        file_name = self.excel_file_line_edit.text()
+        path = os.getcwd() + "/paklijsten/"
+
+        self.excel_parser.setFileName(file_name)
+        self.stacker.setExcelParser(path, file_name)
+        
         unstacked_rectangles = self.excel_parser.getOrders()
 
         self.stacker.addToDatabase(unstacked_rectangles)
@@ -565,7 +572,7 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
-        self.excel_file_line_edit = QLineEdit("paklijst.xlsx")
+        self.excel_file_line_edit = QLineEdit("paklijst2.xlsx")
         
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")
