@@ -50,7 +50,9 @@ class RectanglePackingGui(QWidget):
         # Other classes
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
-        path = os.getcwd() + "/paklijsten/"
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+        path = desktop + "/paklijsten/"
+        
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
@@ -429,7 +431,9 @@ class RectanglePackingGui(QWidget):
         self.refreshNewOrders()
         """
         file_name = self.excel_file_line_edit.text()
-        path = os.getcwd() + "/paklijsten/"
+        # path = os.getcwd() + "/paklijsten/"
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+        path = desktop + "/paklijsten/"
 
         self.excel_parser.setFileName(file_name)
         self.stacker.setExcelParser(path, file_name)

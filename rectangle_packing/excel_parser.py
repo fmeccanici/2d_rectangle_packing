@@ -41,7 +41,12 @@ class ExcelParser():
             except AttributeError:
                 height = row['Lengte']
 
-            name = str(row['Ordernummer'])
+            name = row['Ordernummer']
+            print(type(name))
+
+            if name is not np.nan:
+                name = str((name))
+                
             for i, stored_name in enumerate(self.names):
                 if stored_name == name:
                     print("Got double order")
@@ -53,11 +58,14 @@ class ExcelParser():
             width = float(width)
             height = float(height)
             brand = row["Merk"]
+            if brand is not None:
+                brand = str(brand)
+
             coupage_batch = row["Coupage/Batch"]
             client_name = row["Klantnaam"]
 
-            if brand == "Kokos" and coupage_batch == "Batch":
-                color = row['Kleur'].lower()
+            if coupage_batch == "Batch":
+                color = str(row['Kleur']).lower()
                 brand = brand.lower()
                 quantity = int(row['Aantal'])
                 
