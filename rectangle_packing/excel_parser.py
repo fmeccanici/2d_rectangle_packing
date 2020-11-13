@@ -64,7 +64,7 @@ class ExcelParser():
             coupage_batch = row["Coupage/Batch"]
             client_name = row["Klantnaam"]
 
-            if coupage_batch == "Batch":
+            if brand == "Kokos" and coupage_batch == "Batch":
                 color = str(row['Kleur']).lower()
                 brand = brand.lower()
                 quantity = int(row['Aantal'])
