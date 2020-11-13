@@ -293,7 +293,7 @@ class StackedGrid(object):
                 
                 self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
                                     bgcolor=bgcolor))
-                text = dxf.text(str(rectangle.getClientName()), (y + height/2, x + width), 100.0, rotation=-90)
+                text = dxf.text(str(rectangle.getClientName()), (y, x + width), 100.0, rotation=0)
                 
                 text['layer'] = 'TEXT'
                 text['color'] = '7'
@@ -304,7 +304,7 @@ class StackedGrid(object):
                 self.dxf_drawing.add(dxf.rectangle((x,y), height, width,
                                     bgcolor=bgcolor))
 
-                text = dxf.text(str(rectangle.getClientName()), (x, y), 100.0, rotation=-90)
+                text = dxf.text(str(rectangle.getClientName()), (x, y), 100.0, rotation=0)
 
                 text['layer'] = 'TEXT'
                 text['color'] = '7'
@@ -329,8 +329,6 @@ class StackedGrid(object):
             if stacked_rectangle.getName() == rectangle.getName():
                 del self.stacked_rectangles[i]
                 break
-
-
 
     def printStackedRectangles(self):
         for r in self.stacked_rectangles:
