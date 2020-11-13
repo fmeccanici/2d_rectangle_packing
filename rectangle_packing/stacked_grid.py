@@ -47,7 +47,10 @@ class StackedGrid(object):
         datum = today.strftime("%Y%m%d")
         
         # self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
-        self.dxf_path = os.getcwd() + "/" + datum + "/"
+        # self.dxf_path = os.getcwd() + "/" + datum + "/"
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+
+        self.dxf_path = desktop + "/grids/" + datum + "/"
         self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
 
         if not os.path.exists(self.dxf_path):

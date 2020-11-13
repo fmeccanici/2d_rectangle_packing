@@ -267,7 +267,9 @@ class DatabaseManager(object):
         query = {"name" : rectangle_number}
 
         cursor = self.rectangles_collection.find(query)
+        
         for document in cursor:
+            print(document)
             if not for_cutting:
                 rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
             else: 
