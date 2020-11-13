@@ -15,6 +15,7 @@ from ezdxf.addons.drawing import matplotlib
 
 import pandas as pd
 import math 
+import datetime
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -39,8 +40,15 @@ class StackedGrid(object):
         self.points = []
         self.lines = []
 
-        self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
-        self.dxf_file_path = self.dxf_path + "/grid" + str(name) + ".dxf"
+        today = datetime.date.today()
+        hour = datetime.datetime.now().hour
+
+        # ddmmYY
+        datum = today.strftime("%Y%m%d")
+        
+        # self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
+        self.dxf_path = os.getcwd() + "/" + datum + "/"
+        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
 
         if not os.path.exists(self.dxf_path):
             os.makedirs(self.dxf_path)
