@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_","ns":"stacked_rectangles_database.grids"}],"uuid":"4c075dff7c904d248b1d470ebed81fcc"}
