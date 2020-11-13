@@ -6,19 +6,24 @@ class ExcelParser():
     def __init__(self, path, file_name):
         self.path = path
         self.file_name = file_name
-        print(file_name)
-        self.df = pd.read_excel(path + file_name, sheet_name=None)  
+
+    def setFileName(self, file_name):
+        self.file_name = file_name
+
+    def createDataFrame(self):
+        self.df = pd.read_excel(self.path + self.file_name, sheet_name=None)  
         self.df = self.df['Paklijst']
         self.df = self.df.drop([0, 1, 2, 3])
         self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
 
-    def reloadExcel(self):
+    def reloadExcel(self):            
         self.df = pd.read_excel(self.path + self.file_name, sheet_name=None)        
         self.df = self.df['Paklijst']
         self.df = self.df.drop([0, 1, 2, 3])
         self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
    
     def getOrders(self):
+        self.createDataFrame()
         self.reloadExcel()
         orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal']]
 

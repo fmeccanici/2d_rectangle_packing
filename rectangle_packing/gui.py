@@ -50,7 +50,7 @@ class RectanglePackingGui(QWidget):
         # Other classes
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
-        path = "../documents/"
+        path = "../paklijsten/"
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
@@ -426,7 +426,7 @@ class RectanglePackingGui(QWidget):
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
         """
-
+        self.excel_parser.setFileName(self.excel_file_line_edit.text())
         unstacked_rectangles = self.excel_parser.getOrders()
 
         self.stacker.addToDatabase(unstacked_rectangles)
@@ -565,6 +565,8 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
+        self.excel_file_line_edit = QLineEdit("paklijst.xlsx")
+        
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")
         self.color_naturel_radio_button.setChecked(True)
@@ -616,6 +618,8 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(self.empty_grid_button)
 
         self.buttons_layout.addWidget(self.load_orders_button)
+        self.buttons_layout.addWidget(self.excel_file_line_edit)
+
         self.buttons_layout.addWidget(self.make_database_backup_button)
 
         group_box = QGroupBox("Stacking")
