@@ -1,8 +1,10 @@
-PyQt5==5.14
-PyQtWebEngine==5.13
-numpy==1.19.2
+PyQt5
+PyQtWebEngine
+numpy
 bokeh==2.2.2
 dxfwrite==1.2.2
 ezdxf==0.14.2
-matplotlib==3.3.2
+matplotlib
 pymongo==3.11.0
+pandas
+xlrd

@@ -47,7 +47,10 @@ class StackedGrid(object):
         datum = today.strftime("%Y%m%d")
         
         # self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
-        self.dxf_path = os.getcwd() + "/" + datum + "/"
+        # self.dxf_path = os.getcwd() + "/" + datum + "/"
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+
+        self.dxf_path = desktop + "/grids/" + datum + "/"
         self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
 
         if not os.path.exists(self.dxf_path):
@@ -290,7 +293,7 @@ class StackedGrid(object):
                 
                 self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
                                     bgcolor=bgcolor))
-                text = dxf.text(str(rectangle.getClientName()), (y + height/2, x + width), 100.0, rotation=-90)
+                text = dxf.text(str(rectangle.getClientName()), (y, x + width), 100.0, rotation=0)
                 
                 text['layer'] = 'TEXT'
                 text['color'] = '7'
@@ -301,7 +304,7 @@ class StackedGrid(object):
                 self.dxf_drawing.add(dxf.rectangle((x,y), height, width,
                                     bgcolor=bgcolor))
 
-                text = dxf.text(str(rectangle.getClientName()), (x, y), 100.0, rotation=-90)
+                text = dxf.text(str(rectangle.getClientName()), (x, y), 100.0, rotation=0)
 
                 text['layer'] = 'TEXT'
                 text['color'] = '7'
@@ -326,8 +329,6 @@ class StackedGrid(object):
             if stacked_rectangle.getName() == rectangle.getName():
                 del self.stacked_rectangles[i]
                 break
-
-
 
     def printStackedRectangles(self):
         for r in self.stacked_rectangles:
