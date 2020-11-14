@@ -50,10 +50,13 @@ class RectanglePackingGui(QWidget):
         # Other classes
         self.db_manager = DatabaseManager()
         self.stacker = Stacker()
-        path = "/home/fmeccanici/Documents/2d_rectangle_packing/documents/"
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+        path = desktop + "/paklijsten/"
+        
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
+        self.stacker.setExcelParser(path, file_name)
 
         # Multithreading
         self.threadpool = QThreadPool()
@@ -68,7 +71,6 @@ class RectanglePackingGui(QWidget):
         self.createButtonEvents()
 
         grid_number = 1
-        self.createGridHtmlViewer(grid_number)
         self.createGridOrdersLayout()
 
         self.grid_drawing = QtWidgets.QLabel()
@@ -144,53 +146,8 @@ class RectanglePackingGui(QWidget):
         self.refreshNewOrders()
         self.updateCodeStatus("Done with automatic stacking!")
 
-        # self.stacker.startStacking()
-        # self.loadOrders()
-        # self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-        # self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
-
-        
-        # for rectangle in self.unstacked_rectangles:
-        #     if not self.stacker.isGridAvailable(rectangle):
-        #         self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
-
-        # self.grids = self.db_manager.getGridsNotCut()
-
-        # for grid in self.grids:
-        #     self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-        #     self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
-
-        #     for rectangle in self.unstacked_rectangles:
-        #         if not self.stacker.stackingStopped():
-        #             if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
-        #                 try:
-        #                     self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-
-        #                 except InvalidGridPositionError:
-        #                     try:
-        #                         rectangle.rotate()
-        #                         self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                                    
-            
-        #                     except InvalidGridPositionError:
-        #                         self.updateCodeStatus("Order " + str(rectangle.getName()) + " does not fit")
-        #                         print("Cannot stack rectangle in this grid")
-        #                         continue
-                        
-        #                 self.refreshGrids()
-        #                 self.refreshGrid(grid.getName())
-        #                 self.refreshNewOrders()
-        #                 self.updateCodeStatus("Order " + str(rectangle.getName()) + " stacked")
-                        
-        #             else:
-        #                 print("Colors don't match")
-        #                 self.updateCodeStatus("Order has color " + str(rectangle.getColor()) + ", grid has color " + str(grid.getColor()))      
-                    
-        #         else:
-        #             self.updateCodeStatus("Stacking stopped")
-        #             break
-
     def onStartStackingClick(self):
+        self.loadOrders()
         self.stacker.startStacking()
         self.updateCodeStatus("Stacking started")
 
@@ -202,19 +159,6 @@ class RectanglePackingGui(QWidget):
 
         for i, rectangle in enumerate(self.unstacked_rectangles):
             print("Stacking rectangle " + str(i) + " out of " + str(len(self.unstacked_rectangles)))
-
-            # print(grid.getColor() == rectangle.getColor())
-            # print(grid.getColor())
-            # print(rectangle.getColor())
-            # print()
-            # print(grid.getBrand() == rectangle.getBrand())
-            # print(grid.getBrand())
-            # print(rectangle.getBrand())
-            # print()
-            # print(grid.getWidth() == rectangle.getGridWidth())
-            # print(grid.getWidth())
-            # print(rectangle.getWidth())
-            # print()
             if not self.stacker.stackingStopped():
                 try:
 
@@ -278,14 +222,7 @@ class RectanglePackingGui(QWidget):
     def onLoadGridClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         self.refreshGrid(grid_number)
-        
-    def createGridHtmlViewer(self, grid_number):
-        self.grid_html_viewer = QtWebEngineWidgets.QWebEngineView()
-        self.grid_html_viewer.load(QUrl().fromLocalFile(
-            os.path.split(os.path.abspath(__file__))[0] + '/plots/stacked_grid_' + str(grid_number) + '.html'
-        ))
 
-        # self.buttons_layout.addWidget(self.grid_html_viewer)
 
     def refreshGrids(self):
         grids = self.db_manager.getGridsNotCut()
@@ -493,8 +430,16 @@ class RectanglePackingGui(QWidget):
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
         """
+        file_name = self.excel_file_line_edit.text()
+        # path = os.getcwd() + "/paklijsten/"
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+        path = desktop + "/paklijsten/"
 
+        self.excel_parser.setFileName(file_name)
+        self.stacker.setExcelParser(path, file_name)
+        
         unstacked_rectangles = self.excel_parser.getOrders()
+
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
 
@@ -566,7 +511,7 @@ class RectanglePackingGui(QWidget):
         elif order_state == 'unstacked':
             list_widget = self.list_widget_new_orders
 
-        rectangle_number = int(list_widget.currentItem().text().split(' ')[1])
+        rectangle_number = str(list_widget.currentItem().text().split(' ')[1])
         rectangle = self.db_manager.getRectangle(rectangle_number, for_cutting=True)
 
         if rectangle.isStacked():
@@ -631,7 +576,8 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
-        # self.load_grid_button = QPushButton("Load")
+        self.excel_file_line_edit = QLineEdit("paklijst2.xlsx")
+        
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")
         self.color_naturel_radio_button.setChecked(True)
@@ -683,6 +629,8 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(self.empty_grid_button)
 
         self.buttons_layout.addWidget(self.load_orders_button)
+        self.buttons_layout.addWidget(self.excel_file_line_edit)
+
         self.buttons_layout.addWidget(self.make_database_backup_button)
 
         group_box = QGroupBox("Stacking")

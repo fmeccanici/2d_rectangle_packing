@@ -201,11 +201,13 @@ class DatabaseManager(object):
         height = rectangle.getHeight()
         brand = rectangle.getBrand()
         color = rectangle.getColor()
+        quantity = rectangle.getQuantity()
         grid_width = rectangle.getGridWidth()
         position = rectangle.getPosition()
         name = rectangle.getName()
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
+        client_name = rectangle.getClientName()
 
         w = int(np.ceil(width))
         h = int(np.ceil(height))
@@ -217,7 +219,7 @@ class DatabaseManager(object):
             h += 1
         
         print(width, height)
-        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width}
+        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity, 'client_name': client_name}
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)
@@ -262,14 +264,24 @@ class DatabaseManager(object):
         return is_present
 
     def getRectangle(self, rectangle_number, for_cutting=False):
-        query = {"name" : rectangle_number}
+        query = {"name" : str(rectangle_number)}
 
-        cursor = self.rectangles_collection.find(query)
-        for document in cursor:
-            if not for_cutting:
-                rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
-            else: 
-                rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'])
+        # print(list(self.rectangles_collection.find_one(query)))
+        # cursor = self.rectangles_collection.find(query)
+        # print(list(cursor))
+        document = self.rectangles_collection.find_one(query)
+        if not for_cutting:
+            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
+        else: 
+            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
+
+
+        # for document in cursor:
+        #     print(document)
+        #     if not for_cutting:
+        #         rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
+        #     else: 
+        #         rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
 
         return rectangle        
 
@@ -287,9 +299,9 @@ class DatabaseManager(object):
         rectangles = []
         for rectangle in rectangles_dict:
             if for_cutting == True:
-                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
+                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name']))
             else:
-                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked']))
+                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name']))
             print("Rectangle " + str(rectangle['name']) + " loaded from database")
         return rectangles
     
@@ -333,7 +345,7 @@ class DatabaseManager(object):
 
         rectangles = []
         for rectangle in rectangles_dict:
-            rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width']))
+            rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name']))
     
         return rectangles
     
