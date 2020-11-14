@@ -41,7 +41,7 @@ class ExcelParser():
             except AttributeError:
                 height = row['Lengte']
 
-            name = row['Ordernummer']
+            name = str(row['Ordernummer'])
             print(type(name))
 
             if name is not np.nan:
@@ -64,9 +64,10 @@ class ExcelParser():
             coupage_batch = row["Coupage/Batch"]
             client_name = row["Klantnaam"]
 
-            if brand == "Kokos" and coupage_batch == "Batch":
-                color = str(row['Kleur']).lower()
-                brand = brand.lower()
+            if coupage_batch == "Batch":
+                color = str(row['Kleur'])
+                brand = brand
+                print(brand)
                 quantity = int(row['Aantal'])
                 
                     

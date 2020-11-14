@@ -511,7 +511,7 @@ class RectanglePackingGui(QWidget):
         elif order_state == 'unstacked':
             list_widget = self.list_widget_new_orders
 
-        rectangle_number = int(list_widget.currentItem().text().split(' ')[1])
+        rectangle_number = str(list_widget.currentItem().text().split(' ')[1])
         rectangle = self.db_manager.getRectangle(rectangle_number, for_cutting=True)
 
         if rectangle.isStacked():
