@@ -189,6 +189,7 @@ class RectanglePackingGui(QWidget):
 
         self.uncut_color_line_edit.setText(grid.getColor())
         self.uncut_width_line_edit.setText(str(grid.getWidth()))
+        self.uncut_brand_line_edit.setText(str(grid.getBrand()))
 
         self.drawGrid(grid)
         self.removeAllOrderItems()
@@ -206,6 +207,7 @@ class RectanglePackingGui(QWidget):
 
         self.cut_color_line_edit.setText(grid.getColor())
         self.cut_width_line_edit.setText(str(grid.getWidth()))
+        self.cut_brand_line_edit.setText(str(grid.getBrand()))
 
         self.drawGrid(grid)
         self.removeAllOrderItems()
@@ -266,24 +268,34 @@ class RectanglePackingGui(QWidget):
         
         cut_color_label = QLabel("Color")
         cut_width_label = QLabel("Width")
+        cut_brand_label = QLabel("Brand")
+
         self.cut_color_line_edit = QLineEdit()
         self.cut_width_line_edit = QLineEdit()
+        self.cut_brand_line_edit = QLineEdit()
 
         uncut_color_label = QLabel("Color")
         uncut_width_label = QLabel("Width")
+        uncut_brand_label = QLabel("Brand")
+
         self.uncut_color_line_edit = QLineEdit()
         self.uncut_width_line_edit = QLineEdit()
-        
+        self.uncut_brand_line_edit = QLineEdit()
+
         self.cut_uncut_layout.addWidget(cut_color_label, 2, 1)
         self.cut_uncut_layout.addWidget(self.cut_color_line_edit, 3, 1)
         self.cut_uncut_layout.addWidget(cut_width_label, 4, 1)        
         self.cut_uncut_layout.addWidget(self.cut_width_line_edit, 5, 1)
+        self.cut_uncut_layout.addWidget(cut_brand_label, 6, 1)        
+        self.cut_uncut_layout.addWidget(self.cut_brand_line_edit, 7, 1)
 
         self.cut_uncut_layout.addWidget(uncut_color_label, 2, 0)
         self.cut_uncut_layout.addWidget(self.uncut_color_line_edit, 3, 0)
         self.cut_uncut_layout.addWidget(uncut_width_label, 4, 0)
         self.cut_uncut_layout.addWidget(self.uncut_width_line_edit, 5, 0)
-    
+        self.cut_uncut_layout.addWidget(uncut_brand_label, 6, 0)        
+        self.cut_uncut_layout.addWidget(self.uncut_brand_line_edit, 7, 0)
+
         
         cut_uncut_group_box.setLayout(self.cut_uncut_layout)
         self.grid_orders_layout.addWidget(cut_uncut_group_box)
@@ -297,11 +309,13 @@ class RectanglePackingGui(QWidget):
         order_height_label = QLabel("Height")
         order_color_label = QLabel("Color")
         order_grid_width_label = QLabel("Grid width")
+        order_brand_label = QLabel("Brand")
 
         self.width_line_edit = QLineEdit()
         self.height_line_edit = QLineEdit()
         self.color_line_edit = QLineEdit()
         self.grid_width_line_edit = QLineEdit()
+        self.brand_line_edit = QLineEdit()
 
         grid_orders_layout.addWidget(order_width_label, 1, 0)
         grid_orders_layout.addWidget(self.width_line_edit, 2, 0)
@@ -315,6 +329,9 @@ class RectanglePackingGui(QWidget):
         grid_orders_layout.addWidget(order_grid_width_label, 3, 1)
         grid_orders_layout.addWidget(self.grid_width_line_edit, 4, 1)
 
+        grid_orders_layout.addWidget(order_brand_label, 5, 1)
+        grid_orders_layout.addWidget(self.brand_line_edit, 6, 1)
+
 
         grid_orders_groupbox.setLayout(grid_orders_layout)
 
@@ -326,6 +343,7 @@ class RectanglePackingGui(QWidget):
         unstacked_order_height_label = QLabel("Height")
         unstacked_order_color_label = QLabel("Color")
         unstacked_order_grid_width_label = QLabel("Grid width")
+        unstacked_order_brand_label = QLabel("Brand")
 
         self.unstacked_orders_layout = QGridLayout()
         self.unstacked_orders_layout.addWidget(self.list_widget_new_orders, 0, 0)
@@ -334,6 +352,7 @@ class RectanglePackingGui(QWidget):
         self.unstacked_order_height_line_edit = QLineEdit()
         self.unstacked_order_color_line_edit = QLineEdit()
         self.unstacked_order_grid_width_line_edit = QLineEdit()
+        self.unstacked_order_brand_line_edit = QLineEdit()
 
         self.unstacked_orders_layout.addWidget(unstacked_order_width_label, 1, 0)
         self.unstacked_orders_layout.addWidget(self.unstacked_order_width_line_edit, 2, 0)        
@@ -344,6 +363,9 @@ class RectanglePackingGui(QWidget):
         self.unstacked_orders_layout.addWidget(self.unstacked_order_color_line_edit, 2, 1)
         self.unstacked_orders_layout.addWidget(unstacked_order_grid_width_label, 3, 1)
         self.unstacked_orders_layout.addWidget(self.unstacked_order_grid_width_line_edit, 4, 1)
+
+        self.unstacked_orders_layout.addWidget(unstacked_order_brand_label, 5, 1)
+        self.unstacked_orders_layout.addWidget(self.unstacked_order_brand_line_edit, 6, 1)
 
         self.unstacked_orders_group_box.setLayout(self.unstacked_orders_layout)
         self.grid_orders_layout.addWidget(self.unstacked_orders_group_box)
@@ -522,19 +544,22 @@ class RectanglePackingGui(QWidget):
             self.current_rectangle = rectangle_number
             self.previous_rectangle = rectangle
 
-        self.updateWidthHeightColorGridWidth(rectangle)
+        self.updateWidthHeightColorGridWidthBrand(rectangle)
         
-    def updateWidthHeightColorGridWidth(self, rectangle):
+    def updateWidthHeightColorGridWidthBrand(self, rectangle):
         if rectangle.isStacked():
             self.width_line_edit.setText(str(rectangle.getWidth() * 10) + 'mm')
             self.height_line_edit.setText(str(rectangle.getHeight() * 10) + 'mm')
             self.color_line_edit.setText(str(rectangle.getColor()))
             self.grid_width_line_edit.setText(str(rectangle.getGridWidth()))
+            self.brand_line_edit.setText(str(rectangle.getBrand()))
+
         else:
             self.unstacked_order_width_line_edit.setText(str(rectangle.getWidth() * 10) + 'mm')
             self.unstacked_order_height_line_edit.setText(str(rectangle.getHeight() * 10) + 'mm')
             self.unstacked_order_color_line_edit.setText(str(rectangle.getColor()))
             self.unstacked_order_grid_width_line_edit.setText(str(rectangle.getGridWidth()))
+            self.unstacked_order_brand_line_edit.setText(str(rectangle.getBrand()))
 
     def onDoubleClickGrid(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])

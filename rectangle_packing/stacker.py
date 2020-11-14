@@ -117,7 +117,7 @@ class Stacker(object):
     def createGridInDatabaseIfNotAvailable(self):
         for rectangle in self.unstacked_rectangles:
             if not self.isGridAvailable(rectangle):
-                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor())
+                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesMatchingGridColorSortedArea(self):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor())
@@ -133,7 +133,9 @@ class Stacker(object):
     def isGridAvailable(self, rectangle):
         grid_width = rectangle.getGridWidth()
         color = rectangle.getColor()
-        return len(self.db_manager.getGridsNotCutByWidthBrandColor(width=grid_width, color=color)) > 0        
+        brand = rectangle.getBrand()
+
+        return len(self.db_manager.getGridsNotCutByWidthBrandColor(width=grid_width, color=color, brand=brand)) > 0        
 
     def rectangleAndGridPropertiesMatch(self):
         return (self.grid.getBrand() == self.rectangle.getBrand()) and (self.grid.getColor() == self.rectangle.getColor()) and (self.grid.getWidth() == self.rectangle.getGridWidth())

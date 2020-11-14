@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from rectangle import Rectangle
 
+import os
 class ExcelParser():
     def __init__(self, path, file_name):
         self.path = path
@@ -20,10 +21,48 @@ class ExcelParser():
             self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
         else:
             self.df = pd.read_excel(self.path + self.file_name, sheet_name='paklijst_zonder_opmaak')        
+            self.df[['Ordernummer']] = self.df[['Ordernummer']].astype(str)
+            self.parseDuplicateOrderNumbers()
 
+    def parseDuplicateOrderNumbers(self):
+
+        duplicates = self.df.duplicated(keep=False, subset=['Ordernummer'])
+        duplicates = self.df[duplicates].sort_values(by=['Ordernummer'])
+
+        duplicates_ordernumbers = list(duplicates['Ordernummer'])
+
+        i = 0
+        while True:
+            try:
+                if (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+1]) and not (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+2]):
+                    duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
+                    duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
+                    
+                    i = i + 2
+                    if i >= len(duplicates_ordernumbers)-1: break
+
+
+                elif (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+1]) and (duplicates_ordernumbers[i+1] == duplicates_ordernumbers[i+2]):
+                    duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
+                    duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
+                    duplicates_ordernumbers[i+2] = duplicates_ordernumbers[i+2] + '-3'
+                    i = i + 3
+                    if i >= len(duplicates_ordernumbers)-1: break
+            except IndexError:
+                duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
+                duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
+                break
+            
+        duplicates.drop(['Ordernummer'], axis=1)
+        duplicates['Ordernummer'] = duplicates_ordernumbers
+
+        self.df.drop_duplicates(keep=False, subset=["Ordernummer"])
+        self.df = pd.concat([self.df, duplicates])
+        
     def getOrders(self):
         self.reloadExcel()
         orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam']]
+        colors = []
 
         unstacked_rectangles = []
         for index, row in orders.iterrows():
@@ -42,18 +81,17 @@ class ExcelParser():
                 height = row['Lengte']
 
             name = str(row['Ordernummer'])
-            print(type(name))
 
             if name is not np.nan:
                 name = str((name))
                 
-            for i, stored_name in enumerate(self.names):
-                if stored_name == name:
-                    print("Got double order")
-                    self.names[i] = name + "-1"
-                    self.names.append(name + "-2")
-            else:
-                self.names.append(name)
+            # for i, stored_name in enumerate(self.names):
+            #     if stored_name == name:
+            #         print("Got double order")
+            #         self.names[i] = name + "-1"
+            #         self.names.append(name + "-2")
+            # else:
+            #     self.names.append(name)
                 
             width = float(width)
             height = float(height)
@@ -67,10 +105,11 @@ class ExcelParser():
             if coupage_batch == "Batch":
                 color = str(row['Kleur'])
                 brand = brand
-                print(brand)
+                print("brand = " + (brand))
+                print("color = " + (color))
                 quantity = int(row['Aantal'])
-                
-                    
+                colors.append(color)
+
                 grid_width = int(row['Rolbreedte'])
                 if quantity > 1:
                     for i in range(1, quantity+1):
@@ -81,3 +120,11 @@ class ExcelParser():
                     unstacked_rectangles.append(rectangle)
 
         return unstacked_rectangles
+
+if __name__ == "__main__":
+    desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+    path = desktop + "/paklijsten/"
+    file_name = "paklijst2.xlsx"
+
+    parser = ExcelParser(path, file_name)
+    parser.getOrders()
