@@ -147,6 +147,7 @@ class Stacker(object):
         self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
 
     def createNewGridAndStackRectangle(self):
+
         new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), brand=self.rectangle.getBrand(),
                     color=self.rectangle.getColor())
         

@@ -433,6 +433,7 @@ class RectanglePackingGui(QWidget):
 
         self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
         self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
+
         self.export_button.clicked.connect(self.onExportClick)
         self.cut_button.clicked.connect(self.onCutClick)
         self.uncut_button.clicked.connect(self.onUncutClick)
@@ -601,7 +602,7 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
-        self.excel_file_line_edit = QLineEdit("paklijst2.xlsx")
+        self.excel_file_line_edit = QLineEdit("paklijst1totaal.xlsx")
         
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")

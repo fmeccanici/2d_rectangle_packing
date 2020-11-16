@@ -41,13 +41,16 @@ class ExcelParser():
                     i = i + 2
                     if i >= len(duplicates_ordernumbers)-1: break
 
-
                 elif (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+1]) and (duplicates_ordernumbers[i+1] == duplicates_ordernumbers[i+2]):
                     duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
                     duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
                     duplicates_ordernumbers[i+2] = duplicates_ordernumbers[i+2] + '-3'
                     i = i + 3
                     if i >= len(duplicates_ordernumbers)-1: break
+                else:
+                    i = i + 1
+                    if i >= len(duplicates_ordernumbers)-1: break
+
             except IndexError:
                 duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
                 duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
@@ -58,6 +61,7 @@ class ExcelParser():
 
         self.df.drop_duplicates(keep=False, subset=["Ordernummer"])
         self.df = pd.concat([self.df, duplicates])
+        print(list(self.df['Ordernummer']))
         
     def getOrders(self):
         self.reloadExcel()
