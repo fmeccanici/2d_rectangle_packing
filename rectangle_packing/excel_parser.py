@@ -59,10 +59,10 @@ class ExcelParser():
         duplicates.drop(['Ordernummer'], axis=1)
         duplicates['Ordernummer'] = duplicates_ordernumbers
 
-        self.df.drop_duplicates(keep=False, subset=["Ordernummer"])
+        self.df = self.df.drop_duplicates(keep=False, subset=["Ordernummer"])
         self.df = pd.concat([self.df, duplicates])
         print(list(self.df['Ordernummer']))
-        
+
     def getOrders(self):
         self.reloadExcel()
         orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam']]
