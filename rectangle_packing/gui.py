@@ -432,7 +432,10 @@ class RectanglePackingGui(QWidget):
         self.start_stacking_automatic_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingAutomaticClick))
 
         self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
+        self.clear_orders_button.clicked.connect(self.onClearNewOrdersClick)
+
         self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
+        self.clear_database_button.clicked.connect(self.onClearDatabaseClick)
 
         self.export_button.clicked.connect(self.onExportClick)
         self.cut_button.clicked.connect(self.onCutClick)
@@ -475,8 +478,17 @@ class RectanglePackingGui(QWidget):
     def onLoadOrdersClick(self):
         self.loadOrders()
 
+    def onClearNewOrdersClick(self):
+        self.db_manager.clearNewOrders()
+        self.refreshNewOrders()
+
     def onMakeDatabaseBackupClick(self):
         self.db_manager.makeBackup()
+
+    def onClearDatabaseClick(self):
+        self.db_manager.clearDatabase()
+        self.refreshGrids()
+        self.refreshNewOrders()
 
     def onExportClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
@@ -602,6 +614,8 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
+        self.clear_orders_button = QPushButton("Clear new orders")
+
         self.excel_file_line_edit = QLineEdit("paklijst1totaal.xlsx")
         
         self.create_grid_button = QPushButton("Create new grid")
@@ -646,6 +660,8 @@ class RectanglePackingGui(QWidget):
         self.empty_grid_button = QPushButton("Empty grid")
 
         self.make_database_backup_button = QPushButton("Make database backup")
+        self.clear_database_button = QPushButton("Clear database")
+
 
         # self.buttons_layout.addWidget(self.load_grid_button)
         self.buttons_layout.addWidget(self.create_grid_button)
@@ -655,9 +671,12 @@ class RectanglePackingGui(QWidget):
         self.buttons_layout.addWidget(self.empty_grid_button)
 
         self.buttons_layout.addWidget(self.load_orders_button)
+        self.buttons_layout.addWidget(self.clear_orders_button)
+
         self.buttons_layout.addWidget(self.excel_file_line_edit)
 
         self.buttons_layout.addWidget(self.make_database_backup_button)
+        self.buttons_layout.addWidget(self.clear_database_button)
 
         group_box = QGroupBox("Stacking")
         layout = QVBoxLayout()

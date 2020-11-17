@@ -36,6 +36,14 @@ class DatabaseManager(object):
 
         self.backup_path = '/home/' + username + '/Documents/2d_rectangle_packing/rectangle_packing/database_backups/'
 
+    def clearDatabase(self):
+        print("check")
+        self.client.drop_database("stacked_rectangles_database")
+    
+    def clearNewOrders(self):
+        query = {"isStacked" : {"$eq" : False}}
+        self.rectangles_collection.delete_many(query)
+
     def listUsedGridNames(self):
         names = []
         cursor = self.grids_collection.find({})
