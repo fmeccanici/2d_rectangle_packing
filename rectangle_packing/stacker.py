@@ -72,7 +72,7 @@ class Stacker(object):
                         if self.rectangleAndGridPropertiesMatch():
                             try:
                                 self.stackOriginalRectangle()
-
+                                
                             except InvalidGridPositionError:
                                 try:
                                     self.stackRotatedRectangle()
@@ -248,6 +248,16 @@ class Stacker(object):
 
     def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
         stacking_position = self.computeStackingPosition(rectangle, grid)
+        rectangle.rotate()
+        stacking_position_rotated = self.computeStackingPosition(rectangle, grid)
+        
+        if np.linalg.norm(stacking_position_rotated) < np.linalg.norm(stacking_position):
+            stacking_position = stacking_position_rotated
+            self.db_manager.updateRectangle(rectangle)
+        else:
+            # rotate rectangle back to original
+            rectangle.rotate()
+
         rectangle.setPosition(stacking_position)
         
         if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
