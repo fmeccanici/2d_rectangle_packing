@@ -2,14 +2,25 @@
 import pandas as pd
 import numpy as np
 from rectangle import Rectangle
-
 import os
+
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+
+class EmptyExcelError(Error):
+    """Raised when excel is empty"""
+    pass
+
 class ExcelParser():
-    def __init__(self, path, file_name):
+    def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx"):
         self.path = path
         self.file_name = file_name
         self.names = []
 
+    def setPath(self, path):
+        self.path = path
+    
     def setFileName(self, file_name):
         self.file_name = file_name
 
@@ -22,10 +33,10 @@ class ExcelParser():
         else:
             self.df = pd.read_excel(self.path + self.file_name, sheet_name='paklijst_zonder_opmaak')        
             self.df[['Ordernummer']] = self.df[['Ordernummer']].astype(str)
-            self.parseDuplicateOrderNumbers()
+            if self.areThereDuplicates():
+                self.parseDuplicateOrderNumbers()
 
     def parseDuplicateOrderNumbers(self):
-
         duplicates = self.df.duplicated(keep=False, subset=['Ordernummer'])
         duplicates = self.df[duplicates].sort_values(by=['Ordernummer'])
 
@@ -52,16 +63,24 @@ class ExcelParser():
                     if i >= len(duplicates_ordernumbers)-1: break
 
             except IndexError:
-                duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
-                duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
-                break
-            
+                try:
+                    duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
+                    duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
+                    break
+                except IndexError:
+                    raise EmptyExcelError
+
         duplicates.drop(['Ordernummer'], axis=1)
         duplicates['Ordernummer'] = duplicates_ordernumbers
 
         self.df = self.df.drop_duplicates(keep=False, subset=["Ordernummer"])
         self.df = pd.concat([self.df, duplicates])
         print(list(self.df['Ordernummer']))
+
+    def areThereDuplicates(self):
+        duplicates = self.df.duplicated(keep=False, subset=['Ordernummer'])
+        duplicates = self.df[duplicates].sort_values(by=['Ordernummer'])
+        return len(duplicates) > 0
 
     def getOrders(self):
         self.reloadExcel()
@@ -88,15 +107,7 @@ class ExcelParser():
 
             if name is not np.nan:
                 name = str((name))
-                
-            # for i, stored_name in enumerate(self.names):
-            #     if stored_name == name:
-            #         print("Got double order")
-            #         self.names[i] = name + "-1"
-            #         self.names.append(name + "-2")
-            # else:
-            #     self.names.append(name)
-                
+
             width = float(width)
             height = float(height)
             brand = row["Merk"]
@@ -122,6 +133,9 @@ class ExcelParser():
                 else:            
                     rectangle = Rectangle(width=width, height=height, name=name, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name)
                     unstacked_rectangles.append(rectangle)
+        
+        if len(unstacked_rectangles) == 0:
+            raise EmptyExcelError
 
         return unstacked_rectangles
 

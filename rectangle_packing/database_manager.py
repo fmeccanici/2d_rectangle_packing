@@ -23,6 +23,10 @@ class DatabaseNotEmptyError(Error):
     """Raised when database is not empty when we expect it to be"""
     pass
 
+class NewOrdersNotEmptyError(Error):
+    """Raised when database is not empty when we expect it to be"""
+    pass
+
 class DatabaseManager(object):
     def __init__(self, host='localhost', port=27017, database="stacked_rectangles_database", username="NA", password="NA"):
         self.host = host
@@ -40,15 +44,7 @@ class DatabaseManager(object):
 
         self.backup_path = '/home/' + username + '/Documents/2d_rectangle_packing/rectangle_packing/database_backups/'
     
-    def getRectanglesCollection(self):
-        return self.rectangles_collection
 
-    def getGridCollection(self):
-        return self.grids_collection
-
-    def isDatabaseEmpty(self):
-        return (self.rectangles_collection.count() == 0) and (self.grids_collection.count() == 0)
-        
     def clearDatabase(self):
         try:
             self.client.drop_database("stacked_rectangles_database")            
@@ -57,16 +53,22 @@ class DatabaseManager(object):
 
         except DatabaseNotEmptyError:
             print("Database was not successfully emptied!")
-
+    
+    def isDatabaseEmpty(self):
+        return (self.rectangles_collection.count() == 0) and (self.grids_collection.count() == 0)
+    
     def clearNewOrders(self):
         try:
             query = {"isStacked" : {"$eq" : False}}
             self.rectangles_collection.delete_many(query)
-            return True
-        except Exception as e:
-            print(e)
-            return False
-        
+            if not self.isUnstackedRectanglesEmpty():
+                raise NewOrdersNotEmptyError
+        except NewOrdersNotEmptyError:
+            print("New order were not successfully deleted")
+    
+    def isUnstackedRectanglesEmpty(self):
+        return len(self.getUnstackedRectangles()) == 0
+
     def listUsedGridNames(self):
         names = []
         cursor = self.grids_collection.find({})
@@ -297,22 +299,11 @@ class DatabaseManager(object):
     def getRectangle(self, rectangle_number, for_cutting=False):
         query = {"name" : str(rectangle_number)}
 
-        # print(list(self.rectangles_collection.find_one(query)))
-        # cursor = self.rectangles_collection.find(query)
-        # print(list(cursor))
         document = self.rectangles_collection.find_one(query)
         if not for_cutting:
             rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
         else: 
             rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
-
-
-        # for document in cursor:
-        #     print(document)
-        #     if not for_cutting:
-        #         rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
-        #     else: 
-        #         rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
 
         return rectangle        
 

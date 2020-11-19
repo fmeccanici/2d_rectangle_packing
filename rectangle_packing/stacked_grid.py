@@ -150,7 +150,6 @@ class StackedGrid(object):
                 if self.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
 
-
         return stacking_position
 
     def isValidPosition(self, rectangle):
@@ -160,8 +159,7 @@ class StackedGrid(object):
         for stacked_rectangle in self.stacked_rectangles:
             if rectangle.intersection(stacked_rectangle):
                 return False
-
-        
+                
         return True
     
     def isOutOfGrid(self, rectangle):

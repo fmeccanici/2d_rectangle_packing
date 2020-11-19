@@ -17,6 +17,9 @@ class StackerTest(unittest.TestCase):
 
     def testClearDatabase(self):
         self.db_manager.clearDatabase()
+
+    def testClearNewOrders(self):
+        self.db_manager.clearNewOrders()
     
 if __name__ == '__main__':
     unittest.main()
