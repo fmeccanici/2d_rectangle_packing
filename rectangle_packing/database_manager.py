@@ -19,6 +19,10 @@ class EmptyDataBaseError(Error):
     """Raised when database is empty"""
     pass
 
+class DatabaseNotEmptyError(Error):
+    """Raised when database is not empty when we expect it to be"""
+    pass
+
 class DatabaseManager(object):
     def __init__(self, host='localhost', port=27017, database="stacked_rectangles_database", username="NA", password="NA"):
         self.host = host
@@ -35,15 +39,34 @@ class DatabaseManager(object):
         username = getpass.getuser()
 
         self.backup_path = '/home/' + username + '/Documents/2d_rectangle_packing/rectangle_packing/database_backups/'
-
-    def clearDatabase(self):
-        print("check")
-        self.client.drop_database("stacked_rectangles_database")
     
-    def clearNewOrders(self):
-        query = {"isStacked" : {"$eq" : False}}
-        self.rectangles_collection.delete_many(query)
+    def getRectanglesCollection(self):
+        return self.rectangles_collection
 
+    def getGridCollection(self):
+        return self.grids_collection
+
+    def isDatabaseEmpty(self):
+        return (self.rectangles_collection.count() == 0) and (self.grids_collection.count() == 0)
+        
+    def clearDatabase(self):
+        try:
+            self.client.drop_database("stacked_rectangles_database")            
+            if not self.isDatabaseEmpty():
+                raise DatabaseNotEmptyError
+
+        except DatabaseNotEmptyError:
+            print("Database was not successfully emptied!")
+
+    def clearNewOrders(self):
+        try:
+            query = {"isStacked" : {"$eq" : False}}
+            self.rectangles_collection.delete_many(query)
+            return True
+        except Exception as e:
+            print(e)
+            return False
+        
     def listUsedGridNames(self):
         names = []
         cursor = self.grids_collection.find({})

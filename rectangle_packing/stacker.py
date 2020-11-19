@@ -33,9 +33,7 @@ class Stacker(object):
         file_name = "paklijst.xlsx"
 
         self.setExcelParser(path, file_name)
-
         self.unstacked_rectangles = []
-        
         self.stop_stacking = False
 
     def setExcelParser(self, path, file_name):
@@ -68,7 +66,6 @@ class Stacker(object):
                     self.rectangle = rectangle
 
                     if not self.stackingStopped():
-
                         if self.rectangleAndGridPropertiesMatch():
                             try:
                                 self.stackOriginalRectangle()
@@ -81,8 +78,6 @@ class Stacker(object):
                                 except InvalidGridPositionError:
                                     self.createNewGridAndStackRectangle()
                                     continue
-
-
                         else: 
                             print("Colors don't match")
                     else:
