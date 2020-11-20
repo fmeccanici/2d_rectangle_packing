@@ -12,6 +12,18 @@ class EmptyExcelError(Error):
     """Raised when excel is empty"""
     pass
 
+class InvalidWidthError(Error):
+    """Raised when width field has an invalid value"""
+    pass
+
+class InvalidHeightError(Error):
+    """Raised when height field has an invalid value"""
+    pass
+
+class InvalidNameError(Error):
+    """Raised when name field has an invalid value"""
+    pass
+
 class ExcelParser():
     def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx"):
         self.path = path
@@ -82,6 +94,43 @@ class ExcelParser():
         duplicates = self.df[duplicates].sort_values(by=['Ordernummer'])
         return len(duplicates) > 0
 
+    def getWidth(self, row):
+        try:
+            width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
+        except IndexError:
+            width = row['Breedte'].split(',')[0]
+        except AttributeError:
+            width = row['Breedte']
+
+        width = float(width)
+        if width == np.nan or width <= 0:
+            raise InvalidWidthError
+
+        return width
+    
+    def getHeight(self, row):
+        try:
+            height = row['Lengte'].split(',')[0] + '.' + row['Lengte'].split(',')[1]
+        except IndexError:
+            height = row['Lengte'].split(',')[0]
+        except AttributeError:
+            height = row['Lengte']
+
+        height = float(height)
+        if height == np.nan or height <= 0:
+            raise InvalidHeightError
+
+        return height
+
+    def getName(self, row):
+        name = str(row['Ordernummer'])
+        if name == np.nan:
+            raise InvalidNameError
+
+        name = str(name)
+
+        return name
+
     def getOrders(self):
         self.reloadExcel()
         orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam']]
@@ -90,50 +139,46 @@ class ExcelParser():
         unstacked_rectangles = []
         for index, row in orders.iterrows():
             try:
-                width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
-            except IndexError:
-                width = row['Breedte'].split(',')[0]
-            except AttributeError:
-                width = row['Breedte']
+                width = self.getWidth(row)
+                height = self.getHeight(row)
+                name = self.getName(row)
 
-            try:
-                height = row['Lengte'].split(',')[0] + '.' + row['Lengte'].split(',')[1]
-            except IndexError:
-                height = row['Lengte'].split(',')[0]
-            except AttributeError:
-                height = row['Lengte']
+                brand = row["Merk"]
+                if brand is not None:
+                    brand = str(brand)
 
-            name = str(row['Ordernummer'])
+                coupage_batch = row["Coupage/Batch"]
+                client_name = row["Klantnaam"]
 
-            if name is not np.nan:
-                name = str((name))
+                if coupage_batch == "Batch":
+                    color = str(row['Kleur'])
+                    brand = brand
+                    print("brand = " + (brand))
+                    print("color = " + (color))
+                    quantity = int(row['Aantal'])
+                    colors.append(color)
 
-            width = float(width)
-            height = float(height)
-            brand = row["Merk"]
-            if brand is not None:
-                brand = str(brand)
-
-            coupage_batch = row["Coupage/Batch"]
-            client_name = row["Klantnaam"]
-
-            if coupage_batch == "Batch":
-                color = str(row['Kleur'])
-                brand = brand
-                print("brand = " + (brand))
-                print("color = " + (color))
-                quantity = int(row['Aantal'])
-                colors.append(color)
-
-                grid_width = int(row['Rolbreedte'])
-                if quantity > 1:
-                    for i in range(1, quantity+1):
-                        rectangle = Rectangle(width=width, height=height, name=name+'-'+str(i), brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name)
+                    grid_width = int(row['Rolbreedte'])
+                    if quantity > 1:
+                        for i in range(1, quantity+1):
+                            rectangle = Rectangle(width=width, height=height, name=name+'-'+str(i), brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name)
+                            unstacked_rectangles.append(rectangle)
+                    else:            
+                        rectangle = Rectangle(width=width, height=height, name=name, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name)
                         unstacked_rectangles.append(rectangle)
-                else:            
-                    rectangle = Rectangle(width=width, height=height, name=name, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name)
-                    unstacked_rectangles.append(rectangle)
-        
+            
+            except InvalidHeightError:
+                print("Invalid height value")
+                continue
+
+            except InvalidWidthError:
+                print("Invalid width value")
+                continue
+            
+            except InvalidNameError:
+                print("Invalid name value")
+                continue
+
         if len(unstacked_rectangles) == 0:
             raise EmptyExcelError
 
