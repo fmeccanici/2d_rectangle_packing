@@ -1,4 +1,3 @@
-
 from rectangle import Rectangle
 from stacked_grid import StackedGrid
 from database_manager import DatabaseManager
@@ -79,12 +78,6 @@ class Stacker(object):
                                     continue
 
                                 except InvalidGridPositionError:
-                                    if rectangle.getName() == "120344992-1-1":
-                                        print("check 3")
-
-                                        print("WIDTH = " + str(rectangle.getWidth()))
-                                        print("HEIGHT = " + str(rectangle.getHeight()))
-
                                     self.createNewGridAndStackRectangle()
                                     continue
                         else: 

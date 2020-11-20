@@ -45,9 +45,6 @@ class StackedGrid(object):
 
         # ddmmYY
         datum = today.strftime("%Y%m%d")
-        
-        # self.dxf_path = "./dxf/" + self.getBrand() + "/" + self.getColor() + "/" + str(self.getWidth()) + "cm"
-        # self.dxf_path = os.getcwd() + "/" + datum + "/"
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
 
         self.dxf_path = desktop + "/grids/" + datum + "/"

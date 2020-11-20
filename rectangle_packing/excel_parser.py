@@ -153,8 +153,6 @@ class ExcelParser():
                 if coupage_batch == "Batch":
                     color = str(row['Kleur'])
                     brand = brand
-                    print("brand = " + (brand))
-                    print("color = " + (color))
                     quantity = int(row['Aantal'])
                     colors.append(color)
 
@@ -166,7 +164,7 @@ class ExcelParser():
                     else:            
                         rectangle = Rectangle(width=width, height=height, name=name, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name)
                         unstacked_rectangles.append(rectangle)
-            
+
             except InvalidHeightError:
                 print("Invalid height value")
                 continue
