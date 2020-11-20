@@ -71,14 +71,31 @@ class Stacker(object):
                     if not self.stackingStopped():
                         if self.rectangleAndGridPropertiesMatch():
                             try:
+                                if rectangle.getName() == "120344992-1-1":
+                                    print("check 1")
+                                    print("WIDTH = " + str(rectangle.getWidth()))
+                                    print("HEIGHT = " + str(rectangle.getHeight()))
+        
                                 self.stackOriginalRectangle()
                                 
                             except InvalidGridPositionError:
-                                try:
+                                try:        
+                                    if rectangle.getName() == "120344992-1-1":
+                                        print("check 2")
+
+                                        print("WIDTH = " + str(rectangle.getWidth()))
+                                        print("HEIGHT = " + str(rectangle.getHeight()))
+
                                     self.stackRotatedRectangle()
                                     continue
 
                                 except InvalidGridPositionError:
+                                    if rectangle.getName() == "120344992-1-1":
+                                        print("check 3")
+
+                                        print("WIDTH = " + str(rectangle.getWidth()))
+                                        print("HEIGHT = " + str(rectangle.getHeight()))
+
                                     self.createNewGridAndStackRectangle()
                                     continue
                         else: 
@@ -176,6 +193,10 @@ class Stacker(object):
             self.is_optimized_x = False
             self.is_optimized_y = False
             self.optimized_rectangle = copy.deepcopy(exact_rectangle)
+            if exact_rectangle.getName() == "120344992-1-1":
+                print("WIDTH = " + str(exact_rectangle.getWidth()))
+                print("HEIGHT = " + str(exact_rectangle.getHeight()))
+            
             
             while not self.is_optimized_x:
                 self.moveRectangleVertically(step_size)
@@ -245,13 +266,19 @@ class Stacker(object):
         
         if np.linalg.norm(stacking_position_rotated) < np.linalg.norm(stacking_position):
             stacking_position = stacking_position_rotated
-            self.db_manager.updateRectangle(rectangle)
+
+            # get exact width height to update database correctly
+            # rotate this rectangle
+            rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
+            rectangle_exact.rotate()
+            self.db_manager.updateRectangle(rectangle_exact)
+
         else:
             # rotate rectangle back to original
             rectangle.rotate()
 
         rectangle.setPosition(stacking_position)
-        
+
         if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
             rectangle.setStacked()
             rectangle.setGridNumber(grid.getName())
@@ -275,6 +302,10 @@ class Stacker(object):
             # set rectangle width height back to the exact ones
             rectangle.setWidth(width_exact)
             rectangle.setHeight(height_exact)
+
+            if rectangle.getName() == "120344992-1-1":
+                print("WIDTH = " + str(rectangle.getWidth()))
+                print("HEIGHT = " + str(rectangle.getHeight()))
             
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)

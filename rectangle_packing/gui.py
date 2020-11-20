@@ -616,7 +616,7 @@ class RectanglePackingGui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
-        self.excel_file_line_edit = QLineEdit("paklijst1totaal.xlsx")
+        self.excel_file_line_edit = QLineEdit("paklijst_bug_2_aantal_ambiant_only.xlsx")
         
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")

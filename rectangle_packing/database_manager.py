@@ -320,6 +320,10 @@ class DatabaseManager(object):
 
         rectangles = []
         for rectangle in rectangles_dict:
+            if rectangle["name"] == "120344992-1-1":
+                print("WIDTH = " + str(rectangle["exact_width"]))
+                print("Height = " + str(rectangle["exact_height"]))
+            
             if for_cutting == True:
                 rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name']))
             else:
@@ -384,6 +388,7 @@ class DatabaseManager(object):
     def updateRectangle(self, rectangle):
         print("Updating rectangle in database")
         query = {"name" : rectangle.getName()}
+        
         width = rectangle.getWidth()
         height = rectangle.getHeight()
         w = int(np.ceil(width))
