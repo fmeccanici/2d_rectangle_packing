@@ -1,7 +1,7 @@
-from rectangle import Rectangle
-from stacked_grid import StackedGrid
-from database_manager import DatabaseManager
-from excel_parser import *
+from rectangle_packing.rectangle import Rectangle
+from rectangle_packing.stacked_grid import StackedGrid
+from rectangle_packing.database_manager import DatabaseManager
+from rectangle_packing.excel_parser import *
 
 import random
 import time

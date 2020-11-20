@@ -1,5 +1,5 @@
 # Stacker
-This is a Python package uses to stack rectangles in a grid in 2D. 
+This is a Python package uses to stack rectangles in a grid in 2D, which is tested on Python 3.9.0.
 
 ## Setup on Windows
 
@@ -22,6 +22,12 @@ pip install -r requirements.txt
 
 ### Running the application 
 To run the application double click on the Stacker shortcut present inside the 2d_rectangle_packing folder, which starts the GUI. This shortcut can be moved to the Desktop for convenience. On the desktop a folder "paklijsten" should be created, where the paklijst is stored that is used to load the orders in the GUI.
+
+To start the GUI via the command line "cd" into the 2d_rectangle_packing folder and execute:
+
+```
+python main.py
+```
 
 ## Run tests
 To run the test navigate inside the 2d_rectangle_packing folder and execute the following command:
