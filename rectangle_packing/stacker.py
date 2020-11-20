@@ -71,21 +71,10 @@ class Stacker(object):
                     if not self.stackingStopped():
                         if self.rectangleAndGridPropertiesMatch():
                             try:
-                                if rectangle.getName() == "120344992-1-1":
-                                    print("check 1")
-                                    print("WIDTH = " + str(rectangle.getWidth()))
-                                    print("HEIGHT = " + str(rectangle.getHeight()))
-        
                                 self.stackOriginalRectangle()
                                 
                             except InvalidGridPositionError:
                                 try:        
-                                    if rectangle.getName() == "120344992-1-1":
-                                        print("check 2")
-
-                                        print("WIDTH = " + str(rectangle.getWidth()))
-                                        print("HEIGHT = " + str(rectangle.getHeight()))
-
                                     self.stackRotatedRectangle()
                                     continue
 
@@ -193,10 +182,6 @@ class Stacker(object):
             self.is_optimized_x = False
             self.is_optimized_y = False
             self.optimized_rectangle = copy.deepcopy(exact_rectangle)
-            if exact_rectangle.getName() == "120344992-1-1":
-                print("WIDTH = " + str(exact_rectangle.getWidth()))
-                print("HEIGHT = " + str(exact_rectangle.getHeight()))
-            
             
             while not self.is_optimized_x:
                 self.moveRectangleVertically(step_size)
@@ -303,10 +288,6 @@ class Stacker(object):
             rectangle.setWidth(width_exact)
             rectangle.setHeight(height_exact)
 
-            if rectangle.getName() == "120344992-1-1":
-                print("WIDTH = " + str(rectangle.getWidth()))
-                print("HEIGHT = " + str(rectangle.getHeight()))
-            
             grid.addRectangle(rectangle)
             self.db_manager.updateRectangle(rectangle)
             self.db_manager.updateGrid(grid)
