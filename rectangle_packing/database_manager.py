@@ -124,7 +124,6 @@ class DatabaseManager(object):
             
             if not grid.isCut():
                 print("Loaded grid " + str(document["name"]) + " from database")
-
                 grids.append(grid)
 
         return grids
@@ -141,7 +140,6 @@ class DatabaseManager(object):
             
             if not grid.isCut():
                 print("Loaded grid " + str(document["name"]) + " from database")
-
                 grids.append(grid)
 
         return grids
@@ -241,6 +239,7 @@ class DatabaseManager(object):
         is_stacked = rectangle.isStacked()
         grid_number = rectangle.getGridNumber()
         client_name = rectangle.getClientName()
+        coupage_batch = rectangle.getCoupageBatch()
 
         w = int(np.ceil(width))
         h = int(np.ceil(height))
@@ -251,8 +250,7 @@ class DatabaseManager(object):
         if h % 2 > 0:
             h += 1
         
-        print(width, height)
-        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity, 'client_name': client_name}
+        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity, 'client_name': client_name, "coupage_batch": coupage_batch}
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)
@@ -301,9 +299,9 @@ class DatabaseManager(object):
 
         document = self.rectangles_collection.find_one(query)
         if not for_cutting:
-            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
+            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
         else: 
-            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'])
+            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
 
         return rectangle        
 
@@ -320,14 +318,10 @@ class DatabaseManager(object):
 
         rectangles = []
         for rectangle in rectangles_dict:
-            if rectangle["name"] == "120344992-1-1":
-                print("WIDTH = " + str(rectangle["exact_width"]))
-                print("Height = " + str(rectangle["exact_height"]))
-            
             if for_cutting == True:
-                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name']))
+                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
             else:
-                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name']))
+                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
             print("Rectangle " + str(rectangle['name']) + " loaded from database")
         return rectangles
     
@@ -359,20 +353,23 @@ class DatabaseManager(object):
 
         print("loading backup from " + str(datetime))
 
-    def getUnstackedRectangles(self, brand='kokos', color='all'):
+    def getUnstackedRectangles(self, brand='kokos', color='all', for_cutting=False, coupage_batch="batch"):
         if color != 'all':
             rectangles_dict = self.rectangles_collection.find({
-                "isStacked" : {"$eq" : False}, "color": color
+                "isStacked" : {"$eq" : False}, "color": color, "coupage_batch": coupage_batch
             })
         else:
             rectangles_dict = self.rectangles_collection.find({
-                "isStacked" : {"$eq" : False}
+                "isStacked" : {"$eq" : False}, "coupage_batch": coupage_batch
             })
 
         rectangles = []
         for rectangle in rectangles_dict:
-            rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name']))
-    
+            if not for_cutting:
+                rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
+            elif for_cutting:
+                rectangles.append(Rectangle(width=rectangle['exact_width'], height=rectangle['exact_height'], name=rectangle['name'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
+
         return rectangles
     
     def updateGrid(self, grid):

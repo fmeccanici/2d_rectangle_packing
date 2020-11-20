@@ -50,7 +50,15 @@ class Stacker(object):
     def getGrid(self, grid):
         return self.grid
 
+    def exportCoupages(self):
+        coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
+        for coupage in coupages:
+            coupage.exportDxf(for_prime_center=True)
+            coupage.setStacked()
+            self.db_manager.updateRectangle(coupage)
+
     def start(self):        
+        self.exportCoupages()
         self.startStacking()
         # self.loadOrdersAndAddToDatabase()
 

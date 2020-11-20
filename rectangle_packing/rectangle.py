@@ -4,9 +4,11 @@ import os
 
 from pathlib import Path
 from dxfwrite import DXFEngine as dxf
+import datetime
+import random
 
 class Rectangle(object):
-    def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name=''):
+    def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
         self.position = np.asarray(position)
         self.width = width
         self.height = height
@@ -16,9 +18,24 @@ class Rectangle(object):
         self.grid_width = grid_width
         self.quantity = quantity 
         self.client_name = client_name
+        self.coupage_batch = coupage_batch
 
         self.grid_number = grid_number
         self.is_stacked = is_stacked
+
+        today = datetime.date.today()
+        hour = datetime.datetime.now().hour
+
+        datum = today.strftime("%Y%m%d")
+        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+
+        self.dxf_path = desktop + "/grids/" + datum + "/"
+        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + self.getClientName() + "_" + self.getCoupageBatch() + ".dxf"
+
+        if not os.path.exists(self.dxf_path):
+            os.makedirs(self.dxf_path)
+
+        self.dxf_drawing = dxf.drawing(self.dxf_file_path)
 
     def setClientName(self, client_name):
         self.client_name
@@ -104,6 +121,12 @@ class Rectangle(object):
     def getArea(self):
         return self.width * self.height
 
+    def getCoupageBatch(self):
+        return self.coupage_batch
+    
+    def setCoupageBatch(self, coupage_batch):
+        self.coupage_batch = coupage_batch
+        
     def rotate(self):
         width = self.getHeight()
         height = self.getWidth()
@@ -135,7 +158,63 @@ class Rectangle(object):
         right_vertical_line = dxf.line((top_right[0], top_right[1]), (bottom_right[0], bottom_right[1]))
 
         return upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line
-    
+
+    def toMillimeters(self, variable):
+        return variable * 10
+
+    # coupage
+    def exportDxf(self, for_prime_center=True):
+        print("DEBUG")
+        print(self.getGridWidth())
+        print(self.getWidth())
+        print(self.getHeight())
+        print("DEBUG")
+        width = self.getWidth()
+        height = self.getHeight()
+
+        # rotate when more optimal
+        if (height > width) and height <= self.getGridWidth():
+            width = self.getHeight()
+            height = self.getWidth()
+
+        print("DEBUG2")
+        print(width)
+        print(height)
+        print("DEBUG2")
+
+        x = width/2
+        y = height/2
+
+        if for_prime_center == True:
+            x = self.toMillimeters(x)
+            y = self.toMillimeters(y)
+
+            width = self.toMillimeters(width)
+            height = self.toMillimeters(height)
+
+            bgcolor = random.randint(1,255)
+            
+            self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
+                                bgcolor=bgcolor))
+            text = dxf.text(str(self.getClientName()), (y, x + width), 100.0, rotation=0)
+            
+            text['layer'] = 'TEXT'
+            text['color'] = '7'
+            self.dxf_drawing.add(text)
+        else:
+            bgcolor = random.randint(1,255)
+            
+            self.dxf_drawing.add(dxf.rectangle((x, y), width, height,
+                                bgcolor=bgcolor))
+
+            text = dxf.text(str(self.getClientName()), (x, y), 100.0, rotation=0)
+
+            text['layer'] = 'TEXT'
+            text['color'] = '7'
+            self.dxf_drawing.add(text)
+        
+        self.dxf_drawing.save()
+
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
         

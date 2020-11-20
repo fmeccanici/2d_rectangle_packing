@@ -297,7 +297,7 @@ class StackedGrid(object):
             else:
                 bgcolor = random.randint(1,255)
                 
-                self.dxf_drawing.add(dxf.rectangle((x,y), height, width,
+                self.dxf_drawing.add(dxf.rectangle((x,y), width, height,
                                     bgcolor=bgcolor))
 
                 text = dxf.text(str(rectangle.getClientName()), (x, y), 100.0, rotation=0)
