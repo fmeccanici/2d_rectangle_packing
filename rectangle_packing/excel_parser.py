@@ -1,7 +1,7 @@
 
 import pandas as pd
 import numpy as np
-from rectangle_packing.rectangle import Rectangle
+from rectangle import Rectangle
 import os
 
 class Error(Exception):

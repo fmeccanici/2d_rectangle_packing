@@ -30,7 +30,7 @@ class Rectangle(object):
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
 
         self.dxf_path = desktop + "/grids/" + datum + "/"
-        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + self.getClientName() + "_" + self.getCoupageBatch() + ".dxf"
+        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + self.getClientName() + "_" + self.getName() + "_" + self.getCoupageBatch() + ".dxf"
 
         if not os.path.exists(self.dxf_path):
             os.makedirs(self.dxf_path)
@@ -164,11 +164,6 @@ class Rectangle(object):
 
     # coupage
     def exportDxf(self, for_prime_center=True):
-        print("DEBUG")
-        print(self.getGridWidth())
-        print(self.getWidth())
-        print(self.getHeight())
-        print("DEBUG")
         width = self.getWidth()
         height = self.getHeight()
 
@@ -176,11 +171,6 @@ class Rectangle(object):
         if (height > width) and height <= self.getGridWidth():
             width = self.getHeight()
             height = self.getWidth()
-
-        print("DEBUG2")
-        print(width)
-        print(height)
-        print("DEBUG2")
 
         x = width/2
         y = height/2

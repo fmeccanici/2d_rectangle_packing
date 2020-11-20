@@ -1,5 +1,5 @@
 # my own classes
-from rectangle_packing.rectangle import Rectangle
+from rectangle import Rectangle
 
 # external dependencies
 import numpy as np
