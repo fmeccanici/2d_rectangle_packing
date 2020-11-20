@@ -191,8 +191,6 @@ class StackedGrid(object):
         self.dxf_drawing.save()
 
     """
-    tjeerd@homedesignshops.nl
-
     1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
     2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
     than the current start x value, this is chosen as starting value x_start.  
