@@ -1,8 +1,8 @@
 import unittest
 import sys
 
-from stacked_grid import StackedGrid
-from rectangle import Rectangle
+from rectangle_packing.stacked_grid import StackedGrid
+from rectangle_packing.rectangle import Rectangle
 
 class StackedGridTest(unittest.TestCase):
 
