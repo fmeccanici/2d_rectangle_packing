@@ -497,7 +497,7 @@ class RectanglePackingGui(QWidget):
         if self.export_dxf_radio_button.isChecked():
             # grid.toPrimeCenterFormatDxf()
             # grid.toDxf()
-            self.stacker.optimizeAndExportGrid(grid)
+            self.stacker.optimizeAndExportGrid()
 
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
