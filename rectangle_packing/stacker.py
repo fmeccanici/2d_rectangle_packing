@@ -90,12 +90,19 @@ class Stacker(object):
                                     continue
                         else: 
                             print("Colors don't match")
+            
+            # break out of nested loop when user presses stop button
                     else:
                         print("Stacking stopped")
                         break
-                    
+                else:
+                    continue
+
                 self.optimizeAndExportGrid(grid)
-            
+                break
+            else:
+                continue
+            break
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
     
