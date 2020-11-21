@@ -26,7 +26,7 @@ class InvalidGridPositionError(Error):
     pass
 
 class StackedGrid(object):
-    def __init__(self, width, height, name, brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width=-1, height=-1, name="-1", brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.width = width
         self.height = height
         self.name = name

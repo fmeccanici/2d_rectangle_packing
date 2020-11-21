@@ -8,7 +8,7 @@ import datetime
 import random
 
 class Rectangle(object):
-    def __init__(self, width, height, name, brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
+    def __init__(self, width=-1, height=-1, name="-1", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
         self.position = np.asarray(position)
         self.width = width
         self.height = height

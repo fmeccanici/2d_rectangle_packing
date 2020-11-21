@@ -17,6 +17,10 @@ class InvalidGridPositionError(Error):
     """Raised when rectangle has invalid grid position"""
     pass
 
+class RectangleDoesNotFitError(Error):
+    """Raised when rectangle does not fit in grid"""
+    pass
+    
 class GridFullError(Error):
     """Raised when grid is full"""
     pass
@@ -31,6 +35,22 @@ class Stacker(object):
 
         self.unstacked_rectangles = []
         self.stop_stacking = False
+
+        # current rectangle to stack in current grid
+        self.rectangle = Rectangle()
+        self.grid = StackedGrid()
+
+        # stacking position of current rectangle
+        self.stacking_position = []
+
+        # stacking position of current rectangle rotated
+        self.stacking_position_rotated = []
+        
+    def setGrid(self, grid):
+        self.grid = grid
+    
+    def setRectangle(self, rectangle):
+        self.rectangle = rectangle
 
     def setExcelParser(self, path, file_name):
         self.excel_parser = ExcelParser(path, file_name)
@@ -69,23 +89,23 @@ class Stacker(object):
             self.grids = self.db_manager.getGridsNotCut()
 
             for grid in self.grids:
-                self.grid = grid
+                self.setGrid(grid)
                 self.getUnstackedRectanglesFromDatabaseMatchingGridColorAndSortOnArea()
 
                 for rectangle in self.unstacked_rectangles:
-                    self.rectangle = rectangle
-
+                    self.setRectangle(rectangle)
+                    
                     if not self.stackingStopped():
                         if self.rectangleAndGridPropertiesMatch():
                             try:
                                 self.stackOriginalRectangle()
                                 
-                            except InvalidGridPositionError:
+                            except RectangleDoesNotFitError:
                                 try:        
                                     self.stackRotatedRectangle()
                                     continue
 
-                                except InvalidGridPositionError:
+                                except RectangleDoesNotFitError:
                                     self.createNewGridAndStackRectangle()
                                     continue
                         else: 
@@ -139,7 +159,7 @@ class Stacker(object):
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
     def stackOriginalRectangle(self):
-        self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
+        self.computeStackingPositionAndUpdateDatabase(self.grid)
 
     def isGridAvailable(self, rectangle):
         grid_width = rectangle.getGridWidth()
@@ -155,22 +175,23 @@ class Stacker(object):
         print("Cannot stack rectangle")
         print("Try rotated rectangle")
         self.rectangle.rotate()
-        self.computeStackingPositionAndUpdateDatabase(self.rectangle, self.grid)
+        self.computeStackingPositionAndUpdateDatabase(self.grid)
 
     def createNewGridAndStackRectangle(self):
 
         new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), brand=self.rectangle.getBrand(),
                     color=self.rectangle.getColor())
         
+
         # for some reason new_grid starts out filled in an iteration
         self.db_manager.emptyGrid(new_grid)
 
         try:
-            self.computeStackingPositionAndUpdateDatabase(self.rectangle, new_grid)
+            self.computeStackingPositionAndUpdateDatabase(new_grid)
         
-        except InvalidGridPositionError:
+        except RectangleDoesNotFitError:
             self.rectangle.rotate()
-            self.computeStackingPositionAndUpdateDatabase(self.rectangle, new_grid)
+            self.computeStackingPositionAndUpdateDatabase(new_grid)
     
     def optimizeAndExportGrid(self, grid):
         print("Optimizing grid and exporting to DXF...")
@@ -245,78 +266,80 @@ class Stacker(object):
             self.db_manager.addGrid(grid)
             print("Created and added initial grid to database")
 
-    def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
-        stacking_position = self.computeStackingPosition(rectangle, grid)
-        rectangle.rotate()
-        stacking_position_rotated = self.computeStackingPosition(rectangle, grid)
-        
-        if np.linalg.norm(stacking_position_rotated) < np.linalg.norm(stacking_position):
-            stacking_position = stacking_position_rotated
+    def computeStackingPositionAndUpdateDatabase(self, grid):
+        self.stacking_position = self.computeStackingPosition(grid)
+        self.rectangle.rotate()
+        self.stacking_position_rotated = self.computeStackingPosition(grid)
+    
+        if np.linalg.norm(self.stacking_position_rotated) < np.linalg.norm(self.stacking_position):
+            self.stacking_position = self.stacking_position_rotated
 
             # get exact width height to update database correctly
             # rotate this rectangle
-            rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
+            rectangle_exact = self.db_manager.getRectangle(self.rectangle.getName(), for_cutting=True)
             rectangle_exact.rotate()
             self.db_manager.updateRectangle(rectangle_exact)
 
         else:
             # rotate rectangle back to original
-            rectangle.rotate()
+            self.rectangle.rotate()
+        
+        if self.stacking_position[0] == grid.getWidth() and self.stacking_position[1] == grid.getHeight():
+            raise RectangleDoesNotFitError
 
-        rectangle.setPosition(stacking_position)
+        self.stackRectangle(grid)
 
-        if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
-            rectangle.setStacked()
-            rectangle.setGridNumber(grid.getName())
+    def stackRectangle(self, grid):
+        self.rectangle.setPosition(self.stacking_position)
 
-            # get exact rectangle width and height
-            rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
+        self.rectangle.setStacked()
+        self.rectangle.setGridNumber(grid.getName())
 
-            width_exact = rectangle_exact.getWidth()
-            height_exact = rectangle_exact.getHeight()
+        # get exact rectangle width and height
+        rectangle_exact = self.db_manager.getRectangle(self.rectangle.getName(), for_cutting=True)
+
+        width_exact = rectangle_exact.getWidth()
+        height_exact = rectangle_exact.getHeight()
+        
+        # check if rectangle was rotated in start function
+        w = int(np.ceil(width_exact))
+        if w % 2 > 0:
+            w += 1
+
+        if w == self.rectangle.getHeight():
+            t = height_exact
+            height_exact = width_exact
+            width_exact = t
             
-            # check if rectangle was rotated in start function
-            w = int(np.ceil(width_exact))
-            if w % 2 > 0:
-                w += 1
+        # set rectangle width height back to the exact ones
+        self.rectangle.setWidth(width_exact)
+        self.rectangle.setHeight(height_exact)
 
-            if w == rectangle.getHeight():
-                t = height_exact
-                height_exact = width_exact
-                width_exact = t
-                
-            # set rectangle width height back to the exact ones
-            rectangle.setWidth(width_exact)
-            rectangle.setHeight(height_exact)
+        grid.addRectangle(self.rectangle)
+        self.db_manager.updateRectangle(self.rectangle)
+        self.db_manager.updateGrid(grid)
 
-            grid.addRectangle(rectangle)
-            self.db_manager.updateRectangle(rectangle)
-            self.db_manager.updateGrid(grid)
-            
-        else:
-            raise InvalidGridPositionError
-
-    def computeStackingPosition(self, rectangle, grid):
+    def computeStackingPosition(self, grid):
         stacking_position = [grid.getWidth(), grid.getHeight()]
 
-        if grid.getWidth() > rectangle.getWidth():
-            for x in reversed(range(int(rectangle.width/2), int(grid.getWidth() - rectangle.width/2) + 1)):
-                for y in reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2) + 1)):
+        if grid.getWidth() > self.rectangle.getWidth():
+            for x in reversed(range(int(self.rectangle.width/2), int(grid.getWidth() - self.rectangle.width/2) + 1)):
+                for y in reversed(range(int(self.rectangle.height/2), int(grid.getHeight() - self.rectangle.height/2) + 1)):
                     position = np.array([x,y])
-                    rectangle.setPosition(position)
+                    self.rectangle.setPosition(position)
 
-                    if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
+                    if grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                         stacking_position = position
         
-        elif grid.getWidth() == rectangle.getWidth():
-            x = rectangle.getWidth() / 2
+        elif grid.getWidth() == self.rectangle.getWidth():
+            x = self.rectangle.getWidth() / 2
             
-            for y in reversed(range(int(rectangle.height/2), int(grid.getHeight() - rectangle.height/2))):
+            for y in reversed(range(int(self.rectangle.height/2), int(grid.getHeight() - self.rectangle.height/2))):
                 position = np.array([x,y])
-                rectangle.setPosition(position)
-                if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
+                self.rectangle.setPosition(position)
+                if grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
-
+        
         return stacking_position
         
 
