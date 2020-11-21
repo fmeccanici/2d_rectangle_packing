@@ -111,44 +111,6 @@ class StackedGrid(object):
     def setUncut(self):
         self.is_cut = False
 
-    def checkAndSetFull(self):
-        print("Checking if grid " + str(self.getName()) + " is full")
-
-        if self.minimumRectangleFits() or self.minimumRectangleRotatedFits():
-            self.is_full = False
-            print("Grid " + str(self.getName()) + " is not full")
-            return False
-        else: 
-            self.is_full = True
-            print("Grid " + str(self.getName()) + " is full")
-            return True
-    
-    def minimumRectangleFits(self):
-        min_rectangle = Rectangle(self.min_rectangle_width, self.min_rectangle_height, -1)
-        stacking_position = self.computeStackingPosition(min_rectangle)
-        min_rectangle.setPosition(stacking_position)
-
-        return self.isValidPosition(min_rectangle)
-
-    def minimumRectangleRotatedFits(self):
-        min_rectangle_rotated = Rectangle(self.min_rectangle_height, self.min_rectangle_width, -1)
-        stacking_position = self.computeStackingPosition(min_rectangle_rotated)
-        min_rectangle_rotated.setPosition(stacking_position)
-
-        return self.isValidPosition(min_rectangle_rotated)
-
-    def computeStackingPosition(self, rectangle):
-        stacking_position = [self.getWidth(), self.getHeight()]
-
-        for x in reversed(range(int(rectangle.width/2), int(self.getWidth() - rectangle.width/2))):
-            for y in reversed(range(int(rectangle.height/2), int(self.getHeight() - rectangle.height/2))):
-                position = np.array([x,y])
-                rectangle.setPosition(position)
-                if self.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
-                    stacking_position = position
-
-        return stacking_position
-
     def isValidPosition(self, rectangle):
         if self.isOutOfGrid(rectangle):
             return False

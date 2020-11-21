@@ -17,6 +17,10 @@ class InvalidGridPositionError(Error):
     """Raised when rectangle has invalid grid position"""
     pass
 
+class RectangleDoesNotFitError(Error):
+    """Raised when rectangle does not fit in grid"""
+    pass
+
 class GridFullError(Error):
     """Raised when grid is full"""
     pass
@@ -254,10 +258,9 @@ class Stacker(object):
 
     def computeStackingPositionAndUpdateDatabase(self, rectangle, grid):
         stacking_position = self.computeStackingPosition(rectangle, grid)
-        rectangle.rotate()
-        stacking_position_rotated = self.computeStackingPosition(rectangle, grid)
+        stacking_position_rotated = self.computeRotatedStackingPosition(rectangle, grid)
         
-        if np.linalg.norm(stacking_position_rotated) < np.linalg.norm(stacking_position):
+        if self.isRotatedStackingPositionMoreOptimal():
             stacking_position = stacking_position_rotated
 
             # get exact width height to update database correctly
@@ -272,36 +275,39 @@ class Stacker(object):
 
         rectangle.setPosition(stacking_position)
 
-        if stacking_position[0] != grid.getWidth() and stacking_position[1] != grid.getHeight():
-            rectangle.setStacked()
-            rectangle.setGridNumber(grid.getName())
+        rectangle.setStacked()
+        rectangle.setGridNumber(grid.getName())
 
-            # get exact rectangle width and height
-            rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
+        # get exact rectangle width and height
+        rectangle_exact = self.db_manager.getRectangle(rectangle.getName(), for_cutting=True)
 
-            width_exact = rectangle_exact.getWidth()
-            height_exact = rectangle_exact.getHeight()
+        width_exact = rectangle_exact.getWidth()
+        height_exact = rectangle_exact.getHeight()
+        
+        # check if rectangle was rotated in start function
+        w = int(np.ceil(width_exact))
+        if w % 2 > 0:
+            w += 1
+
+        if w == rectangle.getHeight():
+            t = height_exact
+            height_exact = width_exact
+            width_exact = t
             
-            # check if rectangle was rotated in start function
-            w = int(np.ceil(width_exact))
-            if w % 2 > 0:
-                w += 1
+        # set rectangle width height back to the exact ones
+        rectangle.setWidth(width_exact)
+        rectangle.setHeight(height_exact)
 
-            if w == rectangle.getHeight():
-                t = height_exact
-                height_exact = width_exact
-                width_exact = t
-                
-            # set rectangle width height back to the exact ones
-            rectangle.setWidth(width_exact)
-            rectangle.setHeight(height_exact)
+        grid.addRectangle(rectangle)
+        self.db_manager.updateRectangle(rectangle)
+        self.db_manager.updateGrid(grid)
 
-            grid.addRectangle(rectangle)
-            self.db_manager.updateRectangle(rectangle)
-            self.db_manager.updateGrid(grid)
-            
-        else:
-            raise InvalidGridPositionError
+    def isRotatedStackingPositionMoreOptimal(self):
+        return np.linalg.norm(stacking_position_rotated) < np.linalg.norm(stacking_position)
+
+    def computeRotatedStackingPosition(self, rectangle, grid):
+        rotated_rectangle = Rectangle.getRotated(rectangle.getWidth(), rectangle.getHeight(), rectangle.getPosition())
+        return self.computeStackingPosition(rectangle, grid)
 
     def computeStackingPosition(self, rectangle, grid):
         stacking_position = [grid.getWidth(), grid.getHeight()]
@@ -324,6 +330,10 @@ class Stacker(object):
                 rectangle.setPosition(position)
                 if grid.isValidPosition(rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
+
+        if stacking_position[0] == grid.getWidth() and stacking_position[1] == grid.getHeight():
+            raise RectangleDoesNotFitError
+
 
         return stacking_position
         

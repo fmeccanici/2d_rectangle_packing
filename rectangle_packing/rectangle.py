@@ -130,10 +130,22 @@ class Rectangle(object):
     def rotate(self):
         width = self.getHeight()
         height = self.getWidth()
+        x = self.getPosition[1]
+        y = self.getPosition[0]
 
         self.setWidth(width)
         self.setHeight(height)
-        
+        self.setPosition(x, y)
+
+    @staticmethod
+    def getRotated(self, width, height, position):
+        width = height
+        height = width
+        x = position[1]
+        y = position[0]
+
+        return Rectangle(widht, height, [x, y])
+
     def intersection(self, other):
         if self.getBottomRight()[0] <= other.getTopLeft()[0] or self.getTopLeft()[0] >= other.getBottomRight()[0]:
             return False
