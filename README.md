@@ -2,7 +2,11 @@
 This is a Python package uses to stack rectangles in a grid in 2D, which is tested on Python 3.9.0.
 
 ## Setup on Windows
-
+First this package should be cloned somewhere on your harddisk:
+```
+git clone https://github.com/fmeccanici/2d_rectangle_packing.git
+```
+Then proceed with the following steps.
 ### MongoDB
 This package uses MongoDB as database to store the rectangles and grids. To install this on Windows, download the .msi package from: https://www.mongodb.com/try/download/community?tck=docs_server. To be able to use MongoDB with the command line, in the package dropdown menu select .zip. Inside this .zip are the command line tools "mongod" and "mongo".
 

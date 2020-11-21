@@ -50,22 +50,6 @@ class StackedGridTest(unittest.TestCase):
 
         self.rectangle_5.setPosition([76, 40])
         self.assertFalse(self.grid_2.isValidPosition(self.rectangle_5))
-
-    def testComputeStackingPosition(self):
-        stacking_position = self.grid_1.computeStackingPosition(self.rectangle_1)
-        self.assertEqual(stacking_position[0], 50)
-        self.assertEqual(stacking_position[1], 50)
-
-        # edge case werkt niet?
-        """
-        stacking_position = self.grid.computeStackingPosition(self.rectangle_2)
-        self.assertEqual(stacking_position[0], 100)
-        self.assertEqual(stacking_position[1], 50)
-        """
-
-        stacking_position = self.grid_1.computeStackingPosition(self.rectangle_3)
-        self.assertEqual(stacking_position[0], 99)
-        self.assertEqual(stacking_position[1], 50)
     
 if __name__ == '__main__':
     unittest.main()

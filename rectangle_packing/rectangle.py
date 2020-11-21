@@ -30,7 +30,7 @@ class Rectangle(object):
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
 
         self.dxf_path = desktop + "/grids/" + datum + "/"
-        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + self.getClientName() + "_" + self.getName() + "_" + self.getCoupageBatch() + ".dxf"
+        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
 
         if not os.path.exists(self.dxf_path):
             os.makedirs(self.dxf_path)
@@ -130,21 +130,21 @@ class Rectangle(object):
     def rotate(self):
         width = self.getHeight()
         height = self.getWidth()
-        x = self.getPosition[1]
-        y = self.getPosition[0]
+        x = self.getPosition()[1]
+        y = self.getPosition()[0]
 
         self.setWidth(width)
         self.setHeight(height)
-        self.setPosition(x, y)
+        self.setPosition([x, y])
 
     @staticmethod
-    def getRotated(self, width, height, position):
+    def getRotated(width, height, position):
         width = height
         height = width
         x = position[1]
         y = position[0]
 
-        return Rectangle(widht, height, [x, y])
+        return Rectangle(width, height, [x, y])
 
     def intersection(self, other):
         if self.getBottomRight()[0] <= other.getTopLeft()[0] or self.getTopLeft()[0] >= other.getBottomRight()[0]:
