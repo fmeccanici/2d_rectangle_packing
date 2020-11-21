@@ -7,9 +7,7 @@ from rectangle_packing.rectangle import Rectangle
 class StackedGridTest(unittest.TestCase):
 
     def setUp(self):
-        self.rectangle_1 = Rectangle(100, 100, 1)
-        self.rectangle_2 = Rectangle(200, 100, 2)
-        self.rectangle_3 = Rectangle(198, 100, 3)
+
         self.rectangle_4 = Rectangle(50, 80, 4)
         self.rectangle_5 = Rectangle(50, 80, 5)
 
@@ -39,8 +37,6 @@ class StackedGridTest(unittest.TestCase):
 
     def testIsValidPosition(self):
         self.grid_2 = StackedGrid(100, 100, 2)
-        self.rectangle_4 = Rectangle(50, 80, 4)
-        self.rectangle_5 = Rectangle(50, 80, 5)
 
         self.rectangle_4.setPosition([25, 40])
         self.rectangle_5.setPosition([24, 40])
