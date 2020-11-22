@@ -30,7 +30,7 @@ class Rectangle(object):
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
 
         self.dxf_path = desktop + "/grids/" + datum + "/"
-        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + self.getClientName() + "_" + self.getName() + "_" + self.getCoupageBatch() + ".dxf"
+        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + self.getClientName() + "_" + str(self.getName()) + "_" + self.getCoupageBatch() + ".dxf"
 
         if not os.path.exists(self.dxf_path):
             os.makedirs(self.dxf_path)

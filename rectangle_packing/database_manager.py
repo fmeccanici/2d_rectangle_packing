@@ -1,6 +1,6 @@
 # import own classes
-from rectangle import Rectangle
-from stacked_grid import StackedGrid
+from rectangle_packing.rectangle import Rectangle
+from rectangle_packing.stacked_grid import StackedGrid
 
 # external dependencies
 import pymongo
