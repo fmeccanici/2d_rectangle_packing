@@ -202,6 +202,11 @@ class Rectangle(object):
             height = self.getWidth()
 
         if for_prime_center == True:
+            x = Helper.toMillimeters(x)
+            y = Helper.toMillimeters(y)
+            width = Helper.toMillimeters(width)
+            height = Helper.toMillimeters(width)
+
             text = dxf.text(str(self.getClientName()), (y, x + width), 100.0, rotation=0)
             
             text['layer'] = 'TEXT'
