@@ -46,9 +46,6 @@ class Stacker(object):
         # stacking position of current rectangle rotated
         self.stacking_position_rotated = []
         
-    def setGrid(self, grid):
-        self.grid = grid
-    
     def setRectangle(self, rectangle):
         self.rectangle = rectangle
 

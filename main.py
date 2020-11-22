@@ -186,7 +186,9 @@ class RectanglePackingGui(QWidget):
         
     def refreshGrid(self, grid_number):        
         grid = self.db_manager.getGrid(grid_number)
-
+        stacked_rectangles = grid.getStackedRectangles()
+        self.stacker.setGrid(grid)
+        
         self.uncut_color_line_edit.setText(grid.getColor())
         self.uncut_width_line_edit.setText(str(grid.getWidth()))
         self.uncut_brand_line_edit.setText(str(grid.getBrand()))
@@ -194,7 +196,7 @@ class RectanglePackingGui(QWidget):
         self.drawGrid(grid)
         self.removeAllOrderItems()
 
-        for rectangle in grid.getStackedRectangles():
+        for rectangle in stacked_rectangles:
             list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
             self.list_widget_orders.addItem(list_widget_item) 
         
@@ -224,7 +226,6 @@ class RectanglePackingGui(QWidget):
     def onLoadGridClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         self.refreshGrid(grid_number)
-
 
     def refreshGrids(self):
         grids = self.db_manager.getGridsNotCut()
