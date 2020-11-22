@@ -464,7 +464,7 @@ class RectanglePackingGui(QWidget):
         self.excel_parser.setFileName(file_name)
         self.stacker.setExcelParser(path, file_name)
         
-        unstacked_rectangles = self.excel_parser.getOrders()
+        unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
 
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
@@ -616,7 +616,7 @@ class RectanglePackingGui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
-        self.excel_file_line_edit = QLineEdit("paklijst_bug_2_aantal_ambiant_only.xlsx")
+        self.excel_file_line_edit = QLineEdit("paklijst_bug_2_aantal_ambiant.xlsx")
         
         self.create_grid_button = QPushButton("Create new grid")
         self.color_naturel_radio_button = QRadioButton("Naturel")

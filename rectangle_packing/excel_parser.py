@@ -24,6 +24,30 @@ class InvalidNameError(Error):
     """Raised when name field has an invalid value"""
     pass
 
+class InvalidBrandError(Error):
+    """Raised when brand field has an invalid value"""
+    pass
+
+class InvalidCoupageBatchError(Error):
+    """Raised when coupage/batch field has an invalid value"""
+    pass
+
+class InvalidClientNameError(Error):
+    """Raised when clientname field has an invalid value"""
+    pass
+
+class InvalidColorError(Error):
+    """Raised when color field has an invalid value"""
+    pass
+
+class InvalidQuantityError(Error):
+    """Raised when quantity field has an invalid value"""
+    pass
+
+class InvalidGridWidthError(Error):
+    """Raised when gridwidth field has an invalid value"""
+    pass
+
 class ExcelParser():
     def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx"):
         self.path = path
@@ -36,17 +60,33 @@ class ExcelParser():
     def setFileName(self, file_name):
         self.file_name = file_name
 
+    def getUnstackedRectangles(self):
+        self.reloadExcel()
+        orders = self.getOrders()
+        unstacked_rectangles = self.convertOrdersToRectangles(orders)
+        
+        return unstacked_rectangles
+    
     def reloadExcel(self, basic_excel=True):
+    
+        # basic means only columns and rows, no other opmaak things as "PAKLIJST" large at the top
         if not basic_excel: 
-            self.df = pd.read_excel(self.path + self.file_name, sheet_name=None)        
-            self.df = self.df['Paklijst']
-            self.df = self.df.drop([0, 1, 2, 3])
-            self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
+            self.loadNonBasicExcel()
         else:
-            self.df = pd.read_excel(self.path + self.file_name, sheet_name='paklijst_zonder_opmaak')        
-            self.df[['Ordernummer']] = self.df[['Ordernummer']].astype(str)
-            if self.areThereDuplicates():
-                self.parseDuplicateOrderNumbers()
+            self.loadBasicExcel()
+        
+        if self.areThereDuplicates():
+            self.parseDuplicateOrderNumbers()
+
+    def loadNonBasicExcel(self):
+        self.df = pd.read_excel(self.path + self.file_name, sheet_name=None)        
+        self.df = self.df['Paklijst']
+        self.df = self.df.drop([0, 1, 2, 3])
+        self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
+
+    def loadBasicExcel(self):
+        self.df = pd.read_excel(self.path + self.file_name, sheet_name='paklijst_zonder_opmaak')        
+        self.df[['Ordernummer']] = self.df[['Ordernummer']].astype(str)
 
     def parseDuplicateOrderNumbers(self):
         order_numbers = np.unique(list(self.df['Ordernummer']))
@@ -66,76 +106,27 @@ class ExcelParser():
                     self.df.loc[self.df.index[i], 'Ordernummer'] = order_number + "-" + str(j)
                     j += 1
 
-    def getOrdernumberRows(self, order_number):
-        return self.df.loc[self.df['Ordernummer'] == order_number]
-
     def areThereDuplicates(self):
         duplicates = self.df.duplicated(keep=False, subset=['Ordernummer'])
         duplicates = self.df[duplicates].sort_values(by=['Ordernummer'])
         return len(duplicates) > 0
-
-    def getWidth(self, row):
-        try:
-            width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
-        except IndexError:
-            width = row['Breedte'].split(',')[0]
-        except AttributeError:
-            width = row['Breedte']
-
-        width = float(width)
-        if width == np.nan or width <= 0:
-            raise InvalidWidthError
-
-        return width
     
-    def getHeight(self, row):
-        try:
-            height = row['Lengte'].split(',')[0] + '.' + row['Lengte'].split(',')[1]
-        except IndexError:
-            height = row['Lengte'].split(',')[0]
-        except AttributeError:
-            height = row['Lengte']
-
-        height = float(height)
-        if height == np.nan or height <= 0:
-            raise InvalidHeightError
-
-        return height
-
-    def getName(self, row):
-        name = str(row['Ordernummer'])
-        if name == np.nan:
-            raise InvalidNameError
-
-        name = str(name)
-
-        return name
-
     def getOrders(self):
-        self.reloadExcel()
-        orders = self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam']]
-        colors = []
+        return self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam']]
 
+    def convertOrdersToRectangles(self, orders):
         unstacked_rectangles = []
         for index, row in orders.iterrows():
             try:
                 width = self.getWidth(row)
                 height = self.getHeight(row)
                 name = self.getName(row)
-
-                brand = row["Merk"]
-                if brand is not None:
-                    brand = str(brand)
-
-                coupage_batch = row["Coupage/Batch"].lower()
-                client_name = row["Klantnaam"]
-
-                color = str(row['Kleur'])
-                brand = brand
-                quantity = int(row['Aantal'])
-                colors.append(color)
-
-                grid_width = int(row['Rolbreedte'])
+                brand = self.getBrand(row)
+                coupage_batch = self.getCoupageBatch(row)
+                client_name = self.getClientName(row)
+                color = self.getColor(row)
+                quantity = self.getQuantity(row)
+                grid_width = self.getGridWidth(row)
                 
                 if quantity > 1:
                     for i in range(1, quantity+1):
@@ -156,11 +147,124 @@ class ExcelParser():
             except InvalidNameError:
                 print("Invalid name value")
                 continue
+            
+            except InvalidBrandError:
+                print("Invalid brand value")
+                continue
+            
+            except InvalidCoupageBatchError:
+                print("Invalid coupage/batch value")
+                continue
+        
+            except InvalidClientNameError:
+                print("Invalid clientname value")
+                continue
 
+            except InvalidColorError:
+                print("Invalid color value")
+                continue
+            
+            except InvalidQuantityError:
+                print("Invalid quantity value")
+                continue
+        
         if len(unstacked_rectangles) == 0:
-            raise EmptyExcelError
+            raise EmptyExcelError    
 
         return unstacked_rectangles
+
+    def getWidth(self, row):
+        try:
+            width = row['Breedte'].split(',')[0] + '.' + row['Breedte'].split(',')[1]
+        except IndexError:
+            width = row['Breedte'].split(',')[0]
+        except AttributeError:
+            width = row['Breedte']
+
+        width = float(width)
+        if width == np.nan or width <= 0 or width is None:
+            raise InvalidWidthError
+
+        return width
+    
+    def getHeight(self, row):
+        try:
+            height = row['Lengte'].split(',')[0] + '.' + row['Lengte'].split(',')[1]
+        except IndexError:
+            height = row['Lengte'].split(',')[0]
+        except AttributeError:
+            height = row['Lengte']
+
+        height = float(height)
+        if height == np.nan or height <= 0 or height is None:
+            raise InvalidHeightError
+
+        return height
+
+    def getName(self, row):
+        name = str(row['Ordernummer'])
+        if name == np.nan or name == "" or name is None:
+            raise InvalidNameError
+
+        name = str(name)
+
+        return name
+    
+    def getBrand(self, row):
+        brand = row["Merk"]
+        if brand == np.nan or brand == "" or brand is None:
+            raise InvalidBrandError
+
+        brand = str(brand)
+
+        return brand
+
+    def getCoupageBatch(self, row):
+        coupage_batch = row["Coupage/Batch"]
+        if coupage_batch == np.nan or coupage_batch == "" or coupage_batch is None:
+            raise InvalidCoupageBatchError
+
+        # lower needed because somewhere else in the code it is checked for
+        # coupage_batch == "batch"
+        coupage_batch = str(coupage_batch).lower()
+
+        return coupage_batch
+
+    def getClientName(self, row):
+        client_name = row["Klantnaam"]
+        if client_name == np.nan or client_name == "" or client_name is None:
+            raise InvalidClientNameError
+
+        client_name = str(client_name)
+
+        return client_name
+
+    def getColor(self, row):
+        color = row["Kleur"]
+        if color == np.nan or color == "" or color is None:
+            raise InvalidColorError
+
+        color = str(color)
+
+        return color
+
+    def getQuantity(self, row):
+        quantity = row["Aantal"]
+        if quantity == np.nan or quantity == "" or quantity is None:
+            raise InvalidQuantityError
+
+        quantity = int(quantity)
+
+        return quantity
+
+    def getGridWidth(self, row):
+        grid_width = row["Rolbreedte"]
+        if grid_width == np.nan or grid_width == "" or grid_width is None:
+            raise InvalidGridWidthError
+
+        grid_width = int(grid_width)
+
+        return grid_width
 
 if __name__ == "__main__":
     desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
