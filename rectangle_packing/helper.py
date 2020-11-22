@@ -31,6 +31,13 @@ class Helper(object):
         return dxf_path
     
     @staticmethod
+    def getDateTimeToday():
+        return datetime.date.today().strftime("%Y%m%d")
+
+    @staticmethod
     def getCurrentHour():
         return datetime.datetime.now().hour
 
+    @staticmethod
+    def getDesktopPath():
+        return os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 

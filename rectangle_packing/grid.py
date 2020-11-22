@@ -38,34 +38,21 @@ class Grid(object):
         self.is_full = is_full
         self.is_cut = is_cut
 
+        self.initEmptyDxfDrawing()
+        
+        # used for removing duplicates
         self.points = []
         self.lines = []
-        
-        self.min_rectangle_width = 100 #cm
-        self.min_rectangle_height = 50 #cm
-        self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
 
-        self.initDxfDrawing()
-
-    def initDxfDrawing(self):
+    def initEmptyDxfDrawing(self):
         self.createDxfFilePath()
         self.dxf_drawing = dxf.drawing(self.dxf_file_path)
 
     def createDxfFilePath(self):
-        today = datetime.date.today()
-        hour = datetime.datetime.now().hour
-
-        # ddmmYY
-        datum = today.strftime("%Y%m%d")
-        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
-
-        self.dxf_path = desktop + "/grids/" + datum + "/"
-        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
+        dxf_path = Helper.createAndGetDxfFolder()
+        hour = Helper.getCurrentHour()
+        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
         
-        if not os.path.exists(self.dxf_path):
-            os.makedirs(self.dxf_path)
-
     def getWidth(self):
         return self.width
     
@@ -227,10 +214,6 @@ class Grid(object):
         for line in self.lines:
             self.dxf_drawing.add(line)
 
-    # TODO 
-    # use toDxf function in rectangle class
-    # refactor adding text and rectangle to drawing
-    # make two separate functions: 1 to saveAsDxf and one getDxf
     def addRectanglesToDxf(self, for_prime_center):
         for rectangle in self.stacked_rectangles:
             rectangle_dxf = rectangle.getRectangleDxf()
@@ -264,12 +247,16 @@ class Grid(object):
 
     def toHtml(self):
         print("Plotting grid " + str(self.getName()))
+        html_path = './html/'
 
+        if not os.path.exists(html_path):
+            os.makedirs(html_path)
+        
         # file to save the model  
-        output_file("plots/stacked_grid_" + str(self.getName()) + ".html")  
+        output_file(html_path + "grid_" + str(self.getName()) + ".html")  
             
         # instantiating the figure object  
-        graph = figure(title = "Stacked grid " + str(self.getName()), x_range=(0, self.width), y_range=(0, self.height))  
+        graph = figure(title = "Grid " + str(self.getName()), x_range=(0, self.width), y_range=(0, self.height))  
 
         # name of the x-axis  
         graph.xaxis.axis_label = "x-axis"

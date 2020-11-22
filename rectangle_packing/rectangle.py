@@ -25,6 +25,18 @@ class Rectangle(object):
 
         self.initEmptyDxfDrawing()
 
+    @staticmethod
+    def getMinimumSize():
+        min_width = 100
+        min_height = 50
+        return min_width, min_height
+    
+    @staticmethod
+    def getMaximumSize():
+        max_width = 200
+        max_height = 1500
+        return max_width, max_height
+
     def initEmptyDxfDrawing(self):
         hour = Helper.getCurrentHour()
         dxf_file_path = Helper.createAndGetDxfFolder() + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
