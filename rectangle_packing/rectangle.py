@@ -10,17 +10,17 @@ import random
 class Rectangle(object):
     def __init__(self, width=-1, height=-1, name="-1", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
         self.position = np.asarray(position)
-        self.width = width
-        self.height = height
-        self.name = name
-        self.brand = brand
-        self.color = color
-        self.grid_width = grid_width
-        self.quantity = quantity 
-        self.client_name = client_name
-        self.coupage_batch = coupage_batch
-
-        self.grid_number = grid_number
+        self.setWidth(width)
+        self.setHeight(height)
+        self.setName(name)
+        self.setBrand(brand)
+        self.setColor(color)
+        self.setGridWidth(grid_width)
+        self.setQuantity(quantity)
+        self.setClientName(client_name)
+        self.setCoupageBatch(coupage_batch)
+        self.setGridNumber(grid_number)
+        
         self.is_stacked = is_stacked
 
         self.initEmptyDxfDrawing()
@@ -31,7 +31,7 @@ class Rectangle(object):
         self.dxf_drawing = dxf.drawing(dxf_file_path)
 
     def setClientName(self, client_name):
-        self.client_name
+        self.client_name = str(client_name)
     
     def getClientName(self):
         return self.client_name
@@ -55,31 +55,31 @@ class Rectangle(object):
         return self.name
     
     def setName(self, name):
-        self.name = name
+        self.name = str(name)
     
     def getBrand(self):
         return self.brand
 
     def setBrand(self, brand):
-        self.brand = brand
+        self.brand = str(brand)
 
     def getColor(self):
         return self.color
     
     def setColor(self, color):
-        self.color = color
+        self.color = str(color)
 
     def getWidth(self):
         return self.width
     
     def setWidth(self, width):
-        self.width = width
+        self.width = int(width)
 
     def getHeight(self):
         return self.height
 
     def setHeight(self, height):
-        self.height = height
+        self.height = int(height)
 
     def getPosition(self):
         return self.position
@@ -91,13 +91,13 @@ class Rectangle(object):
         return self.grid_width
     
     def setGridWidth(self, width):
-        self.grid_width = width
+        self.grid_width = int(width)
 
     def getQuantity(self):
         return self.quantity
     
     def setQuantity(self, quantity):
-        self.quantity = quantity
+        self.quantity = int(quantity)
         
     def getTopLeft(self):   
         return self.getPosition() + np.array([-self.getWidth()/2, self.getHeight()/2])
@@ -118,7 +118,7 @@ class Rectangle(object):
         return self.coupage_batch
     
     def setCoupageBatch(self, coupage_batch):
-        self.coupage_batch = coupage_batch
+        self.coupage_batch = str(coupage_batch)
     
     def isCoupage(self):
         return self.coupage_batch == 'coupage'
@@ -142,9 +142,6 @@ class Rectangle(object):
 
         return True
 
-    # TODO
-    # refactor drawing adding to dxf
-    # make two separate functions: 1 to saveAsDxf and one getDxf
     def toDxf(self, for_prime_center=True):
         rectangle_dxf = self.getRectangleDxf()
         label_dxf = self.getLabelDxf()

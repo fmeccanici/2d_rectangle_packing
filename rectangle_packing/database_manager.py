@@ -44,6 +44,14 @@ class DatabaseManager(object):
 
         self.backup_path = '/home/' + username + '/Documents/2d_rectangle_packing/rectangle_packing/database_backups/'
     
+    def removeGrid(self, grid):
+        query = {"grid_number": grid.getName()}
+        y = self.rectangles_collection.delete_many(query)
+        print(y.deleted_count)
+
+        query = {"name": grid.getName()}
+        x = self.grids_collection.delete_many(query)
+        print(x.deleted_count)
 
     def clearDatabase(self):
         try:
@@ -299,9 +307,9 @@ class DatabaseManager(object):
 
         document = self.rectangles_collection.find_one(query)
         if not for_cutting:
-            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
+            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], brand=document['brand'], color=document['color'], grid_width=document['grid_width'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
         else: 
-            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
+            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], brand=document['brand'], color=document['color'], grid_width=document['grid_width'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
 
         return rectangle        
 

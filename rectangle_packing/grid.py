@@ -28,15 +28,16 @@ class InvalidGridPositionError(Error):
 
 class Grid(object):
     def __init__(self, width=-1, height=-1, name="-1", brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
-        self.width = width
-        self.height = height
-        self.name = name
-        self.brand = brand
-        self.color = color
+        self.setWidth(width)
+        self.setHeight(height)
+        self.setName(name)
+        self.setBrand(brand)
+        self.setColor(color)
+        self.setStackedRectangles(stacked_rectangles)
+
         self.is_full = is_full
         self.is_cut = is_cut
 
-        self.stacked_rectangles = stacked_rectangles
         self.points = []
         self.lines = []
         
@@ -69,31 +70,31 @@ class Grid(object):
         return self.width
     
     def setWidth(self, width):
-        self.width = width
+        self.width = int(width)
 
     def getHeight(self):
         return self.height
     
     def setHeight(self, height):
-        self.height = height
+        self.height = int(height)
 
     def getName(self):
         return self.name
     
     def setName(self, name):
-        self.name = name
+        self.name = int(name)
 
     def getBrand(self):
         return self.brand
 
     def setBrand(self, brand):
-        self.brand = brand
+        self.brand = str(brand)
 
     def getColor(self):
         return self.color
     
     def setColor(self, color):
-        self.color = color
+        self.color = str(color)
         
     def getNumStackedRectangles(self):
         return len(self.stacked_rectangles)

@@ -33,3 +33,4 @@ class Helper(object):
     @staticmethod
     def getCurrentHour():
         return datetime.datetime.now().hour
+

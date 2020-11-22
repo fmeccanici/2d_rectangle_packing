@@ -45,7 +45,8 @@ class Stacker(object):
 
         # stacking position of current rectangle rotated
         self.stacking_position_rotated = []
-        
+
+            
     def setRectangle(self, rectangle):
         self.rectangle = rectangle
 
@@ -74,7 +75,7 @@ class Stacker(object):
             coupage.setStacked()
             self.db_manager.updateRectangle(coupage)
 
-    def start(self):        
+    def start(self, automatic=True):        
         self.exportCoupages()
         self.startStacking()
         # self.loadOrdersAndAddToDatabase()
@@ -82,8 +83,12 @@ class Stacker(object):
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
-            self.createGridInDatabaseIfNotAvailable()
-            self.grids = self.db_manager.getGridsNotCut()
+            if automatic:
+                self.createGridInDatabaseIfNotAvailable()
+                self.grids = self.db_manager.getGridsNotCut()
+            else:
+                self.grids = []
+                self.grids.append(self.grid)
 
             for grid in self.grids:
                 self.setGrid(grid)

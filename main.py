@@ -52,7 +52,6 @@ class RectanglePackingGui(QWidget):
         self.stacker = Stacker()
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
         path = desktop + "/paklijsten/"
-        
         file_name = "paklijst.xlsx"
 
         self.excel_parser = ExcelParser(path, file_name)
@@ -70,14 +69,13 @@ class RectanglePackingGui(QWidget):
         self.createButtonsLayout()
         self.createButtonEvents()
 
-        grid_number = 1
         self.createGridOrdersLayout()
 
         self.grid_drawing = QtWidgets.QLabel()
 
         # TODO relative to window size
-        self.canvas_width = 450
-        self.canvas_height = 900
+        self.canvas_width = 200
+        self.canvas_height = 1000
         self.max_rectangle_width = 200 #cm
         self.max_rectangle_height = 1500 #cm
         
@@ -87,8 +85,6 @@ class RectanglePackingGui(QWidget):
         color = QColor(255, 255, 255)
         self.canvas.fill(color)
         self.grid_drawing.setPixmap(self.canvas)
-
-        # self.left_side_layout.addWidget(self.grid_drawing)
 
         self.createGridOrdersEvents()
 
@@ -113,7 +109,6 @@ class RectanglePackingGui(QWidget):
 
         x = rectangle.getPosition()[0] - rectangle.getWidth()/2
         y = rectangle.getPosition()[1] + rectangle.getHeight()/2
-        print(x,y)
         width = rectangle.getWidth() 
         height = rectangle.getHeight() 
 
@@ -141,7 +136,7 @@ class RectanglePackingGui(QWidget):
 
     def loadOrdersCreateNecessaryGridsAndStartStacking(self):
         self.updateCodeStatus("Creating grids, stacking and exporting. Please wait...")
-        self.stacker.start()
+        self.stacker.start(automatic=True)
         self.refreshGrids()
         self.refreshNewOrders()
         self.updateCodeStatus("Done with automatic stacking!")
@@ -149,41 +144,19 @@ class RectanglePackingGui(QWidget):
     def onStartStackingClick(self):
         self.loadOrders()
         self.stacker.startStacking()
-        self.updateCodeStatus("Stacking started")
 
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
         grid = self.db_manager.getGrid(grid_number)
-
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
-        self.unstacked_rectangles = self.stacker.computeRectangleOrderArea(self.unstacked_rectangles)
-
-        for i, rectangle in enumerate(self.unstacked_rectangles):
-            print("Stacking rectangle " + str(i) + " out of " + str(len(self.unstacked_rectangles)))
-            if not self.stacker.stackingStopped():
-                try:
-
-                    if (grid.getBrand() == rectangle.getBrand()) and (grid.getColor() == rectangle.getColor()) and (grid.getWidth() == rectangle.getGridWidth()):
-                        self.stacker.computeStackingPositionAndUpdateDatabase(rectangle, grid)
-                        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
-
-                        self.refreshGrid(grid_number)
-                        self.refreshNewOrders()
-                        self.updateCodeStatus("Order " + str(rectangle.getName()) + " stacked")
-                    else:
-                        print("Colors don't match")
-                        self.updateCodeStatus("Order has color " + str(rectangle.getColor()) + ", grid has color " + str(grid.getColor()))
-                except InvalidGridPositionError:
-                    print("Rectangle does not fit")
-                    self.updateCodeStatus("Order " + str(rectangle.getName()) + " does not fit")
-            else:
-                self.updateCodeStatus("Stacking stopped")
-                break
-
-        self.updateCodeStatus("Stacking stopped")
+        self.updateCodeStatus("Stacking started for grid " + str(grid_number))
+        self.stacker.setGrid(grid)
+        self.stacker.start(automatic=False)
+        self.refreshGrid(grid_number)
+        self.refreshNewOrders()
+        self.updateCodeStatus("Done with stacking grid " + str(grid_number) + "!")
 
     def onStopStackingClick(self):
         self.stacker.stopStacking()
-        
+
     def refreshGrid(self, grid_number):        
         grid = self.db_manager.getGrid(grid_number)
         stacked_rectangles = grid.getStackedRectangles()
@@ -384,38 +357,9 @@ class RectanglePackingGui(QWidget):
         self.list_widget_new_orders.clear()
 
     def onCreateGridClick(self):
-        brand = 'kokos'
-        if self.grid_width1_radio_button.isChecked():
-            width = 100
-        elif self.grid_width2_radio_button.isChecked():
-            width = 200
-
-        if self.color_antraciet_radio_button.isChecked():
-            color = 'antraciet'
-        elif self.color_blauw_radio_button.isChecked():
-            color = 'blauw'
-        elif self.color_bordeaux_radio_button.isChecked():
-            color = 'bordeaux'
-        elif self.color_bruin_radio_button.isChecked():
-            color = 'bruin'
-        elif self.color_bruin_terra_radio_button.isChecked():
-            color = 'bruin-terra'
-        elif self.color_grijs_radio_button.isChecked():
-            color = 'grijs'
-        elif self.color_naturel_radio_button.isChecked():
-            color = 'naturel'
-        elif self.color_rood_bordeaux_radio_button.isChecked():
-            color = 'rood-bordeaux'
-        elif self.color_rood_radio_button.isChecked():
-            color = 'rood'
-        elif self.color_terra_radio_button.isChecked():
-            color = 'terra'
-        elif self.color_zwart_grijs_radio_button.isChecked():
-            color = 'zwart-grijs'
-        elif self.color_zwart_radio_button.isChecked():
-            color = 'zwart'
-
-        print("color = " + str(color))
+        brand = self.grid_brand_line_edit.text()
+        width = self.create_grid_grid_width_line_edit.text()
+        color = self.grid_color_line_edit.text()
         grid = self.db_manager.createUniqueGrid(width=width, brand=brand, color=color)
 
         list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
@@ -427,6 +371,7 @@ class RectanglePackingGui(QWidget):
         # self.load_grid_button.clicked.connect(self.onLoadGridClick)
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
         self.empty_grid_button.clicked.connect(self.onEmptyGridClick)
+        self.remove_grid_button.clicked.connect(self.onRemoveGridClick)
 
         self.start_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingClick))
         self.stop_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStopStackingClick))
@@ -447,18 +392,17 @@ class RectanglePackingGui(QWidget):
         grid = self.db_manager.getGrid(grid_number)
 
         self.db_manager.emptyGrid(grid)
-        
+        self.refreshGrids()
         self.refreshNewOrders()
 
+    def onRemoveGridClick(self):
+        grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
+        grid = self.db_manager.getGrid(grid_number)
+        self.removeGridItem(remove_completely=True)
+
     def loadOrders(self):
-        """
-        n = 5
-        unstacked_rectangles = self.stacker.generateRandomRectangles(n)
-        self.stacker.addToDatabase(unstacked_rectangles)
-        self.refreshNewOrders()
-        """
+
         file_name = self.excel_file_line_edit.text()
-        # path = os.getcwd() + "/paklijsten/"
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
         path = desktop + "/paklijsten/"
 
@@ -466,15 +410,8 @@ class RectanglePackingGui(QWidget):
         self.stacker.setExcelParser(path, file_name)
         
         unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
-
         self.stacker.addToDatabase(unstacked_rectangles)
         self.refreshNewOrders()
-
-        # names = [x.getName() for x in unstacked_rectangles]
-        # print(sorted(names))
-        # print(len(names))
-        # print(len(np.unique(names)))
-        
 
     def onLoadOrdersClick(self):
         self.loadOrders()
@@ -496,10 +433,7 @@ class RectanglePackingGui(QWidget):
         grid = self.db_manager.getGrid(grid_number, for_cutting=True)
         
         if self.export_dxf_radio_button.isChecked():
-            # grid.toPrimeCenterFormatDxf()
-            # grid.toDxf()
             self.stacker.optimizeAndExportGrid()
-
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
         elif self.export_html_radio_button.isChecked():
@@ -511,7 +445,8 @@ class RectanglePackingGui(QWidget):
     def onUncutClick(self):
         self.removeGridItem('cut')
 
-    def removeGridItem(self, current_grid_state='uncut'):
+    def removeGridItem(self, current_grid_state='uncut', remove_completely=False):
+        
         if current_grid_state == 'cut':
             list_widget_current = self.list_widget_cut_grids
             list_widget_next = self.list_widget_grids
@@ -528,12 +463,17 @@ class RectanglePackingGui(QWidget):
         elif current_grid_state == 'uncut':
             grid.setCut()
 
-        self.db_manager.updateGrid(grid)
+        if not remove_completely:
+            self.db_manager.updateGrid(grid)
+        else:
+            self.db_manager.removeGrid(grid)
 
         item = list_widget_current.findItems(list_widget_current.currentItem().text(), Qt.MatchExactly)
         row = list_widget_current.row(item[0])
         list_widget_current.takeItem(row)
-        list_widget_next.addItem(item[0])
+        
+        if not remove_completely:
+            list_widget_next.addItem(item[0])
 
     def onDoubleClickOrder(self):
         self.updateOrder('stacked')
@@ -597,84 +537,66 @@ class RectanglePackingGui(QWidget):
         self.code_status_line_edit.setText(text)
 
     def createButtonsLayout(self):
-        group_box = QGroupBox("Export grid")
+        group_box = QGroupBox("Grid")
         self.export_button = QPushButton("Export")
         self.export_dxf_radio_button = QRadioButton("DXF")
         self.export_pdf_radio_button = QRadioButton("PDF")
         self.export_html_radio_button = QRadioButton("HTML")
         self.export_pdf_radio_button.setChecked(True)
+        self.create_grid_button = QPushButton("Create new")
 
-        export_grid = QGridLayout()
-        export_grid.addWidget(self.export_button, 0, 0)
-        export_grid.addWidget(self.export_dxf_radio_button, 1, 0)
-        export_grid.addWidget(self.export_pdf_radio_button, 2, 0)
-        export_grid.addWidget(self.export_html_radio_button, 1, 1)
+        grid_layout = QGridLayout()
+        grid_layout.addWidget(self.export_button, 0, 0)
+        grid_layout.addWidget(self.export_dxf_radio_button, 1, 0)
+        grid_layout.addWidget(self.export_pdf_radio_button, 2, 0)
+        grid_layout.addWidget(self.export_html_radio_button, 1, 1)
+        grid_layout.addWidget(self.create_grid_button, 3, 0)
 
-        group_box.setLayout(export_grid)
 
-        self.buttons_layout.addWidget(group_box)
         
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
         self.excel_file_line_edit = QLineEdit("paklijst_bug_2_aantal_ambiant.xlsx")
         
-        self.create_grid_button = QPushButton("Create new grid")
-        self.color_naturel_radio_button = QRadioButton("Naturel")
-        self.color_naturel_radio_button.setChecked(True)
-        self.color_zwart_radio_button = QRadioButton("Zwart")
-        self.color_antraciet_radio_button = QRadioButton("Antraciet")
-        self.color_grijs_radio_button = QRadioButton("Grijs")
-        self.color_rood_radio_button = QRadioButton("Rood")
-        self.color_bruin_terra_radio_button = QRadioButton("Bruin-Terra")
-        self.color_zwart_grijs_radio_button = QRadioButton("Zwart-Grijs")
-        self.color_rood_bordeaux_radio_button = QRadioButton("Rood-Bordeaux")
-        self.color_terra_radio_button = QRadioButton("Terra")
-        self.color_bordeaux_radio_button = QRadioButton("Bordeaux")
-        self.color_blauw_radio_button = QRadioButton("Blauw")
-        self.color_bruin_radio_button = QRadioButton("Bruin")
-        self.color_buttons_layout = QGridLayout()
-        self.color_buttons_layout.addWidget(self.color_naturel_radio_button, 0, 0)
-        self.color_buttons_layout.addWidget(self.color_zwart_radio_button, 1, 0)
-        self.color_buttons_layout.addWidget(self.color_antraciet_radio_button, 2, 0)
-        self.color_buttons_layout.addWidget(self.color_grijs_radio_button, 0, 1)
-        self.color_buttons_layout.addWidget(self.color_rood_radio_button, 1, 1)
-        self.color_buttons_layout.addWidget(self.color_bruin_terra_radio_button, 2, 1)
-        self.color_buttons_layout.addWidget(self.color_zwart_grijs_radio_button, 0, 2)
-        self.color_buttons_layout.addWidget(self.color_rood_bordeaux_radio_button, 1, 2)
-        self.color_buttons_layout.addWidget(self.color_terra_radio_button, 2, 2)
-        self.color_buttons_layout.addWidget(self.color_bordeaux_radio_button, 0, 3)
-        self.color_buttons_layout.addWidget(self.color_blauw_radio_button, 1, 3)
-        self.color_buttons_layout.addWidget(self.color_bruin_radio_button, 2, 3)
-        self.color_buttons_groupbox = QGroupBox("Colors")
-        self.color_buttons_groupbox.setLayout(self.color_buttons_layout)
+        self.grid_color_label = QLabel("Color")
+        self.grid_color_line_edit = QLineEdit("Naturel")
+
+        self.grid_brand_label = QLabel("Brand")
+        self.grid_brand_line_edit = QLineEdit("Kokos")
+
+        grid_layout.addWidget(self.grid_color_label, 4, 0)
+        grid_layout.addWidget(self.grid_brand_label, 4, 1)
+
+        grid_layout.addWidget(self.grid_color_line_edit, 5, 0)
+        grid_layout.addWidget(self.grid_brand_line_edit, 5, 1)
         
-        self.grid_width_groupbox = QGroupBox("Width")
-        self.grid_width_layout = QGridLayout()
-        self.grid_width1_radio_button = QRadioButton("100cm")
-        self.grid_width2_radio_button = QRadioButton("200cm")
-        self.grid_width1_radio_button.setChecked(True)
-        self.grid_width_layout.addWidget(self.grid_width1_radio_button, 0, 0)
-        self.grid_width_layout.addWidget(self.grid_width2_radio_button, 1, 0)
-        self.grid_width_groupbox.setLayout(self.grid_width_layout)
+        self.create_grid_grid_width_label = QLabel("Width")
+        self.create_grid_grid_width_line_edit = QLineEdit("100")
 
-        self.empty_grid_button = QPushButton("Empty grid")
+        grid_layout.addWidget(self.create_grid_grid_width_label, 6, 0)
+        grid_layout.addWidget(self.create_grid_grid_width_line_edit, 7, 0)
 
+        self.cut_button = QPushButton("Cut")
+        self.uncut_button = QPushButton("Uncut")
+        grid_layout.addWidget(self.cut_button, 8, 0)
+        grid_layout.addWidget(self.uncut_button, 9, 0)
+
+        self.empty_grid_button = QPushButton("Empty")
+        self.remove_grid_button = QPushButton("Remove")
+
+        grid_layout.addWidget(self.empty_grid_button, 8, 1)
+        grid_layout.addWidget(self.remove_grid_button, 9, 1)
+
+        group_box.setLayout(grid_layout)
+        self.buttons_layout.addWidget(group_box)
+        
         self.make_database_backup_button = QPushButton("Make database backup")
         self.clear_database_button = QPushButton("Clear database")
 
-
-        # self.buttons_layout.addWidget(self.load_grid_button)
-        self.buttons_layout.addWidget(self.create_grid_button)
-        self.buttons_layout.addWidget(self.color_buttons_groupbox)
-        self.buttons_layout.addWidget(self.grid_width_groupbox)
-
-        self.buttons_layout.addWidget(self.empty_grid_button)
-
         self.buttons_layout.addWidget(self.load_orders_button)
-        self.buttons_layout.addWidget(self.clear_orders_button)
-
         self.buttons_layout.addWidget(self.excel_file_line_edit)
+        self.buttons_layout.addWidget(self.clear_orders_button)
 
         self.buttons_layout.addWidget(self.make_database_backup_button)
         self.buttons_layout.addWidget(self.clear_database_button)
@@ -697,13 +619,6 @@ class RectanglePackingGui(QWidget):
 
         group_box.setLayout(layout)
         self.buttons_layout.addWidget(group_box)
-
-        self.cut_button = QPushButton("Cut")
-        self.uncut_button = QPushButton("Uncut")
-
-        self.buttons_layout.addWidget(self.cut_button)
-        self.buttons_layout.addWidget(self.uncut_button)
-
 
         self.buttons_layout.addStretch()
 if __name__ == '__main__':
