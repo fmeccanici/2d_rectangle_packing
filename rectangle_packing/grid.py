@@ -1,5 +1,6 @@
 # my own classes
 from rectangle_packing.rectangle import Rectangle
+from rectangle_packing.helper import Helper
 
 # external dependencies
 import numpy as np
@@ -49,7 +50,6 @@ class Grid(object):
     def initDxfDrawing(self):
         self.createDxfFilePath()
         self.dxf_drawing = dxf.drawing(self.dxf_file_path)
-
 
     def createDxfFilePath(self):
         today = datetime.date.today()
@@ -137,16 +137,6 @@ class Grid(object):
             return True
     
         return False
-    
-    def toMillimeters(self, variable):
-        return variable * 10
-
-    def swap(self, x, y):
-        t = x 
-        x = y
-        y = t
-
-        return x, y
 
     def toDxf(self, remove_duplicates=True, for_prime_center=False):
         if remove_duplicates == True:
@@ -207,9 +197,9 @@ class Grid(object):
                     x_start = round(point[0], 2)
 
             if for_prime_center == True:
-                x_start = self.toMillimeters(x_start)
-                x_end = self.toMillimeters(x_end)
-                y = self.toMillimeters(y)
+                x_start = Helper.toMillimeters(x_start)
+                x_end = Helper.toMillimeters(x_end)
+                y = Helper.toMillimeters(y)
                 self.lines.append(dxf.line((y, x_start), (y, x_end)))
             else:
                 self.lines.append(dxf.line((x_start, y), (x_end, y)))
@@ -225,9 +215,9 @@ class Grid(object):
                     y_start = round(point[1], 2)
 
             if for_prime_center == True:
-                y_start = self.toMillimeters(y_start)
-                y_end = self.toMillimeters(y_end)
-                x = self.toMillimeters(x)
+                y_start = Helper.toMillimeters(y_start)
+                y_end = Helper.toMillimeters(y_end)
+                x = Helper.toMillimeters(x)
                 self.lines.append(dxf.line((y_start, x), (y_end, x)))
             else:
                 self.lines.append(dxf.line((x, y_start), (x, y_end)))
@@ -236,6 +226,10 @@ class Grid(object):
         for line in self.lines:
             self.dxf_drawing.add(line)
 
+    # TODO 
+    # use toDxf function in rectangle class
+    # refactor adding text and rectangle to drawing
+    # make two separate functions: 1 to saveAsDxf and one getDxf
     def addRectanglesToDxf(self, for_prime_center):
         for rectangle in self.stacked_rectangles:
             x = rectangle.getPosition()[0] - rectangle.getWidth()/2
@@ -244,11 +238,11 @@ class Grid(object):
             height = rectangle.getHeight()
 
             if for_prime_center == True:
-                x = self.toMillimeters(x)
-                y = self.toMillimeters(y)
+                x = Helper.toMillimeters(x)
+                y = Helper.toMillimeters(y)
 
-                width = self.toMillimeters(width)
-                height = self.toMillimeters(height)
+                width = Helper.toMillimeters(width)
+                height = Helper.toMillimeters(height)
 
                 bgcolor = random.randint(1,255)
                 
@@ -270,7 +264,7 @@ class Grid(object):
                 text['layer'] = 'TEXT'
                 text['color'] = '7'
                 self.dxf_drawing.add(text)
-                
+            
     def toPdf(self):
         self.toDxf(remove_duplicates=False)
         dox, auditor = recover.readfile(self.dxf_file_path)
@@ -295,7 +289,7 @@ class Grid(object):
         for r in self.stacked_rectangles:
             print(r.getPosition())  
 
-    def plot(self):
+    def toHtml(self):
         print("Plotting grid " + str(self.getName()))
 
         # file to save the model  

@@ -73,7 +73,7 @@ class Stacker(object):
     def exportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
         for coupage in coupages:
-            coupage.exportDxf(for_prime_center=True)
+            coupage.toDxf(for_prime_center=True, coupage=True)
             coupage.setStacked()
             self.db_manager.updateRectangle(coupage)
 

@@ -1,10 +1,10 @@
-import numpy as np
-import pickle
-import os 
+# my own classes
+from rectangle_packing.helper import Helper
 
+# external dependencies
+import numpy as np
 from pathlib import Path
 from dxfwrite import DXFEngine as dxf
-import datetime
 import random
 
 class Rectangle(object):
@@ -23,19 +23,12 @@ class Rectangle(object):
         self.grid_number = grid_number
         self.is_stacked = is_stacked
 
-        today = datetime.date.today()
-        hour = datetime.datetime.now().hour
+        self.initEmptyDxfDrawing()
 
-        datum = today.strftime("%Y%m%d")
-        desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
-
-        self.dxf_path = desktop + "/grids/" + datum + "/"
-        self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
-
-        if not os.path.exists(self.dxf_path):
-            os.makedirs(self.dxf_path)
-
-        self.dxf_drawing = dxf.drawing(self.dxf_file_path)
+    def initEmptyDxfDrawing(self):
+        hour = Helper.getCurrentHour()
+        dxf_file_path = Helper.createAndGetDxfFolder() + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        self.dxf_drawing = dxf.drawing(dxf_file_path)
 
     def setClientName(self, client_name):
         self.client_name
@@ -137,15 +130,6 @@ class Rectangle(object):
         self.setHeight(height)
         self.setPosition([x, y])
 
-    @staticmethod
-    def getRotated(width, height, position):
-        width = height
-        height = width
-        x = position[1]
-        y = position[0]
-
-        return Rectangle(width, height, [x, y])
-
     def intersection(self, other):
         if self.getBottomRight()[0] <= other.getTopLeft()[0] or self.getTopLeft()[0] >= other.getBottomRight()[0]:
             return False
@@ -154,45 +138,27 @@ class Rectangle(object):
             return False
 
         return True
-    
-    def toDict(self):
-        return {'name': self.name, 'width':self.width, 'height': self.height, 'position': self.position}
 
-    def toDxf(self):
-        top_left = self.getTopLeft()
-        top_right = self.getTopRight()
-        bottom_left = self.getBottomLeft()
-        bottom_right = self.getBottomRight()
-
-        upper_horizontal_line = dxf.line((top_left[0], top_left[1]), (top_right[0], top_right[1]))
-        lower_horizontal_line = dxf.line((bottom_left[0], bottom_left[1]), (bottom_right[0], bottom_right[1]))
-        left_vertical_line = dxf.line((top_left[0], top_left[1]), (bottom_left[0], bottom_left[1]))
-        right_vertical_line = dxf.line((top_right[0], top_right[1]), (bottom_right[0], bottom_right[1]))
-
-        return upper_horizontal_line, lower_horizontal_line, left_vertical_line, right_vertical_line
-
-    def toMillimeters(self, variable):
-        return variable * 10
-
-    # coupage
-    def exportDxf(self, for_prime_center=True):
+    # TODO
+    # refactor drawing adding to dxf
+    # make two separate functions: 1 to saveAsDxf and one getDxf
+    def toDxf(self, for_prime_center=True, coupage=False):
+        x = self.getPosition()[0] - self.getWidth()/2
+        y = self.getPosition()[1] - self.getHeight()/2
         width = self.getWidth()
         height = self.getHeight()
 
-        # rotate when more optimal
-        if (height > width) and height <= self.getGridWidth():
+        if coupage and (height > width) and height <= self.getGridWidth():
+            # rotate when more optimal
             width = self.getHeight()
             height = self.getWidth()
 
-        x = width/2
-        y = height/2
-
         if for_prime_center == True:
-            x = self.toMillimeters(x)
-            y = self.toMillimeters(y)
+            x = Helper.toMillimeters(x)
+            y = Helper.toMillimeters(y)
 
-            width = self.toMillimeters(width)
-            height = self.toMillimeters(height)
+            width = Helper.toMillimeters(width)
+            height = Helper.toMillimeters(height)
 
             bgcolor = random.randint(1,255)
             
@@ -213,15 +179,14 @@ class Rectangle(object):
 
             text['layer'] = 'TEXT'
             text['color'] = '7'
+
             self.dxf_drawing.add(text)
         
         self.dxf_drawing.save()
 
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
-        
-    def getFlooredWidthHeight(self):
-        return np.floor(self.width), np.floor(self.height)
+
     
     
 

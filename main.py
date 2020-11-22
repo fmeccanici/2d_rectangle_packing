@@ -502,7 +502,7 @@ class RectanglePackingGui(QWidget):
         elif self.export_pdf_radio_button.isChecked():
             grid.toPdf()
         elif self.export_html_radio_button.isChecked():
-            grid.plot()
+            grid.toHtml()
 
     def onCutClick(self):
         self.removeGridItem('uncut')
