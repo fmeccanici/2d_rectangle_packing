@@ -232,38 +232,10 @@ class Grid(object):
     # make two separate functions: 1 to saveAsDxf and one getDxf
     def addRectanglesToDxf(self, for_prime_center):
         for rectangle in self.stacked_rectangles:
-            x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-            y = rectangle.getPosition()[1] - rectangle.getHeight()/2
-            width = rectangle.getWidth()
-            height = rectangle.getHeight()
-
-            if for_prime_center == True:
-                x = Helper.toMillimeters(x)
-                y = Helper.toMillimeters(y)
-
-                width = Helper.toMillimeters(width)
-                height = Helper.toMillimeters(height)
-
-                bgcolor = random.randint(1,255)
-                
-                self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
-                                    bgcolor=bgcolor))
-                text = dxf.text(str(rectangle.getClientName()), (y, x + width), 100.0, rotation=0)
-                
-                text['layer'] = 'TEXT'
-                text['color'] = '7'
-                self.dxf_drawing.add(text)
-            else:
-                bgcolor = random.randint(1,255)
-                
-                self.dxf_drawing.add(dxf.rectangle((x,y), width, height,
-                                    bgcolor=bgcolor))
-
-                text = dxf.text(str(rectangle.getClientName()), (x, y), 100.0, rotation=0)
-
-                text['layer'] = 'TEXT'
-                text['color'] = '7'
-                self.dxf_drawing.add(text)
+            rectangle_dxf = rectangle.getRectangleDxf()
+            label_dxf = rectangle.getLabelDxf()
+            self.dxf_drawing.add(rectangle_dxf)
+            self.dxf_drawing.add(label_dxf)
             
     def toPdf(self):
         self.toDxf(remove_duplicates=False)

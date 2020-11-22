@@ -119,7 +119,10 @@ class Rectangle(object):
     
     def setCoupageBatch(self, coupage_batch):
         self.coupage_batch = coupage_batch
-        
+    
+    def isCoupage(self):
+        return self.coupage_batch == 'coupage'
+
     def rotate(self):
         width = self.getHeight()
         height = self.getWidth()
@@ -142,13 +145,20 @@ class Rectangle(object):
     # TODO
     # refactor drawing adding to dxf
     # make two separate functions: 1 to saveAsDxf and one getDxf
-    def toDxf(self, for_prime_center=True, coupage=False):
+    def toDxf(self, for_prime_center=True):
+        rectangle_dxf = self.getRectangleDxf()
+        label_dxf = self.getLabelDxf()
+
+        self.dxf_drawing.add(rectangle_dxf)
+        self.dxf_drawing.add(label_dxf)
+        
+    def getRectangleDxf(self, for_prime_center=True):
         x = self.getPosition()[0] - self.getWidth()/2
         y = self.getPosition()[1] - self.getHeight()/2
         width = self.getWidth()
         height = self.getHeight()
 
-        if coupage and (height > width) and height <= self.getGridWidth():
+        if self.isCoupage() and (height > width) and height <= self.getGridWidth():
             # rotate when more optimal
             width = self.getHeight()
             height = self.getWidth()
@@ -162,27 +172,38 @@ class Rectangle(object):
 
             bgcolor = random.randint(1,255)
             
-            self.dxf_drawing.add(dxf.rectangle((y,x), height, width,
-                                bgcolor=bgcolor))
+            return dxf.rectangle((y,x), height, width,
+                                bgcolor=bgcolor)
+
+        else:
+            bgcolor = random.randint(1,255)
+            
+            return dxf.rectangle((x, y), width, height,
+                                bgcolor=bgcolor)
+
+    def getLabelDxf(self, for_prime_center=True):
+        x = self.getPosition()[0] - self.getWidth()/2
+        y = self.getPosition()[1] - self.getHeight()/2
+        width = self.getWidth()
+        height = self.getHeight()
+
+        if self.isCoupage() and (height > width) and height <= self.getGridWidth():
+            # rotate when more optimal
+            width = self.getHeight()
+            height = self.getWidth()
+
+        if for_prime_center == True:
             text = dxf.text(str(self.getClientName()), (y, x + width), 100.0, rotation=0)
             
             text['layer'] = 'TEXT'
             text['color'] = '7'
-            self.dxf_drawing.add(text)
         else:
-            bgcolor = random.randint(1,255)
-            
-            self.dxf_drawing.add(dxf.rectangle((x, y), width, height,
-                                bgcolor=bgcolor))
-
             text = dxf.text(str(self.getClientName()), (x, y), 100.0, rotation=0)
 
             text['layer'] = 'TEXT'
             text['color'] = '7'
-
-            self.dxf_drawing.add(text)
         
-        self.dxf_drawing.save()
+        return text
 
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
