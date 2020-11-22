@@ -92,6 +92,9 @@ class Grid(object):
     def setStackedRectangles(self, rectangles):
         self.stacked_rectangles = rectangles
 
+    def empty(self):
+        self.stacked_rectangles = []
+        
     def isFull(self):
         return self.is_full
     
@@ -107,6 +110,7 @@ class Grid(object):
     def isValidPosition(self, rectangle):
         if self.isOutOfGrid(rectangle):
             return False
+        
 
         for stacked_rectangle in self.stacked_rectangles:
             if rectangle.intersection(stacked_rectangle):

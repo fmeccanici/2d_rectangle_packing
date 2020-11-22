@@ -3,7 +3,7 @@ import sys
 
 from rectangle_packing.stacker import *
 from rectangle_packing.rectangle import *
-from rectangle_packing.stacked_grid import *
+from rectangle_packing.grid import *
 from rectangle_packing.excel_parser import *
 
 class StackerTest(unittest.TestCase):
@@ -19,7 +19,7 @@ class StackerTest(unittest.TestCase):
         self.excel_parser.setPath(self.excel_path)
         self.excel_parser.setFileName(file_name)
 
-        self.assertEqual(len(self.excel_parser.getOrders()), 33)
+        self.assertEqual(len(self.excel_parser.getUnstackedRectangles()), 33)
 
     def testLoadOrders2(self):
         path = os.getcwd() + "/tests/test_paklijsten/"
@@ -27,8 +27,7 @@ class StackerTest(unittest.TestCase):
         self.excel_parser.setPath(path)
         self.excel_parser.setFileName(file_name)
 
-        self.assertRaises(EmptyExcelError, self.excel_parser.getOrders)
-
+        self.assertRaises(EmptyExcelError, self.excel_parser.getUnstackedRectangles)
 
 if __name__ == '__main__':
     unittest.main()

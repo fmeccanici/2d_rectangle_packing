@@ -3,7 +3,7 @@ import sys
 
 from rectangle_packing.stacker import Stacker
 from rectangle_packing.rectangle import Rectangle
-from rectangle_packing.stacked_grid import StackedGrid
+from rectangle_packing.grid import Grid
 from rectangle_packing.database_manager import DatabaseManager
 
 class StackerTest(unittest.TestCase):

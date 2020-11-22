@@ -45,8 +45,7 @@ class Stacker(object):
 
         # stacking position of current rectangle rotated
         self.stacking_position_rotated = []
-
-            
+     
     def setRectangle(self, rectangle):
         self.rectangle = rectangle
 
@@ -104,7 +103,7 @@ class Stacker(object):
 
     def loadOrdersAndAddToDatabase(self):
         try:
-            self.unstacked_rectangles = self.excel_parser.getOrders()
+            self.unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
             self.addToDatabase(self.unstacked_rectangles)
         except EmptyExcelError:
             print("Excel file is empty!")
@@ -329,8 +328,8 @@ class Stacker(object):
         stacking_position = [self.grid.getWidth(), self.grid.getHeight()]
 
         if self.grid.getWidth() > self.rectangle.getWidth():
-            for x in reversed(range(int(self.rectangle.width/2), int(self.grid.getWidth() - self.rectangle.width/2) + 1)):
-                for y in reversed(range(int(self.rectangle.height/2), int(self.grid.getHeight() - self.rectangle.height/2) + 1)):
+            for x in self.getHorizontalLoopRange():
+                for y in self.getVerticalLoopRange():
                     position = np.array([x,y])
                     self.rectangle.setPosition(position)
 
@@ -340,14 +339,20 @@ class Stacker(object):
         elif self.grid.getWidth() == self.rectangle.getWidth():
             x = self.rectangle.getWidth() / 2
             
-            for y in reversed(range(int(self.rectangle.height/2), int(self.grid.getHeight() - self.rectangle.height/2))):
+            for y in self.getVerticalLoopRange():
                 position = np.array([x,y])
                 self.rectangle.setPosition(position)
                 if self.grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
         
         return stacking_position
-        
+
+    def getHorizontalLoopRange(self):
+        return reversed(range(int(self.rectangle.width/2), int(self.grid.getWidth() - self.rectangle.width/2) + 1))        
+
+    def getVerticalLoopRange(self):
+        return reversed(range(int(self.rectangle.height/2), int(self.grid.getHeight() - self.rectangle.height/2) + 1))        
+
 
 if __name__ == "__main__":
     stacker = Stacker()

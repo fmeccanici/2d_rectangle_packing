@@ -1,9 +1,10 @@
 import unittest
+unittest.TestLoader.sortTestMethodsUsing = None
 import sys, os
 
 from rectangle_packing.stacker import *
 from rectangle_packing.rectangle import *
-from rectangle_packing.stacked_grid import *
+from rectangle_packing.grid import *
 from rectangle_packing.excel_parser import *
 
 class StackerTest(unittest.TestCase):
@@ -18,12 +19,12 @@ class StackerTest(unittest.TestCase):
         self.rectangle_4 = Rectangle(200, 100, 2)
         self.rectangle_5 = Rectangle(198, 100, 3)
 
-        self.grid_1 = StackedGrid(200, 1500, 1)
+        self.grid_1 = Grid(200, 1500, 1)
 
     def tearDown(self):
         pass
 
-    def testStacker1(self):
+    def testStart1(self):
         file_name = "paklijst2.xlsx"
         
         self.stacker.setExcelParser(self.excel_path, file_name)
@@ -42,7 +43,7 @@ class StackerTest(unittest.TestCase):
         self.assertEqual(rectangle1.getPosition()[0], 75)
         self.assertEqual(rectangle1.getPosition()[1], 40)
 
-    def testStacker2(self):
+    def testStart2(self):
         file_name = "paklijst3.xlsx"
         
         self.stacker.setExcelParser(self.excel_path, file_name)
@@ -60,20 +61,30 @@ class StackerTest(unittest.TestCase):
         self.assertEqual(rectangle1.getPosition()[0], 75)
         self.assertEqual(rectangle1.getPosition()[1], 40)
 
-    # for some reason when running all the tests this does not work
-    # when running only this test, the test should be good
-    # def testComputeStackingPosition(self):
-    #     stacking_position = self.stacker.computeStackingPosition(self.rectangle_3, self.grid_1)
-    #     self.assertEqual(stacking_position[0], 50)
-    #     self.assertEqual(stacking_position[1], 50)
+    def testComputeStackingPosition(self):
+        self.stacker = Stacker()
+        self.grid_1.empty()
+        self.stacker.setGrid(self.grid_1)
+        self.stacker.setRectangle(self.rectangle_3)
+        stacking_position = self.stacker.computeStackingPosition()
 
-    #     stacking_position = self.stacker.computeStackingPosition(self.rectangle_4, self.grid_1)
-    #     self.assertEqual(stacking_position[0], 100)
-    #     self.assertEqual(stacking_position[1], 50)
-        
-    #     stacking_position = self.stacker.computeStackingPosition(self.rectangle_5, self.grid_1)
-    #     self.assertEqual(stacking_position[0], 99)
-    #     self.assertEqual(stacking_position[1], 50)
+        self.assertEqual(stacking_position[0], 50)
+        self.assertEqual(stacking_position[1], 50)
+
+        self.grid_1.empty()
+        self.stacker.setGrid(self.grid_1)
+        self.stacker.setRectangle(self.rectangle_4)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.assertEqual(stacking_position[0], 100)
+        self.assertEqual(stacking_position[1], 50)
+
+        self.grid_1.empty()
+        self.stacker.setGrid(self.grid_1)
+        self.stacker.setRectangle(self.rectangle_5)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.assertEqual(stacking_position[0], 99)
+        self.assertEqual(stacking_position[1], 50)
+    
 
 if __name__ == '__main__':
     unittest.main()
