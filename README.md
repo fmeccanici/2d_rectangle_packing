@@ -32,7 +32,6 @@ To start the GUI via the command line "cd" into the 2d_rectangle_packing folder 
 ```
 python main.py
 ```
-
 ## Run tests
 To run the test navigate inside the 2d_rectangle_packing folder and execute the following command:
 
@@ -40,7 +39,11 @@ To run the test navigate inside the 2d_rectangle_packing folder and execute the 
 python -m unittest discover tests
 ```
 
-This should run all the test and show OK for each test
+This should run all the test and show OK for each test. To run a single test use, e.g. test_stacker.py, execute the following command:
+```
+python -m unittest tests.test_stacker
+```
+
 
 ## Useful links
 https://askubuntu.com/questions/842592/apt-get-fails-on-16-04-or-18-04-installing-mongodb

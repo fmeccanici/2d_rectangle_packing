@@ -49,45 +49,25 @@ class ExcelParser():
                 self.parseDuplicateOrderNumbers()
 
     def parseDuplicateOrderNumbers(self):
-        duplicates = self.df.duplicated(keep=False, subset=['Ordernummer'])
-        duplicates = self.df[duplicates].sort_values(by=['Ordernummer'])
+        order_numbers = np.unique(list(self.df['Ordernummer']))
+        
+        for order_number in order_numbers:
+            df_order_number = self.df.loc[self.df['Ordernummer'] == order_number]
+            df_order_number_indices = df_order_number.index            
 
-        duplicates_ordernumbers = list(duplicates['Ordernummer'])
+            # check for duplicates
+            if len(df_order_number) > 1:
+                
+                # index used for appending duplicates
+                j = 1
 
-        i = 0
-        while True:
-            try:
-                if (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+1]) and not (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+2]):
-                    duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
-                    duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
-                    
-                    i = i + 2
-                    if i >= len(duplicates_ordernumbers)-1: break
+                # append duplicates with -
+                for i in df_order_number_indices:
+                    self.df.loc[self.df.index[i], 'Ordernummer'] = order_number + "-" + str(j)
+                    j += 1
 
-                elif (duplicates_ordernumbers[i] == duplicates_ordernumbers[i+1]) and (duplicates_ordernumbers[i+1] == duplicates_ordernumbers[i+2]):
-                    duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
-                    duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
-                    duplicates_ordernumbers[i+2] = duplicates_ordernumbers[i+2] + '-3'
-                    i = i + 3
-                    if i >= len(duplicates_ordernumbers)-1: break
-                else:
-                    i = i + 1
-                    if i >= len(duplicates_ordernumbers)-1: break
-
-            except IndexError:
-                try:
-                    duplicates_ordernumbers[i] = duplicates_ordernumbers[i] + '-1'        
-                    duplicates_ordernumbers[i+1] = duplicates_ordernumbers[i+1] + '-2'
-                    break
-                except IndexError:
-                    raise EmptyExcelError
-
-        duplicates.drop(['Ordernummer'], axis=1)
-        duplicates['Ordernummer'] = duplicates_ordernumbers
-
-        self.df = self.df.drop_duplicates(keep=False, subset=["Ordernummer"])
-        self.df = pd.concat([self.df, duplicates])
-        print(list(self.df['Ordernummer']))
+    def getOrdernumberRows(self, order_number):
+        return self.df.loc[self.df['Ordernummer'] == order_number]
 
     def areThereDuplicates(self):
         duplicates = self.df.duplicated(keep=False, subset=['Ordernummer'])
@@ -183,7 +163,9 @@ class ExcelParser():
         return unstacked_rectangles
 
 if __name__ == "__main__":
-    path = "C:/Users/flori/Documents/HDS/2d_rectangle_packing/rectangle_packing/paklijsten/"
-    file_name = "paklijst_bug_2_aantal_ambiant_only"
-    parser = ExcelParser("", file_name)
+    desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+    path = desktop + "/paklijsten/"
+    file_name = "paklijst_bug_2_aantal_ambiant.xlsx"
+
+    parser = ExcelParser(path, file_name)
     parser.getOrders()
