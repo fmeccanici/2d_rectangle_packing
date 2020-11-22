@@ -18,6 +18,10 @@ class StackerTest(unittest.TestCase):
         self.rectangle_3 = Rectangle(100, 100, 1)
         self.rectangle_4 = Rectangle(200, 100, 2)
         self.rectangle_5 = Rectangle(198, 100, 3)
+        self.rectangle_6 = Rectangle(100, 100, 4)
+        self.rectangle_7 = Rectangle(100, 100, 5)
+        self.rectangle_8 = Rectangle(200, 750, 6)
+        self.rectangle_9 = Rectangle(200, 750, 7)
 
         self.grid_1 = Grid(200, 1500, 1)
 
@@ -61,7 +65,7 @@ class StackerTest(unittest.TestCase):
         self.assertEqual(rectangle1.getPosition()[0], 75)
         self.assertEqual(rectangle1.getPosition()[1], 40)
 
-    def testComputeStackingPosition(self):
+    def testComputeStackingPosition1(self):
         self.stacker = Stacker()
         self.grid_1.empty()
         self.stacker.setGrid(self.grid_1)
@@ -71,6 +75,7 @@ class StackerTest(unittest.TestCase):
         self.assertEqual(stacking_position[0], 50)
         self.assertEqual(stacking_position[1], 50)
 
+    def testComputeStackingPosition2(self):
         self.grid_1.empty()
         self.stacker.setGrid(self.grid_1)
         self.stacker.setRectangle(self.rectangle_4)
@@ -78,13 +83,60 @@ class StackerTest(unittest.TestCase):
         self.assertEqual(stacking_position[0], 100)
         self.assertEqual(stacking_position[1], 50)
 
+    def testComputeStackingPosition3(self):
         self.grid_1.empty()
         self.stacker.setGrid(self.grid_1)
         self.stacker.setRectangle(self.rectangle_5)
         stacking_position = self.stacker.computeStackingPosition()
         self.assertEqual(stacking_position[0], 99)
         self.assertEqual(stacking_position[1], 50)
-    
 
+    def testComputeStackingPosition4(self):
+        self.grid_1.empty()
+        self.stacker.setGrid(self.grid_1)
+        self.stacker.setRectangle(self.rectangle_3)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.rectangle_3.setPosition(stacking_position)
+        self.grid_1.addRectangle(self.rectangle_3)
+        self.assertEqual(stacking_position[0], 50)
+        self.assertEqual(stacking_position[1], 50)
+        self.stacker.setRectangle(self.rectangle_6)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.assertEqual(stacking_position[0], 150)
+        self.assertEqual(stacking_position[1], 50)
+
+    def testComputeStackingPosition5(self):
+        self.grid_1.empty()
+        self.stacker.setGrid(self.grid_1)
+        self.stacker.setRectangle(self.rectangle_3)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.rectangle_3.setPosition(stacking_position)
+        self.grid_1.addRectangle(self.rectangle_3)
+        self.assertEqual(stacking_position[0], 50)
+        self.assertEqual(stacking_position[1], 50)
+        self.stacker.setRectangle(self.rectangle_6)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.rectangle_6.setPosition(stacking_position)
+        self.grid_1.addRectangle(self.rectangle_6)
+        self.stacker.setRectangle(self.rectangle_7)
+        stacking_position = self.stacker.computeStackingPosition()
+        
+        self.assertEqual(stacking_position[0], 50)
+        self.assertEqual(stacking_position[1], 150)
+
+    def testComputeStackingPosition6(self):
+        self.grid_1.empty()
+        self.stacker.setGrid(self.grid_1)
+        self.stacker.setRectangle(self.rectangle_8)
+        stacking_position = self.stacker.computeStackingPosition()
+        self.rectangle_8.setPosition(stacking_position)
+        self.grid_1.addRectangle(self.rectangle_8)
+        self.stacker.setRectangle(self.rectangle_9)
+        stacking_position = self.stacker.computeStackingPosition()
+        
+        self.assertEqual(stacking_position[0], 100)
+        self.assertEqual(stacking_position[1], 1125)
+        
+        
 if __name__ == '__main__':
     unittest.main()
