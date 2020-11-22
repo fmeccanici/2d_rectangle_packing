@@ -1,5 +1,5 @@
 from rectangle_packing.rectangle import Rectangle
-from rectangle_packing.stacked_grid import StackedGrid
+from rectangle_packing.grid import Grid
 from rectangle_packing.database_manager import DatabaseManager
 from rectangle_packing.excel_parser import *
 
@@ -38,7 +38,7 @@ class Stacker(object):
 
         # current rectangle to stack in current grid
         self.rectangle = Rectangle()
-        self.grid = StackedGrid()
+        self.grid = Grid()
 
         # stacking position of current rectangle
         self.stacking_position = []
@@ -235,14 +235,14 @@ class Stacker(object):
 
     def createAndAddNewGrid(self, width=100, brand='kokos', color='naturel'):
         try:
-            grid = StackedGrid(width=width, height=1500, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
+            grid = Grid(width=width, height=1500, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
             self.grids.append(grid)
 
             self.db_manager.addGrid(grid)
             print("Created and added new grid to database")
 
         except IndexError:
-            grid = StackedGrid(width=200, height=1500, name=1)
+            grid = Grid(width=200, height=1500, name=1)
             self.grids.append(grid)
             self.db_manager.addGrid(grid)
             print("Created and added initial grid to database")

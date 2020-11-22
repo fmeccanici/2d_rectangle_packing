@@ -1,6 +1,6 @@
 # import own classes
 from rectangle_packing.rectangle import Rectangle
-from rectangle_packing.stacked_grid import StackedGrid
+from rectangle_packing.grid import Grid
 
 # external dependencies
 import pymongo
@@ -84,14 +84,14 @@ class DatabaseManager(object):
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
-            grid = StackedGrid(width=width, height=1500, name=unique_name, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=unique_name, brand=brand, color=color)
             self.addGrid(grid)
 
         except IndexError:
             print("No grids available yet")
             print("Creating first grid")
 
-            grid = StackedGrid(width=width, height=1500, name=1, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=1, brand=brand, color=color)
             self.addGrid(grid)
             
         return grid
@@ -118,7 +118,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], name=document['name'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -134,7 +134,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -150,7 +150,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -167,7 +167,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -184,7 +184,7 @@ class DatabaseManager(object):
 
         for document in cursor:
                 print("Loaded grid " + str(document["name"]) + " from database")
-                grid = StackedGrid(document['width'], document['height'], document['name'])
+                grid = Grid(document['width'], document['height'], document['name'])
                 rectangles = self.getRectangles(grid)
                 grid.setStackedRectangles(rectangles)
                 grids.append(grid)
@@ -196,7 +196,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             if for_cutting == True:
                 rectangles = self.getRectangles(grid, for_cutting)
             else:
@@ -215,7 +215,7 @@ class DatabaseManager(object):
 
             for document in cursor:
                     print("Loaded grid " + str(document["name"]) + " from database")
-                    grid = StackedGrid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+                    grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                     rectangles = self.getRectangles(grid)
                     grid.setStackedRectangles(rectangles)
                     
@@ -417,7 +417,7 @@ class DatabaseManager(object):
 if __name__ == "__main__":
     db_manager = DatabaseManager()
     db_list = db_manager.client.list_database_names()
-    if "stacked_grids_database" in db_list:
+    if "grids_database" in db_list:
         print("database exists")
     
     # r = Rectangle([0,0], 1, 1, '1')

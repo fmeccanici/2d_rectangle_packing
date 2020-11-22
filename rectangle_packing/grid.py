@@ -25,21 +25,33 @@ class InvalidGridPositionError(Error):
     """Raised when rectangle has invalid grid position"""
     pass
 
-class StackedGrid(object):
+class Grid(object):
     def __init__(self, width=-1, height=-1, name="-1", brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.width = width
         self.height = height
         self.name = name
         self.brand = brand
         self.color = color
-
-        self.stacked_rectangles = stacked_rectangles
         self.is_full = is_full
         self.is_cut = is_cut
 
+        self.stacked_rectangles = stacked_rectangles
         self.points = []
         self.lines = []
+        
+        self.min_rectangle_width = 100 #cm
+        self.min_rectangle_height = 50 #cm
+        self.max_rectangle_width = 200 #cm
+        self.max_rectangle_height = 1500 #cm
 
+        self.initDxfDrawing()
+
+    def initDxfDrawing(self):
+        self.createDxfFilePath()
+        self.dxf_drawing = dxf.drawing(self.dxf_file_path)
+
+
+    def createDxfFilePath(self):
         today = datetime.date.today()
         hour = datetime.datetime.now().hour
 
@@ -49,16 +61,9 @@ class StackedGrid(object):
 
         self.dxf_path = desktop + "/grids/" + datum + "/"
         self.dxf_file_path = self.dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
-
+        
         if not os.path.exists(self.dxf_path):
             os.makedirs(self.dxf_path)
-
-        self.dxf_drawing = dxf.drawing(self.dxf_file_path)
-
-        self.min_rectangle_width = 100 #cm
-        self.min_rectangle_height = 50 #cm
-        self.max_rectangle_width = 200 #cm
-        self.max_rectangle_height = 1500 #cm
 
     def getWidth(self):
         return self.width
