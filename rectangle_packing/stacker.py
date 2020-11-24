@@ -13,10 +13,6 @@ class Error(Exception):
     """Base class for other exceptions"""
     pass
 
-class InvalidGridPositionError(Error):
-    """Raised when rectangle has invalid grid position"""
-    pass
-
 class RectangleDoesNotFitError(Error):
     """Raised when rectangle does not fit in grid"""
     pass
@@ -25,11 +21,14 @@ class GridFullError(Error):
     """Raised when grid is full"""
     pass
 
-"""
-Contains algorithm for stacking rectangles in a 2D grid. First the rectangles should be sorted
-using computeRectangleOrderArea, after which they can be stacked using computeStackingPosition
-"""
+
 class Stacker(object):
+    """
+    Contains the algorithm for stacking rectangles in a grid in 2D. The rectangles are first sorted at centimeter accuracy. First the rectangles are sorted
+    using in descending order based on the area, after which they are stacked to the most lower left position. After that the rectangles are shrunken to their exact
+    millimeter size and moved left and downwards until they cannot be moved further. The result is a millimeter accuracy stacked grid.
+    """
+
     def __init__(self):
         self.db_manager = DatabaseManager()
 
@@ -54,12 +53,9 @@ class Stacker(object):
     
     def stackingStopped(self):
         return not self.is_stacking
-    
+
     def stopStacking(self):
         self.is_stacking = False
-
-    def startStacking(self):
-        self.is_stacking = True
 
     def setGrid(self, grid):
         self.grid = grid
@@ -67,16 +63,17 @@ class Stacker(object):
     def getGrid(self, grid):
         return self.grid
 
-    def exportCoupages(self):
-        coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
-        for coupage in coupages:
-            coupage.toDxf(for_prime_center=True, coupage=True)
-            coupage.setStacked()
-            self.db_manager.updateRectangle(coupage)
-
     def start(self, automatic=True):        
+        """ 
+        Starts stacking the current unstacked rectangles from database in self.grid
+
+        Parameters
+        -----------
+        automatic: Automatically create grids when not available and stack all unstacked rectangles in these grids (loop over all the grids instead of only self.grid)
+        When automatic is false, the user should manually set a grid to be used for stacking.
+        """
         self.exportCoupages()
-        self.startStacking()
+        self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()
 
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
@@ -91,15 +88,23 @@ class Stacker(object):
 
             for grid in self.grids:
                 self.setGrid(grid)
-                self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesOnArea()
+                self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea()
 
                 self.stackUnstackedRectanglesInGrid()
                 self.optimizeAndExportGrid()
 
+                # break out of loop when operator presses stop button
                 if self.stackingStopped():
                     break
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
+
+   def exportCoupages(self):
+        coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
+        for coupage in coupages:
+            coupage.toDxf(for_prime_center=True, coupage=True)
+            coupage.setStacked()
+            self.db_manager.updateRectangle(coupage)
 
     def loadOrdersAndAddToDatabase(self):
         try:
@@ -132,8 +137,8 @@ class Stacker(object):
             if not self.isGridAvailable(rectangle):
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
-    def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesOnArea(self):
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor())
+    def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea(self):
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand(), grid_width=self.grid.getWidth())
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
     def getAllUnstackedRectanglesFromDatabaseAndSortOnArea(self):
@@ -272,10 +277,15 @@ class Stacker(object):
                 break
 
     def computeStackingPositionAndUpdateDatabase(self):
+        # check both the original rectangle and rotated original
+        # TODO separate this into two functions
+
         self.stacking_position = self.computeStackingPosition()
         self.rectangle.rotate()
         self.stacking_position_rotated = self.computeStackingPosition()
     
+        # check which one is more optimal and use this as stacking position
+        # TODO move this to another function
         if np.linalg.norm(self.stacking_position_rotated) < np.linalg.norm(self.stacking_position):
             self.stacking_position = self.stacking_position_rotated
 

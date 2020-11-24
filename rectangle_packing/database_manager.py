@@ -249,9 +249,12 @@ class DatabaseManager(object):
         client_name = rectangle.getClientName()
         coupage_batch = rectangle.getCoupageBatch()
 
+        # ceiled with height needed to first stack the rectangles on cm accuracy
         w = int(np.ceil(width))
         h = int(np.ceil(height))
         
+        # need to round the to the upper integer divisible by 2, for example width/2 is used in the computeStacking position loop.
+        # this cannot be 0.5
         if w % 2 > 0:
             w += 1
         
