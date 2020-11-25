@@ -44,6 +44,10 @@ class Grid(object):
         self.points = []
         self.lines = []
 
+    def setDxfDrawing(self, path, file_name):
+        self.dxf_file_path = path + file_name
+        self.dxf_drawing = dxf.drawing(self.dxf_file_path)
+
     def initEmptyDxfDrawing(self):
         self.createDxfFilePath()
         self.dxf_drawing = dxf.drawing(self.dxf_file_path)

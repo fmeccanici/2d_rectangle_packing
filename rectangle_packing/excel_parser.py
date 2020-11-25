@@ -259,6 +259,7 @@ class ExcelParser():
 
     def getGridWidth(self, row):
         grid_width = row["Rolbreedte"]
+        print(grid_width)
         if grid_width == np.nan or grid_width == "" or grid_width is None:
             raise InvalidGridWidthError
 

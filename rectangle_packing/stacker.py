@@ -112,13 +112,9 @@ class Stacker(object):
     def loadOrdersAndAddToDatabase(self):
         try:
             self.unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
-            self.addToDatabase(self.unstacked_rectangles)
+            self.db_manager.addRectangles(self.unstacked_rectangles)
         except EmptyExcelError:
             print("Excel file is empty!")
-
-    def addToDatabase(self, rectangles):
-        for rectangle in rectangles:
-            self.db_manager.addRectangle(rectangle)
 
     def computeRectangleOrderArea(self, rectangles):
         areas = [x.getArea() for x in rectangles]
@@ -178,8 +174,10 @@ class Stacker(object):
         print("Optimizing grid and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
 
+        
         # empty before filling it with millimeter accuracy rectangles
         self.grid.empty()
+    
 
         # size to move rectangles in x and y direction
         step_size = 0.01

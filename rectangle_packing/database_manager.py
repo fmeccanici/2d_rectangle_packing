@@ -267,6 +267,10 @@ class DatabaseManager(object):
         document = self.createGridDocument(grid)
         self.grids_collection.insert(document)
 
+    def addRectangles(self, rectangles):
+        for rectangle in rectangles:
+            self.addRectangle(rectangle)
+
     def addRectangle(self, rectangle):
         try:
             document = self.createRectangleDocument(rectangle)

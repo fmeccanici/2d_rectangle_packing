@@ -32,6 +32,11 @@ To start the GUI via the command line "cd" into the 2d_rectangle_packing folder 
 ```
 python main.py
 ```
+### Example code
+Example code is provided that stacks a simple "paklijst". To run this, cd to the 2d_rectangle_stacking folder and execute the following command:
+```
+python -m example.example
+``` 
 
 ## Run tests
 To run the test navigate inside the 2d_rectangle_packing folder and execute the following command:
