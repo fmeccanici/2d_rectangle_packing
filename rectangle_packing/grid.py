@@ -111,7 +111,6 @@ class Grid(object):
         if self.isOutOfGrid(rectangle):
             return False
         
-
         for stacked_rectangle in self.stacked_rectangles:
             if rectangle.intersection(stacked_rectangle):
                 return False

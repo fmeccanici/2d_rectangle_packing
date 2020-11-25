@@ -94,7 +94,7 @@ class Stacker(object):
                 self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea()
 
                 self.stackUnstackedRectanglesInGrid()
-                self.optimizeAndExportGrid()
+                self.convertRectanglesToMillimetersOptimizeAndExportGrid()
 
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
@@ -174,15 +174,21 @@ class Stacker(object):
         except RotatedAndOriginalRectangleDoNotFitError:
             print("Something went wrong, rectangle does not fit in completely new grid")
 
-    def optimizeAndExportGrid(self):
+    def convertRectanglesToMillimetersOptimizeAndExportGrid(self):
         print("Optimizing grid and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
-        
+
+        # empty before filling it with millimeter accuracy rectangles
+        self.grid.empty()
+
+        # size to move rectangles in x and y direction
         step_size = 0.01
 
         for exact_rectangle in self.exact_rectangles:
             self.is_optimized_x = False
             self.is_optimized_y = False
+
+            # copy needed because otherwise variables have the same address
             self.optimized_rectangle = copy.deepcopy(exact_rectangle)
 
             while not self.is_optimized_x:

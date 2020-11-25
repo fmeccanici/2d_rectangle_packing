@@ -24,7 +24,7 @@ And install the required Python packages using the following command:
 pip install -r requirements.txt
 ```
 
-### Running the application 
+## Running the application 
 To run the application double click on the Stacker shortcut present inside the 2d_rectangle_packing folder, which starts the GUI. This shortcut can be moved to the Desktop for convenience. On the desktop a folder "paklijsten" should be created, where the paklijst is stored that is used to load the orders in the GUI.
 
 To start the GUI via the command line "cd" into the 2d_rectangle_packing folder and execute:
@@ -32,6 +32,7 @@ To start the GUI via the command line "cd" into the 2d_rectangle_packing folder 
 ```
 python main.py
 ```
+
 ## Run tests
 To run the test navigate inside the 2d_rectangle_packing folder and execute the following command:
 
