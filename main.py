@@ -1,7 +1,7 @@
 # my own classes
 from rectangle_packing.database_manager import DatabaseManager
 from rectangle_packing.grid import Grid
-from rectangle_packing.stacker import Stacker, InvalidGridPositionError
+from rectangle_packing.stacker import Stacker
 from rectangle_packing.rectangle import Rectangle
 from rectangle_packing.excel_parser import ExcelParser
 from rectangle_packing.helper import Helper

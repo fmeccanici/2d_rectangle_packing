@@ -102,7 +102,7 @@ class Stacker(object):
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
-   def exportCoupages(self):
+    def exportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
         for coupage in coupages:
             coupage.toDxf(for_prime_center=True, coupage=True)
