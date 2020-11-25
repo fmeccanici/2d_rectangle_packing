@@ -66,7 +66,7 @@ class Stacker(object):
     def getGrid(self, grid):
         return self.grid
 
-    def start(self, automatic=True):        
+    def start(self, automatic=True):     
         """ 
         Starts stacking the current unstacked rectangles from database in self.grid
 
@@ -75,6 +75,7 @@ class Stacker(object):
         automatic: Automatically create grids when not available and stack all unstacked rectangles in these grids (loop over all the grids instead of only self.grid)
         When automatic is false, the user should manually set a grid to be used for stacking.
         """
+
         self.exportCoupages()
         self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()
@@ -177,7 +178,6 @@ class Stacker(object):
         
         # empty before filling it with millimeter accuracy rectangles
         self.grid.empty()
-    
 
         # size to move rectangles in x and y direction
         step_size = 0.01
