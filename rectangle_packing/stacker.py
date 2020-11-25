@@ -259,6 +259,7 @@ class Stacker(object):
                     self.stackOriginalOrRotatedRectangleAndUpdateDatabase()
 
                 except RotatedAndOriginalRectangleDoNotFitError:
+                    print("Both rotated and original do not fit in grid")
                     self.createNewGridAndStackRectangle()
                     continue
             else: 
