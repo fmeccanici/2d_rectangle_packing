@@ -303,7 +303,7 @@ class Stacker(object):
             raise RectangleDoesNotFitError
 
         self.stackRectangle()
-
+    
     def stackRectangle(self):
         self.rectangle.setPosition(self.stacking_position)
 
