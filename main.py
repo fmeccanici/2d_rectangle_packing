@@ -273,7 +273,7 @@ class Gui(QWidget):
         self.stacker.setExcelParser(path, file_name)
         
         unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
-        self.stacker.addToDatabase(unstacked_rectangles)
+        self.db_manager.addRectangles(unstacked_rectangles)
         self.refreshNewOrders()
     
     def onClearNewOrdersClick(self):
