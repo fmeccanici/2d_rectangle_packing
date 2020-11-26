@@ -137,7 +137,7 @@ class Stacker(object):
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea(self):
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor())
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand(), grid_width=self.grid.getWidth())
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
     def getAllUnstackedRectanglesFromDatabaseAndSortOnArea(self):
@@ -253,16 +253,13 @@ class Stacker(object):
         for rectangle in self.unstacked_rectangles:
             self.setRectangle(rectangle)
             
-            if self.rectangleAndGridPropertiesMatch():
-                try:
-                    self.stackOriginalOrRotatedRectangleAndUpdateDatabase()
+            try:
+                self.stackOriginalOrRotatedRectangleAndUpdateDatabase()
 
-                except RotatedAndOriginalRectangleDoNotFitError:
-                    print("Both rotated and original do not fit in grid")
-                    self.createNewGridAndStackRectangle()
-                    continue
-            else: 
-                print("Grid properties don't match with rectangle")
+            except RotatedAndOriginalRectangleDoNotFitError:
+                print("Both rotated and original do not fit in grid")
+                self.createNewGridAndStackRectangle()
+                continue
 
             # stop the loop if user presses stop button
             if self.stackingStopped():
@@ -273,7 +270,6 @@ class Stacker(object):
         self.updateUnstackedRectangleInDatabase()
 
     def chooseOriginalOrRotatedRectangle(self):
-
         try:
             self.computeRotatedRectangleStackingPosition()
         except RectangleDoesNotFitError:

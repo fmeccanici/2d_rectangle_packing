@@ -369,9 +369,10 @@ class DatabaseManager(object):
         print("loading backup from " + str(datetime))
 
     def getUnstackedRectangles(self, brand='kokos', color='all', grid_width='all', for_cutting=False, coupage_batch="batch"):
-        if color != 'all':
+        if color != 'all' and brand != 'all' and grid_width != 'all':
             rectangles_dict = self.rectangles_collection.find({
-                "isStacked" : {"$eq" : False}, "color": color, "coupage_batch": coupage_batch
+                "isStacked" : {"$eq" : False}, "color": color, "coupage_batch": coupage_batch,
+                "brand": brand, "grid_width": grid_width
             })
         else:
             rectangles_dict = self.rectangles_collection.find({
