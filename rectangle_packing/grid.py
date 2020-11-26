@@ -134,14 +134,16 @@ class Grid(object):
         return False
 
     def toDxf(self, remove_duplicates=True, for_prime_center=False):
-        if remove_duplicates == True:
-            self.removeDuplicateLines(for_prime_center)
-            self.addLinesToDxf()            
-        else:
-            self.addRectanglesToDxf(for_prime_center)
+        try:
+            if remove_duplicates == True:
+                self.removeDuplicateLines(for_prime_center)
+                self.addLinesToDxf()            
+            else:
+                self.addRectanglesToDxf(for_prime_center)
 
-        self.dxf_drawing.save()
-
+            self.dxf_drawing.save()
+        except PermissionError:
+            print("DXF file opened in another program")
     """
     1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
     2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
