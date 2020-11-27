@@ -199,7 +199,14 @@ class DatabaseManager(object):
         
         return grids
 
+
     def getGrid(self, grid_number, for_cutting=False):
+        """ 
+        Parameters 
+        ----------
+        for_cutting: get the rectangles with the exact sizes (in mm)
+        """
+        
         query = {"name" : grid_number}
 
         cursor = self.grids_collection.find(query)

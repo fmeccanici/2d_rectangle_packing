@@ -63,7 +63,7 @@ class Stacker(object):
     def setGrid(self, grid):
         self.grid = grid
     
-    def getGrid(self, grid):
+    def getGrid(self):
         return self.grid
 
     def start(self, automatic=True):     
