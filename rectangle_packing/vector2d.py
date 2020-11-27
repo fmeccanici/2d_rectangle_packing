@@ -9,6 +9,4 @@ class Vector2d(object):
     
     def getY(self):
         return self.y
-
-    def __add__(self, other):
         
