@@ -85,13 +85,13 @@ class Rectangle(object):
         return self.width
     
     def setWidth(self, width):
-        self.width = int(width)
+        self.width = width
 
     def getHeight(self):
         return self.height
 
     def setHeight(self, height):
-        self.height = int(height)
+        self.height = height
 
     def getPosition(self):
         return self.position
