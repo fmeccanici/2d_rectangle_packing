@@ -437,14 +437,3 @@ class DatabaseManager(object):
         grid.setUncut()
         self.updateGrid(grid)
 
-if __name__ == "__main__":
-    db_manager = DatabaseManager()
-    db_list = db_manager.client.list_database_names()
-    if "grids_database" in db_list:
-        print("database exists")
-    
-    # r = Rectangle([0,0], 1, 1, '1')
-    # db_manager.addRectangle(r)
-    # db_manager.makeBackup()
-    db_manager.getGridsNotFull()
-    # db_manager.loadBackup("27-09-2020-11:00:20")

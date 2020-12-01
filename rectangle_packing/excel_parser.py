@@ -266,11 +266,3 @@ class ExcelParser():
         grid_width = int(grid_width)
 
         return grid_width
-
-if __name__ == "__main__":
-    desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
-    path = desktop + "/paklijsten/"
-    file_name = "paklijst_bug_2_aantal_ambiant.xlsx"
-
-    parser = ExcelParser(path, file_name)
-    parser.getOrders()

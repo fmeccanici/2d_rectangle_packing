@@ -377,10 +377,5 @@ class Stacker(object):
     def getVerticalLoopRange(self):
         return reversed(range(int(self.rectangle.height/2), int(self.grid.getHeight() - self.rectangle.height/2) + 1))        
 
-
-if __name__ == "__main__":
-    stacker = Stacker()
-    stacker.start()    
-
     
 
