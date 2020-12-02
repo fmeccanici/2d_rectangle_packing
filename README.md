@@ -1,5 +1,5 @@
 # Stacker
-This is a Python package uses to stack rectangles in a grid in 2D, which is tested on Python 3.9.0.
+This is a Python package is used to stack rectangles in a grid in 2D, which is tested on Python 3.9.0.
 
 ## Setup on Windows
 First this package should be cloned somewhere on your harddisk:
@@ -13,7 +13,7 @@ This package uses MongoDB as database to store the rectangles and grids. To inst
 ### Python packages
 After MongoDB is present, the required Python dependencies should be installed. Create a virtual environment inside the 2d_rectangle_packing folder:
 ```
-python -m venv venv
+python3 -m venv venv
 ```
 Then activate this virtual environment:
 ```
@@ -21,7 +21,7 @@ Then activate this virtual environment:
 ```
 And install the required Python packages using the following command:
 ```
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 ```
 
 ## Running the application 
@@ -30,24 +30,24 @@ To run the application double click on the Stacker shortcut present inside the 2
 To start the GUI via the command line "cd" into the 2d_rectangle_packing folder and execute:
 
 ```
-python main.py
+python3 main.py
 ```
 ### Example code
 Example code is provided that stacks a simple "paklijst". To run this, cd to the 2d_rectangle_stacking folder and execute the following command:
 ```
-python -m example.example
+python3 -m example.example
 ``` 
 
 ## Run tests
 To run the test navigate inside the 2d_rectangle_packing folder and execute the following command:
 
 ```
-python -m unittest discover tests
+python3 -m unittest discover tests
 ```
 
 This should run all the test and show OK for each test. To run a single test use, e.g. test_stacker.py, execute the following command:
 ```
-python -m unittest tests.test_stacker
+python3 -m unittest tests.test_stacker
 ```
 
 

@@ -57,6 +57,9 @@ class Stacker(object):
     def stackingStopped(self):
         return not self.is_stacking
 
+    def startStacking(self):
+        self.is_stacking = True
+
     def stopStacking(self):
         self.is_stacking = False
 
