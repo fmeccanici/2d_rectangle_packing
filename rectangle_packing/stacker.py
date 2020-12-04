@@ -97,19 +97,20 @@ class Stacker(object):
                 self.setGrid(grid)
                 self.getUnstackedRectanglesFromDatabaseMatchingAllGridPropertiesSortedOnArea()
                 self.stackUnstackedRectanglesInGrid()
-                
+
+                self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
+                # set height to heighest point because we only want to stack in the gaps
+                # of the stack, not add more at the top
+
+                self.grid.setHeight(self.grid.getHighestVerticalPoint())
+                self.stackUnstackedRectanglesInGrid()
+                # self.stackStandardRectangles()
+                self.grid.setHeight(1500)
+
                 # if grid is empty it is not used to stack
                 # it created a grid that is not used
                 # so dont stack other rectangles in this grid
                 if not self.grid.isEmpty():
-                    self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
-                    # set height to heighest point because we only want to stack in the gaps
-                    # of the stack, not add more at the top
-
-                    self.grid.setHeight(self.grid.getHighestVerticalPoint())
-                    self.stackUnstackedRectanglesInGrid()
-                    self.stackStandardRectangles()
-                    self.grid.setHeight(1500)
                     self.convertRectanglesToMillimetersOptimizeAndExportGrid()
                     print(self.grid.getUncutArea())
 
