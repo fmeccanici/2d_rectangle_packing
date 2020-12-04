@@ -179,5 +179,6 @@ class StackerTest(unittest.TestCase):
         grid_1 = self.stacker.db_manager.getGrid(1, for_cutting=True)
 
         self.assertEqual(round(grid_1.getUncutArea(), 2), 5115.00) 
+        
 if __name__ == '__main__':
     unittest.main()

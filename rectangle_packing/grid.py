@@ -117,16 +117,16 @@ class Grid(object):
     def getUncutArea(self):
         uncut_area = self.getWidth() * self.getHighestVerticalPoint()
 
-        print("Uncut area")
-        print(uncut_area)
-        print(self.getWidth())
-        print(self.getHighestVerticalPoint())
-        print()
+        # print("Uncut area")
+        # print(uncut_area)
+        # print(self.getWidth())
+        # print(self.getHighestVerticalPoint())
+        # print()
         for rectangle in self.stacked_rectangles:
-            print("r width = " + str(rectangle.getWidth()))
-            print("r height = " + str(rectangle.getHeight()))
+            # print("r width = " + str(rectangle.getWidth()))
+            # print("r height = " + str(rectangle.getHeight()))
             uncut_area -= rectangle.getArea()
-        print(uncut_area)
+        # print(uncut_area)
 
         return uncut_area
     
@@ -136,9 +136,9 @@ class Grid(object):
     def getHighestVerticalPoint(self):
         highest_vertical_point = 0
         for rectangle in self.stacked_rectangles:
-            print()
-            print(rectangle.getTopLeft()[1])
-            print()
+            # print()
+            # print(rectangle.getTopLeft()[1])
+            # print()
             vertical_point = rectangle.getTopLeft()[1]
 
             if vertical_point > highest_vertical_point:

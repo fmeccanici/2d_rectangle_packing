@@ -119,9 +119,9 @@ class DatabaseManager(object):
     def convertGridsNotCutToDxf(self):
         grids_not_cut = self.getGridsNotCut()
         for grid in grids_not_cut:
-            grid.toDxf()
+            grid.toDxf()        
 
-    def getGridsNotCut(self):
+    def getGridsNotCut(self, sort=False):
         grids = []
 
         cursor = self.grids_collection.find({})
@@ -133,6 +133,11 @@ class DatabaseManager(object):
             if not grid.isCut():
                 print("Loaded grid " + str(document["name"]) + " from database")
                 grids.append(grid)
+
+        if sort == True:
+            grids = sorted(grids, key=lambda g: g.getWidth(), reverse=True)
+
+        print("Grid widths are " + str([grid.getWidth() for grid in grids]))
 
         return grids
 

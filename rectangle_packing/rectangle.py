@@ -37,6 +37,15 @@ class Rectangle(object):
         max_height = 1500
         return max_width, max_height
 
+    @staticmethod
+    def getStandardSizesSortedOnMostSold():
+        size_1 = (60, 80)
+        size_2 = (100, 80)
+        size_3 = (50, 80)
+        size_4 = (40, 70)
+
+        return size_1, size_2, size_3, size_4
+        
     def initEmptyDxfDrawing(self):
         hour = Helper.getCurrentHour()
         dxf_file_path = Helper.createAndGetDxfFolder() + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
