@@ -46,6 +46,7 @@ class GridTest(unittest.TestCase):
 
         self.rectangle_5.setPosition([76, 40])
         self.assertFalse(self.grid_2.isValidPosition(self.rectangle_5))
-    
+
+
 if __name__ == '__main__':
     unittest.main()

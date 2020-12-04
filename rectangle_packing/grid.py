@@ -96,6 +96,9 @@ class Grid(object):
     def setStackedRectangles(self, rectangles):
         self.stacked_rectangles = rectangles
 
+    def isEmpty(self):
+        return len(self.stacked_rectangles) == 0
+
     def empty(self):
         self.stacked_rectangles = []
         
@@ -111,6 +114,38 @@ class Grid(object):
     def setUncut(self):
         self.is_cut = False
 
+    def getUncutArea(self):
+        uncut_area = self.getWidth() * self.getHighestVerticalPoint()
+
+        print("Uncut area")
+        print(uncut_area)
+        print(self.getWidth())
+        print(self.getHighestVerticalPoint())
+        print()
+        for rectangle in self.stacked_rectangles:
+            print("r width = " + str(rectangle.getWidth()))
+            print("r height = " + str(rectangle.getHeight()))
+            uncut_area -= rectangle.getArea()
+        print(uncut_area)
+
+        return uncut_area
+    
+    def getArea(self):
+        return self.width * self.height
+
+    def getHighestVerticalPoint(self):
+        highest_vertical_point = 0
+        for rectangle in self.stacked_rectangles:
+            print()
+            print(rectangle.getTopLeft()[1])
+            print()
+            vertical_point = rectangle.getTopLeft()[1]
+
+            if vertical_point > highest_vertical_point:
+                highest_vertical_point = vertical_point 
+
+        return highest_vertical_point
+        
     def isValidPosition(self, rectangle):
         if self.isOutOfGrid(rectangle):
             return False

@@ -113,7 +113,7 @@ class ExcelParser():
     
     def getOrders(self):
         return self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam']]
-
+    
     def convertOrdersToRectangles(self, orders):
         unstacked_rectangles = []
         for index, row in orders.iterrows():

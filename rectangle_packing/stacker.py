@@ -94,16 +94,31 @@ class Stacker(object):
                 self.grids.append(self.grid)
 
             for grid in self.grids:
+                self.unstacked_rectangles = []
+
                 self.setGrid(grid)
                 self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea()
 
                 self.stackUnstackedRectanglesInGrid()
-                self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+                
+                if not grid.isEmpty():
+                    self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+                    print(self.grid.getUncutArea())  
+
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
                     break
-
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
+
+    def getUncutAreasOfGrids(self):
+        grids = self.db_manager.getGridsNotCut()
+        result = []
+
+        for grid in grids:
+            if not grid.isEmpty():
+                result.append(grid.getUncutArea())
+
+        return result
 
     def exportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
@@ -140,7 +155,11 @@ class Stacker(object):
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea(self):
-        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand(), grid_width=self.grid.getWidth())
+        unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand())
+        for rectangle in unstacked_rectangles:
+            if rectangle.getGridWidth() <= self.grid.getWidth():
+                self.unstacked_rectangles.append(rectangle)
+
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
     def getAllUnstackedRectanglesFromDatabaseAndSortOnArea(self):
@@ -193,6 +212,7 @@ class Stacker(object):
             while not self.is_optimized_y:
                 self.moveRectangleVertically(step_size)
 
+            self.db_manager.updateRectangle(self.optimized_rectangle)
             self.grid.addRectangle(self.optimized_rectangle)
 
         self.grid.toDxf(remove_duplicates=False, for_prime_center=True)

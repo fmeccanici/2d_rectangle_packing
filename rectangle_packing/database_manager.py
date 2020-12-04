@@ -136,10 +136,17 @@ class DatabaseManager(object):
 
         return grids
 
-    def getGridsNotCutByWidthBrandColor(self, width=100, brand='kokos', color='naturel'):
+    def getGridsNotCutByWidthBrandColor(self, width='all', brand='all', color='all'):
         grids = []
-        query = {"width": width, "brand": brand, "color": color}
-
+        
+        query = {}
+        if brand != 'all':
+            query["brand"] = brand
+        if color != 'all':
+            query["color"] = color    
+        if width != 'all':
+            query["width"] = width
+    
         cursor = self.grids_collection.find(query)
         for document in cursor:
             grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
@@ -171,8 +178,14 @@ class DatabaseManager(object):
 
     def getGridsCutByWidthBrandColor(self, width=100, brand='kokos', color='naturel'):
         grids = []
-        query = {"width": width, "brand": brand, "color": color}
-
+        query = {}
+        if brand != 'all':
+            query["brand"] = brand
+        if color != 'all':
+            query["color"] = color    
+        if grid_width != 'all':
+            query["grid_width"] = grid_width
+    
         cursor = self.grids_collection.find(query)
         for document in cursor:
             grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])

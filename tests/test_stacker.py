@@ -7,6 +7,8 @@ from rectangle_packing.rectangle import *
 from rectangle_packing.grid import *
 from rectangle_packing.excel_parser import *
 
+# be aware that these tests generate dxf files in the grids folder on the desktop
+# these should not be actually cut of course
 class StackerTest(unittest.TestCase):
 
     def setUp(self):
@@ -166,7 +168,16 @@ class StackerTest(unittest.TestCase):
         
         self.assertEqual(stacking_position[0], 100)
         self.assertEqual(stacking_position[1], 1125)
+    
+    def testGetUncutArea(self):
+        file_name = "paklijst_kokos.xlsx"
 
-        
+        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.db_manager.clearDatabase()
+        self.stacker.loadOrdersAndAddToDatabase()
+        self.stacker.start()
+        grid_1 = self.stacker.db_manager.getGrid(1, for_cutting=True)
+
+        self.assertEqual(round(grid_1.getUncutArea(), 2), 5115.00) 
 if __name__ == '__main__':
     unittest.main()
