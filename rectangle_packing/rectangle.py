@@ -44,8 +44,8 @@ class Rectangle(object):
         size_3 = (50, 80)
         size_4 = (40, 70)
 
-        return size_1, size_2, size_3, size_4
-        
+        return [size_1, size_2, size_3, size_4]
+
     def initEmptyDxfDrawing(self):
         hour = Helper.getCurrentHour()
         dxf_file_path = Helper.createAndGetDxfFolder() + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"

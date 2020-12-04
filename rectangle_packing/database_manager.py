@@ -53,6 +53,11 @@ class DatabaseManager(object):
         x = self.grids_collection.delete_many(query)
         print(x.deleted_count)
 
+    def removeRectangle(self, rectangle):
+        query = {"rectangle": rectangle.getName()}
+        y = self.rectangles_collection.delete_many(query)
+        print(y.deleted_count)
+
     def clearDatabase(self):
         try:
             self.client.drop_database("stacked_rectangles_database")            

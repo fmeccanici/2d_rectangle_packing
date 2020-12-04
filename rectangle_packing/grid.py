@@ -97,7 +97,10 @@ class Grid(object):
         self.stacked_rectangles = rectangles
 
     def isEmpty(self):
-        return len(self.stacked_rectangles) == 0
+        is_empty = len(self.stacked_rectangles)
+        print("Grid empty: " + str(is_empty))
+        print(str(len(self.stacked_rectangles)) + " rectangles")
+        return is_empty
 
     def empty(self):
         self.stacked_rectangles = []

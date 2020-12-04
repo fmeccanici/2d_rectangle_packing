@@ -97,16 +97,19 @@ class Stacker(object):
                 self.setGrid(grid)
                 self.getUnstackedRectanglesFromDatabaseMatchingAllGridPropertiesSortedOnArea()
                 self.stackUnstackedRectanglesInGrid()
-
-                self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
                 
-                # set height to heighest point because we only want to stack in the gaps
-                # of the stack, not add more at the top
-                self.grid.setHeight(self.grid.getHighestVerticalPoint())
-                self.stackUnstackedRectanglesInGrid()
-                self.grid.setHeight(1500)
+                # if grid is empty it is not used to stack
+                # it created a grid that is not used
+                # so dont stack other rectangles in this grid
+                if not self.grid.isEmpty():
+                    self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
+                    # set height to heighest point because we only want to stack in the gaps
+                    # of the stack, not add more at the top
 
-                if not grid.isEmpty():
+                    self.grid.setHeight(self.grid.getHighestVerticalPoint())
+                    self.stackUnstackedRectanglesInGrid()
+                    self.stackStandardRectangles()
+                    self.grid.setHeight(1500)
                     self.convertRectanglesToMillimetersOptimizeAndExportGrid()
                     print(self.grid.getUncutArea())
 
@@ -115,6 +118,29 @@ class Stacker(object):
                     break
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
+    def stackStandardRectangles(self):
+        print("Try stacking standard rectangles")
+        sizes = Rectangle.getStandardSizesSortedOnMostSold()
+
+        i = 1
+
+        for size in sizes:
+            while True:
+                if not self.stackingStopped():
+                    rectangle = Rectangle(width=size[0], height=size[1], client_name="Voorraad " + str(i), name="00000" + str(i))
+                    self.db_manager.addRectangle(rectangle)
+                    self.setRectangle(rectangle)
+
+                    try:
+                        self.stackOriginalOrRotatedRectangleAndUpdateDatabase()
+                    except RotatedAndOriginalRectangleDoNotFitError:
+                        self.db_manager.removeRectangle(rectangle)
+                        break
+                    
+                    i += 1
+                
+                else: break
+                     
     def getUncutAreasOfGrids(self):
         grids = self.db_manager.getGridsNotCut()
         result = []
