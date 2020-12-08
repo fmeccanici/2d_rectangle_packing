@@ -53,10 +53,17 @@ class InvalidMaterialError(Error):
     pass
 
 class ExcelParser():
-    def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx"):
+    def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx", sheet_name='paklijst_zonder_opmaak'):
         self.path = path
         self.file_name = file_name
         self.names = []
+        self.setSheetName(sheet_name)
+    
+    def getSheetName(self):
+        return self.sheet_name
+
+    def setSheetName(self, sheet_name):
+        self.sheet_name = sheet_name
 
     def setPath(self, path):
         self.path = path
@@ -89,10 +96,7 @@ class ExcelParser():
         self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
 
     def loadBasicExcel(self):
-        sheet_name = "Paklijst"
-        # sheet_name = "paklijst_zonder_opmaak"
-
-        self.df = pd.read_excel(self.path + self.file_name, sheet_name=sheet_name)        
+        self.df = pd.read_excel(self.path + self.file_name, sheet_name=self.sheet_name)        
         self.df[['Ordernummer']] = self.df[['Ordernummer']].astype(str)
 
     def parseDuplicateOrderNumbers(self):

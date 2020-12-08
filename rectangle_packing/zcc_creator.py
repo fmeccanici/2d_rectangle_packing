@@ -22,6 +22,7 @@ class ZccCreator(object):
         self.addGeometry()
         self.addLabel()
         self.addRegister()
+        
     def createInitialTemplate(self):
         self.root = ET.Element("ZCC_cmd", {"MessageID": "887", "CommandID": "jobdescription", 
         "xsi:noNamespaceSchemaLocation": "file:ZCC_cmd.xsd", "Version": "3026",

@@ -72,7 +72,7 @@ class Gui(QWidget):
         desktop = Helper.getDesktopPath()
         path = desktop + "/paklijsten/"
         file_name = "paklijst.xlsx"
-        self.excel_parser = ExcelParser(path, file_name)
+        self.excel_parser = ExcelParser(path, file_name, sheet_name='Paklijst')
         self.stacker.setExcelParser(path, file_name)
 
     # this creates the middle side of the GUI
