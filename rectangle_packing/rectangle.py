@@ -167,8 +167,6 @@ class Rectangle(object):
 
         return True
 
-    def toZcc(self):
-
     def toDxf(self, for_prime_center=True):
         rectangle_dxf = self.getRectangleDxf()
         label_dxf = self.getLabelDxf()
