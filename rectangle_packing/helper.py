@@ -24,7 +24,7 @@ class Helper(object):
         datum = today.strftime("%Y%m%d")
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
 
-        dxf_path = desktop + "/grids/" + datum + "/"
+        dxf_path = desktop + "/grids/" + datum
         if not os.path.exists(dxf_path):
             os.makedirs(dxf_path)
 
@@ -43,7 +43,7 @@ class Helper(object):
 
     @staticmethod
     def getDateTimeZcc():
-        return datetime.datetime.now().strftime("%d-%m-%Y" + "T" + "%H:%M:%S")
+        return datetime.datetime.now().strftime("%Y-%m-%d" + "T" + "%H:%M:%S")
 
     @staticmethod
     def getDateTimeToday():

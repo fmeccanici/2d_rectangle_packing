@@ -8,10 +8,11 @@ from dxfwrite import DXFEngine as dxf
 import random
 
 class Rectangle(object):
-    def __init__(self, width=-1, height=-1, name="-1", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
+    def __init__(self, width=-1, height=-1, name="-1", material="Kokos", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
         self.position = np.asarray(position)
         self.setWidth(width)
         self.setHeight(height)
+        self.setMaterial(material)
         self.setName(name)
         self.setBrand(brand)
         self.setColor(color)
@@ -48,13 +49,19 @@ class Rectangle(object):
 
     def initEmptyDxfDrawing(self):
         dxf_file_name = self.getDxfFileName()
-        dxf_file_path = Helper.createAndGetDxfFolder() + self.getDxfFileName()
+        dxf_file_path = Helper.createAndGetDxfFolder() + "/" + self.getDxfFileName()
         self.dxf_drawing = dxf.drawing(dxf_file_path)
 
     def getDxfFileName(self):
         hour = Helper.getCurrentHour()
-        return "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
-    
+        return str(hour) + "h" + "_" + str(self.getMaterial()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+
+    def getMaterial(self):
+        return self.material
+
+    def setMaterial(self, material):
+        self.material = material
+
     def setClientName(self, client_name):
         self.client_name = str(client_name)
     
@@ -167,8 +174,6 @@ class Rectangle(object):
 
         return True
 
-    def toZcc(self):
-
     def toDxf(self, for_prime_center=True):
         rectangle_dxf = self.getRectangleDxf()
         label_dxf = self.getLabelDxf()
@@ -176,6 +181,8 @@ class Rectangle(object):
         self.dxf_drawing.add(rectangle_dxf)
         self.dxf_drawing.add(label_dxf)
         
+        self.dxf_drawing.save()
+
     def getRectangleDxf(self, for_prime_center=True):
         x = self.getPosition()[0] - self.getWidth()/2
         y = self.getPosition()[1] - self.getHeight()/2
