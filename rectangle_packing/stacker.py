@@ -2,6 +2,7 @@ from rectangle_packing.rectangle import Rectangle
 from rectangle_packing.grid import Grid
 from rectangle_packing.database_manager import DatabaseManager
 from rectangle_packing.excel_parser import *
+from rectangle_packing.zcc_creator import ZccCreator
 
 import random
 import time
@@ -82,7 +83,8 @@ class Stacker(object):
         self.exportCoupages()
         self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()
-
+        
+        
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
@@ -117,7 +119,7 @@ class Stacker(object):
                 if self.stackingStopped():
                     break
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
-
+        
     def stackStandardRectangles(self):
         print("Try stacking standard rectangles")
         sizes = Rectangle.getStandardSizesSortedOnMostSold()
@@ -154,8 +156,10 @@ class Stacker(object):
     def exportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
         for coupage in coupages:
-            coupage.toDxf(for_prime_center=True, coupage=True)
+            coupage.toDxf(for_prime_center=True)
             coupage.setStacked()
+            self.zcc_creator = ZccCreator(coupage)
+            self.zcc_creator.save()
             self.db_manager.updateRectangle(coupage)
 
     def loadOrdersAndAddToDatabase(self):
