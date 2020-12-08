@@ -2,6 +2,7 @@ from rectangle_packing.rectangle import Rectangle
 from rectangle_packing.grid import Grid
 from rectangle_packing.database_manager import DatabaseManager
 from rectangle_packing.excel_parser import *
+from rectangle_packing.zcc_creator import ZccCreator
 
 import random
 import time
@@ -86,6 +87,7 @@ class Stacker(object):
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
+            print('check1')
             if automatic:
                 self.createGridInDatabaseIfNotAvailable()
                 self.grids = self.db_manager.getGridsNotCut()
@@ -108,6 +110,7 @@ class Stacker(object):
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
                     break
+                    
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
     def getUncutAreasOfGrids(self):
@@ -123,10 +126,12 @@ class Stacker(object):
     def exportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
         for coupage in coupages:
-            coupage.toDxf(for_prime_center=True, coupage=True)
+            coupage.toDxf(for_prime_center=True)
             coupage.setStacked()
+            self.zcc_creator = ZccCreator(coupage)
+            self.zcc_creator.save()
             self.db_manager.updateRectangle(coupage)
-
+            
     def loadOrdersAndAddToDatabase(self):
         try:
             self.unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
@@ -150,15 +155,18 @@ class Stacker(object):
         return self.unstacked_rectangles
 
     def createGridInDatabaseIfNotAvailable(self):
+        # input("?1")
+        print([r.getName() for r in self.unstacked_rectangles])
         for rectangle in self.unstacked_rectangles:
             if not self.isGridAvailable(rectangle):
+                print("Grid not available")
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea(self):
-        unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand())
-        for rectangle in unstacked_rectangles:
-            if rectangle.getGridWidth() <= self.grid.getWidth():
-                self.unstacked_rectangles.append(rectangle)
+        self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand(), grid_width=self.grid.getWidth())
+        # for rectangle in unstacked_rectangles:
+        #     if rectangle.getGridWidth() <= self.grid.getWidth():
+        #         self.unstacked_rectangles.append(rectangle)
 
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
 
@@ -187,6 +195,14 @@ class Stacker(object):
         self.db_manager.emptyGrid(new_grid)
 
         try:
+            print("Create new grid and stack rectangle")
+            print("Grid:")
+            print("Width = "+ str(new_grid.getWidth()))
+            print("Height = "+ str(new_grid.getHeight()))
+            print("Rectangle:")
+            print("Width = "+ str(self.rectangle.getGridWidth()))
+            print("Height = "+ str(self.rectangle.getHeight()))
+
             self.stackOriginalOrRotatedRectangleAndUpdateDatabase()
 
         except RotatedAndOriginalRectangleDoNotFitError:

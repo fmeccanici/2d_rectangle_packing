@@ -72,7 +72,7 @@ class Gui(QWidget):
         desktop = Helper.getDesktopPath()
         path = desktop + "/paklijsten/"
         file_name = "paklijst.xlsx"
-        self.excel_parser = ExcelParser(path, file_name)
+        self.excel_parser = ExcelParser(path, file_name, sheet_name='Paklijst')
         self.stacker.setExcelParser(path, file_name)
 
     # this creates the middle side of the GUI
@@ -97,7 +97,7 @@ class Gui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
-        self.excel_file_line_edit = QLineEdit("paklijst_kokos.xlsx")
+        self.excel_file_line_edit = QLineEdit("paklijst_zcc.xlsm")
         
         self.grid_color_label = QLabel("Color")
         self.grid_color_line_edit = QLineEdit("Naturel")
