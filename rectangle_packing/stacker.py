@@ -84,7 +84,7 @@ class Stacker(object):
         self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()
         
-        """
+        
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
@@ -119,7 +119,7 @@ class Stacker(object):
                 if self.stackingStopped():
                     break
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
-        """
+        
     def stackStandardRectangles(self):
         print("Try stacking standard rectangles")
         sizes = Rectangle.getStandardSizesSortedOnMostSold()
