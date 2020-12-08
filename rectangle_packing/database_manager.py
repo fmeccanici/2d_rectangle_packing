@@ -93,10 +93,18 @@ class DatabaseManager(object):
         return names
 
     def createUniqueGrid(self, width=100, brand='kokos', color='naturel'):
+        # input("?2")
+        print("Create unique grid")
+        print("Grid:")
+        print("Width = " + str(width))
+        print("Brand = " + str(brand))
+        print("Color = " + str(color))
+
         try:
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
+            print("Creating unique grid with number: " + str(unique_name))
             grid = Grid(width=width, height=1500, name=unique_name, brand=brand, color=color)
             self.addGrid(grid)
 
@@ -401,7 +409,7 @@ class DatabaseManager(object):
 
         print("loading backup from " + str(datetime))
 
-    def getUnstackedRectangles(self, brand='kokos', color='all', grid_width='all', for_cutting=False, coupage_batch="batch"):
+    def getUnstackedRectangles(self, brand='all', color='all', grid_width='all', for_cutting=False, coupage_batch="batch"):
         if color != 'all' and brand != 'all' and grid_width != 'all':
             rectangles_dict = self.rectangles_collection.find({
                 "isStacked" : {"$eq" : False}, "color": color, "coupage_batch": coupage_batch,
@@ -462,4 +470,3 @@ class DatabaseManager(object):
         grid.setStackedRectangles([])
         grid.setUncut()
         self.updateGrid(grid)
-

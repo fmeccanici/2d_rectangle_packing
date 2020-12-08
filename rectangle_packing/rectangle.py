@@ -243,8 +243,3 @@ class Rectangle(object):
 
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
-
-    
-    
-
-    

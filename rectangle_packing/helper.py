@@ -60,4 +60,3 @@ class Helper(object):
     @staticmethod
     def getCurrentWorkingDirectory():
         return os.getcwd()
-

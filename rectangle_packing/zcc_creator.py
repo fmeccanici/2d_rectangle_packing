@@ -88,5 +88,3 @@ class ZccCreator(object):
     
     def getBinPath(self):
         return Helper.createAndGetFolderOnDesktop('bin')
-
-  
