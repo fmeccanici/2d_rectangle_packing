@@ -31,7 +31,7 @@ class Helper(object):
         return dxf_path
     
     @staticmethod
-    def createFolderOnDesktop(folder_name):
+    def createAndGetFolderOnDesktop(folder_name):
         today = Helper.getDateTimeToday()
         desktop = Helper.getDesktopPath() 
 
@@ -39,10 +39,11 @@ class Helper(object):
         if not os.path.exists(path):
             os.makedirs(path)
 
+        return path
 
     @staticmethod
     def getDateTimeZcc():
-        return datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        return datetime.datetime.now().strftime("%d-%m-%Y" + "T" + "%H:%M:%S")
 
     @staticmethod
     def getDateTimeToday():

@@ -6,12 +6,14 @@ from datetime import datetime
 from xml.dom import minidom
 
 class ZccCreator(object):
-    def __init__(self, path=Helper.getDesktopPath()+'/grids/zcc_test/', 
-                dxf_file_name="10h_Forbo Coral_4721_Dhr. van Schie_120351181_coupage.dxf"):
+    def __init__(self, coupage):
+        self.zcc_path = Helper.createAndGetFolderOnDesktop('zcc')
+        self.coupage = coupage
+
         Helper.createFolderOnDesktop("zcc")
 
-        self.dxf_path = path
-        self.dxf_file_name = dxf_file_name
+        self.dxf_path = Helper.createAndGetDxfFolder()
+        self.dxf_file_name = self.coupage.getDxfFileName()
         self.dxf = ezdxf.readfile(self.dxf_path + self.dxf_file_name)
         self.createInitialTemplate()
 
@@ -32,14 +34,10 @@ class ZccCreator(object):
         "Version": "3.2.6.9", "Date": Helper.getDateTimeZcc()})
 
     def save(self):
-        xmlstr = minidom.parseString(ET.tostring(self.root)).toprettyxml(indent = "   ")
-        print(self.getZccPath() + self.dxf_file_name + ".zcc")
-        with open(self.getZccPath() + self.dxf_file_name + ".zcc", 'w+') as f:
-            f.write(xmlstr)
 
-        # tree = ET.ElementTree(self.root)
-        # tree.write(self.getZccPath() + self.dxf_file_name + ".zcc", xml_declaration=True, encoding='utf-8')
-        print(xmlstr)
+        xmlstr = minidom.parseString(ET.tostring(self.root)).toprettyxml(indent = "   ", encoding='UTF-8')
+        with open(self.getZccPath() + self.dxf_file_name + ".zcc", 'wb+') as f:
+            f.write(xmlstr)
         
     def getZccPath(self):
         today = Helper.getDateTimeToday()

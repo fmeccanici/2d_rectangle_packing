@@ -47,10 +47,14 @@ class Rectangle(object):
         return [size_1, size_2, size_3, size_4]
 
     def initEmptyDxfDrawing(self):
-        hour = Helper.getCurrentHour()
-        dxf_file_path = Helper.createAndGetDxfFolder() + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        dxf_file_name = self.getDxfFileName()
+        dxf_file_path = Helper.createAndGetDxfFolder() + self.getDxfFileName()
         self.dxf_drawing = dxf.drawing(dxf_file_path)
 
+    def getDxfFileName(self):
+        hour = Helper.getCurrentHour()
+        return "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+    
     def setClientName(self, client_name):
         self.client_name = str(client_name)
     
@@ -162,6 +166,8 @@ class Rectangle(object):
             return False
 
         return True
+
+    def toZcc(self):
 
     def toDxf(self, for_prime_center=True):
         rectangle_dxf = self.getRectangleDxf()
