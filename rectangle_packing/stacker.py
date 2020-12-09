@@ -99,6 +99,7 @@ class Stacker(object):
                 self.unstacked_rectangles = []
 
                 self.setGrid(grid)
+                print("self.grid material = " + str(self.grid.getMaterial()))
                 self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea()
 
                 self.stackUnstackedRectanglesInGrid()
@@ -155,12 +156,11 @@ class Stacker(object):
         return self.unstacked_rectangles
 
     def createGridInDatabaseIfNotAvailable(self):
-        # input("?1")
-        print([r.getName() for r in self.unstacked_rectangles])
         for rectangle in self.unstacked_rectangles:
             if not self.isGridAvailable(rectangle):
                 print("Grid not available")
-                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), color=rectangle.getColor(), brand=rectangle.getBrand())
+                print("Create unique grid with material " + str(rectangle.getMaterial()))
+                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), material=rectangle.getMaterial(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea(self):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand(), grid_width=self.grid.getWidth())
@@ -186,8 +186,8 @@ class Stacker(object):
 
     def createNewGridAndStackRectangle(self):
 
-        new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), brand=self.rectangle.getBrand(),
-                    color=self.rectangle.getColor())
+        new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), material=self.rectangle.getMaterial(),
+        brand=self.rectangle.getBrand(), color=self.rectangle.getColor())
         
         self.setGrid(new_grid)
 
@@ -270,9 +270,9 @@ class Stacker(object):
         else:
             print("Moved y to " + str(y_new))
 
-    def createAndAddNewGrid(self, width=100, brand='kokos', color='naturel'):
+    def createAndAddNewGrid(self, width=100, material='kokos', brand='kokos', color='naturel'):
         try:
-            grid = Grid(width=width, height=1500, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
+            grid = Grid(width=width, height=1500, material=material, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
             self.grids.append(grid)
 
             self.db_manager.addGrid(grid)

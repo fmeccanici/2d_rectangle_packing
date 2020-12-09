@@ -92,27 +92,20 @@ class DatabaseManager(object):
         
         return names
 
-    def createUniqueGrid(self, width=100, brand='kokos', color='naturel'):
-        # input("?2")
-        print("Create unique grid")
-        print("Grid:")
-        print("Width = " + str(width))
-        print("Brand = " + str(brand))
-        print("Color = " + str(color))
-
+    def createUniqueGrid(self, width=100, material='kokos', brand='kokos', color='naturel'):
         try:
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
             print("Creating unique grid with number: " + str(unique_name))
-            grid = Grid(width=width, height=1500, name=unique_name, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=unique_name, material=material, brand=brand, color=color)
             self.addGrid(grid)
 
         except IndexError:
             print("No grids available yet")
             print("Creating first grid")
 
-            grid = Grid(width=width, height=1500, name=1, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=1, material=material, brand=brand, color=color)
             self.addGrid(grid)
             
         return grid
@@ -122,12 +115,13 @@ class DatabaseManager(object):
         height = grid.getHeight()
         num_rectangles = grid.getNumStackedRectangles()
         name = grid.getName()
+        material = grid.getMaterial()
         brand = grid.getBrand()
         color = grid.getColor()
         is_full = grid.isFull()
         is_cut = grid.isCut()
 
-        return { "name": name, "width": width, "height": height, "brand": brand, "color": color, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+        return { "name": name, "width": width, "height": height, "material": material, "brand": brand, "color": color, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
     def convertGridsNotCutToDxf(self):
         grids_not_cut = self.getGridsNotCut()
@@ -139,7 +133,8 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], name=document['name'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
+            print("getGridsNotCut material = " + str(document['material']))
+            grid = Grid(width=document['width'], height=document['height'], name=document['name'], material=document['material'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -167,7 +162,7 @@ class DatabaseManager(object):
     
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -183,7 +178,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -206,7 +201,7 @@ class DatabaseManager(object):
     
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], material=document['material'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -223,7 +218,7 @@ class DatabaseManager(object):
 
         for document in cursor:
                 print("Loaded grid " + str(document["name"]) + " from database")
-                grid = Grid(document['width'], document['height'], document['name'])
+                grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                 rectangles = self.getRectangles(grid)
                 grid.setStackedRectangles(rectangles)
                 grids.append(grid)
@@ -242,7 +237,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             if for_cutting == True:
                 rectangles = self.getRectangles(grid, for_cutting)
             else:
@@ -261,7 +256,7 @@ class DatabaseManager(object):
 
             for document in cursor:
                     print("Loaded grid " + str(document["name"]) + " from database")
-                    grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+                    grid = Grid(width=document['width'], height=document['height'], material=document['material'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                     rectangles = self.getRectangles(grid)
                     grid.setStackedRectangles(rectangles)
                     

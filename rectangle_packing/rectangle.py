@@ -54,7 +54,8 @@ class Rectangle(object):
 
     def getDxfFileName(self):
         hour = Helper.getCurrentHour()
-        return str(hour) + "h" + "_" + str(self.getMaterial()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        return str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        # return str(hour) + "h" + "_" + str(self.getMaterial()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
 
     def getMaterial(self):
         return self.material

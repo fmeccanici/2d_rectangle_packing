@@ -27,10 +27,11 @@ class InvalidGridPositionError(Error):
     pass
 
 class Grid(object):
-    def __init__(self, width=-1, height=-1, name="-1", brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width=-1, height=-1, name="-1", material='kokos', brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.setWidth(width)
         self.setHeight(height)
         self.setName(name)
+        self.setMaterial(material)
         self.setBrand(brand)
         self.setColor(color)
         self.setStackedRectangles(stacked_rectangles)
@@ -56,6 +57,7 @@ class Grid(object):
         dxf_path = Helper.createAndGetDxfFolder()
         hour = Helper.getCurrentHour()
         self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
+        # self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getMaterial() + "_" + str(self.getWidth()) + "cm" + ".dxf"
         
     def getWidth(self):
         return self.width
@@ -74,6 +76,12 @@ class Grid(object):
     
     def setName(self, name):
         self.name = int(name)
+
+    def getMaterial(self):
+        return self.material
+
+    def setMaterial(self, material):
+        self.material = material
 
     def getBrand(self):
         return self.brand
