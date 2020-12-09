@@ -145,7 +145,7 @@ class Stacker(object):
             # side with largest length should point sidewards
             # in Prime center it will be rotated 90deg such that the 
             # largest side points upwards
-            coupage.toDxf(for_prime_center=False)
+            coupage.toDxf(for_prime_center=True)
             coupage.setStacked()
             self.zcc_creator = ZccCreator(coupage)
             self.zcc_creator.save()
