@@ -169,7 +169,8 @@ class StackerTest(unittest.TestCase):
         self.assertEqual(stacking_position[0], 100)
         self.assertEqual(stacking_position[1], 1125)
     
-    # somehow doesnt work anymore
+    # only turn on when working on more optimal stacking
+    # of smaller grid widths in larger ones
     """
     def testGetUncutArea(self):
         file_name = "paklijst_kokos.xlsx"

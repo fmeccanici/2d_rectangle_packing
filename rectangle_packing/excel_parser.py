@@ -145,14 +145,14 @@ class ExcelParser():
                         rectangle = Rectangle(width=width, height=height, name=name+'-'+str(i), material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
                         unstacked_rectangles.append(rectangle)
                 else:   
-                    # cut rectangle in two         
+                    # cut rectangle in two when width and height are larger then grid width        
                     if width > grid_width and height > grid_width:
                         if width > height:
-                            rectangle_part1 = Rectangle(width=width/2.0, height=height, name=name+'part'+str(1), material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
-                            rectangle_part2 = Rectangle(width=width/2.0, height=height, name=name+'part'+str(2), material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
+                            rectangle_part1 = Rectangle(width=width/2.0, height=height, name=name+'part1', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part1", coupage_batch=coupage_batch)
+                            rectangle_part2 = Rectangle(width=width/2.0, height=height, name=name+'part2', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part2", coupage_batch=coupage_batch)
                         elif height > width:
-                            rectangle_part1 = Rectangle(width=width, height=height/2.0, name=name+'part'+str(1), material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
-                            rectangle_part2 = Rectangle(width=width, height=height/2.0, name=name+'part'+str(2), material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
+                            rectangle_part1 = Rectangle(width=width, height=height/2.0, name=name+'part1', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part1", coupage_batch=coupage_batch)
+                            rectangle_part2 = Rectangle(width=width, height=height/2.0, name=name+'part2', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part2", coupage_batch=coupage_batch)
 
                         unstacked_rectangles.append(rectangle_part1)
                         unstacked_rectangles.append(rectangle_part2)
