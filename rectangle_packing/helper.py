@@ -24,12 +24,27 @@ class Helper(object):
         datum = today.strftime("%Y%m%d")
         desktop = os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
 
-        dxf_path = desktop + "/grids/" + datum + "/"
+        dxf_path = desktop + "/grids/" + datum
         if not os.path.exists(dxf_path):
             os.makedirs(dxf_path)
 
         return dxf_path
     
+    @staticmethod
+    def createAndGetFolderOnDesktop(folder_name):
+        today = Helper.getDateTimeToday()
+        desktop = Helper.getDesktopPath() 
+
+        path = desktop + "/" + folder_name + "/" + today + "/"
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        return path
+
+    @staticmethod
+    def getDateTimeZcc():
+        return datetime.datetime.now().strftime("%Y-%m-%d" + "T" + "%H:%M:%S")
+
     @staticmethod
     def getDateTimeToday():
         return datetime.date.today().strftime("%Y%m%d")
@@ -41,3 +56,7 @@ class Helper(object):
     @staticmethod
     def getDesktopPath():
         return os.path.join(os.path.join(os.path.expanduser('~')), 'Desktop') 
+
+    @staticmethod
+    def getCurrentWorkingDirectory():
+        return os.getcwd()

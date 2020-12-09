@@ -27,10 +27,12 @@ class InvalidGridPositionError(Error):
     pass
 
 class Grid(object):
-    def __init__(self, width=-1, height=-1, name="-1", brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width=-1, height=-1, name="-1", article_name='default', material='kokos', brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.setWidth(width)
         self.setHeight(height)
         self.setName(name)
+        self.setArticleName(article_name)
+        self.setMaterial(material)
         self.setBrand(brand)
         self.setColor(color)
         self.setStackedRectangles(stacked_rectangles)
@@ -55,7 +57,9 @@ class Grid(object):
     def createDxfFilePath(self):
         dxf_path = Helper.createAndGetDxfFolder()
         hour = Helper.getCurrentHour()
-        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
+        print("Article name for export dxf = " + str(self.getArticleName()))
+        # self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
+        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getArticleName() + "_" + str(self.getWidth()) + "cm" + "_batch.dxf"
         
     def getWidth(self):
         return self.width
@@ -74,6 +78,19 @@ class Grid(object):
     
     def setName(self, name):
         self.name = int(name)
+
+    def getMaterial(self):
+        return self.material
+
+    def setMaterial(self, material):
+        self.material = material
+
+    def getArticleName(self):
+        return self.article_name
+
+    def setArticleName(self, article_name):
+        print("Setting article name of grid " + str(self.getName()) +  " to " + str(article_name))
+        self.article_name = article_name
 
     def getBrand(self):
         return self.brand
@@ -97,7 +114,7 @@ class Grid(object):
         self.stacked_rectangles = rectangles
 
     def isEmpty(self):
-        is_empty = len(self.stacked_rectangles)
+        is_empty = (len(self.stacked_rectangles) == 0)
         print("Grid empty: " + str(is_empty))
         print(str(len(self.stacked_rectangles)) + " rectangles")
         return is_empty
@@ -186,7 +203,6 @@ class Grid(object):
     1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
     2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
     than the current start x value, this is chosen as starting value x_start.  
-
     3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_end. Use the point with the lowest
     y value as y_start
     """

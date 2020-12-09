@@ -8,10 +8,12 @@ from dxfwrite import DXFEngine as dxf
 import random
 
 class Rectangle(object):
-    def __init__(self, width=-1, height=-1, name="-1", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
+    def __init__(self, width=-1, height=-1, name="-1", article_name='default', material="Kokos", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
         self.position = np.asarray(position)
         self.setWidth(width)
         self.setHeight(height)
+        self.setArticleName(article_name)
+        self.setMaterial(material)
         self.setName(name)
         self.setBrand(brand)
         self.setColor(color)
@@ -47,9 +49,27 @@ class Rectangle(object):
         return [size_1, size_2, size_3, size_4]
 
     def initEmptyDxfDrawing(self):
-        hour = Helper.getCurrentHour()
-        dxf_file_path = Helper.createAndGetDxfFolder() + "/" + str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        dxf_file_name = self.getDxfFileName()
+        dxf_file_path = Helper.createAndGetDxfFolder() + "/" + self.getDxfFileName()
         self.dxf_drawing = dxf.drawing(dxf_file_path)
+
+    def getDxfFileName(self):
+        hour = Helper.getCurrentHour()
+        return str(hour) + "h" + "_" + str(self.getArticleName()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        # return str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        # return str(hour) + "h" + "_" + str(self.getMaterial()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+
+    def getArticleName(self):
+        return self.article_name
+
+    def setArticleName(self, article_name):
+        self.article_name = article_name
+
+    def getMaterial(self):
+        return self.material
+
+    def setMaterial(self, material):
+        self.material = material
 
     def setClientName(self, client_name):
         self.client_name = str(client_name)
@@ -164,22 +184,24 @@ class Rectangle(object):
         return True
 
     def toDxf(self, for_prime_center=True):
-        rectangle_dxf = self.getRectangleDxf()
-        label_dxf = self.getLabelDxf()
+        rectangle_dxf = self.getRectangleDxf(for_prime_center)
+        label_dxf = self.getLabelDxf(for_prime_center)
 
         self.dxf_drawing.add(rectangle_dxf)
         self.dxf_drawing.add(label_dxf)
         
+        self.dxf_drawing.save()
+
     def getRectangleDxf(self, for_prime_center=True):
         x = self.getPosition()[0] - self.getWidth()/2
         y = self.getPosition()[1] - self.getHeight()/2
         width = self.getWidth()
         height = self.getHeight()
 
-        if self.isCoupage() and (height > width) and height <= self.getGridWidth():
-            # rotate when more optimal
-            width = self.getHeight()
-            height = self.getWidth()
+        # if self.isCoupage() and (height > width) and height <= self.getGridWidth():
+        #     # rotate when more optimal
+        #     width = self.getHeight()
+        #     height = self.getWidth()
 
         if for_prime_center == True:
             x = Helper.toMillimeters(x)
@@ -205,10 +227,10 @@ class Rectangle(object):
         width = self.getWidth()
         height = self.getHeight()
 
-        if self.isCoupage() and (height > width) and height <= self.getGridWidth():
-            # rotate when more optimal
-            width = self.getHeight()
-            height = self.getWidth()
+        # if self.isCoupage() and (height > width) and height <= self.getGridWidth():
+        #     # rotate when more optimal
+        #     width = self.getHeight()
+        #     height = self.getWidth()
 
         if for_prime_center == True:
             x = Helper.toMillimeters(x)
@@ -221,7 +243,7 @@ class Rectangle(object):
             text['layer'] = 'TEXT'
             text['color'] = '7'
         else:
-            text = dxf.text(str(self.getClientName()), (x, y), 100.0, rotation=0)
+            text = dxf.text(str(self.getClientName()), (x, y + height), 10.0, rotation=0)
 
             text['layer'] = 'TEXT'
             text['color'] = '7'
@@ -230,8 +252,3 @@ class Rectangle(object):
 
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
-
-    
-    
-
-    
