@@ -184,8 +184,8 @@ class Rectangle(object):
         return True
 
     def toDxf(self, for_prime_center=True):
-        rectangle_dxf = self.getRectangleDxf()
-        label_dxf = self.getLabelDxf()
+        rectangle_dxf = self.getRectangleDxf(for_prime_center)
+        label_dxf = self.getLabelDxf(for_prime_center)
 
         self.dxf_drawing.add(rectangle_dxf)
         self.dxf_drawing.add(label_dxf)
@@ -243,7 +243,7 @@ class Rectangle(object):
             text['layer'] = 'TEXT'
             text['color'] = '7'
         else:
-            text = dxf.text(str(self.getClientName()), (x, y), 100.0, rotation=0)
+            text = dxf.text(str(self.getClientName()), (x, y + height), 10.0, rotation=0)
 
             text['layer'] = 'TEXT'
             text['color'] = '7'

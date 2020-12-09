@@ -3,6 +3,7 @@ from rectangle_packing.grid import Grid
 from rectangle_packing.database_manager import DatabaseManager
 from rectangle_packing.excel_parser import *
 from rectangle_packing.zcc_creator import ZccCreator
+from rectangle_packing.helper import Helper
 
 import random
 import time
@@ -127,7 +128,24 @@ class Stacker(object):
     def exportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
         for coupage in coupages:
-            coupage.toDxf(for_prime_center=True)
+            _width = coupage.getWidth()
+            _height = coupage.getHeight()
+
+            if _width > _height:
+                print("Coupage width is larger than height")
+                width, height = Helper.swap(_width, _height)
+                print("Width before swap = " + str(coupage.getWidth()))
+                coupage.setWidth(width)
+                coupage.setHeight(height)
+                print("Width after swap = " + str(coupage.getWidth()))
+                self.db_manager.updateRectangle(coupage)
+
+            # for some reason for_prime_center has to be false
+            # to be rotated correctly for Zund prime center
+            # side with largest length should point sidewards
+            # in Prime center it will be rotated 90deg such that the 
+            # largest side points upwards
+            coupage.toDxf(for_prime_center=False)
             coupage.setStacked()
             self.zcc_creator = ZccCreator(coupage)
             self.zcc_creator.save()
