@@ -127,7 +127,7 @@ class ExcelParser():
         return len(duplicates) > 0
     
     def getOrders(self):
-        return self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam', 'Materiaal', 'Artikelnaam']]
+        return self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Soort', 'Rolbreedte', 'Aantal', 'Klantnaam', 'Materiaal', 'Artikelnaam']]
     
     def convertOrdersToRectangles(self, orders):
         unstacked_rectangles = []
@@ -144,6 +144,7 @@ class ExcelParser():
                 grid_width = self.getGridWidth(row)
                 material = self.getMaterial(row)
                 article_name = self.getArticleName(row)
+
 
                 # print("Material set in excel parser: " + str(material))
                 if quantity > 1:
@@ -212,6 +213,7 @@ class ExcelParser():
             width = row['Breedte']
 
         width = float(width)
+
         if width == np.nan or width <= 0 or width is None:
             raise InvalidWidthError
 
@@ -224,16 +226,18 @@ class ExcelParser():
             height = row['Lengte'].split(',')[0]
         except AttributeError:
             height = row['Lengte']
+ 
 
         height = float(height)
-        if height == np.nan or height <= 0 or height is None:
+
+        if np.isnan(height) or height <= 0 or height is None:
             raise InvalidHeightError
 
         return height
 
     def getName(self, row):
         name = str(row['Ordernummer'])
-        if name == np.nan or name == "" or name is None:
+        if name == "" or name is None:
             raise InvalidNameError
 
         name = str(name)
@@ -242,7 +246,7 @@ class ExcelParser():
     
     def getBrand(self, row):
         brand = row["Merk"]
-        if brand == np.nan or brand == "" or brand is None:
+        if brand == "" or brand is None:
             raise InvalidBrandError
 
         brand = str(brand)
@@ -251,7 +255,7 @@ class ExcelParser():
 
     def getCoupageBatch(self, row):
         coupage_batch = row["Coupage/Batch"]
-        if coupage_batch == np.nan or coupage_batch == "" or coupage_batch is None:
+        if coupage_batch == "" or coupage_batch is None:
             raise InvalidCoupageBatchError
 
         # lower needed because somewhere else in the code it is checked for
@@ -262,7 +266,7 @@ class ExcelParser():
 
     def getClientName(self, row):
         client_name = row["Klantnaam"]
-        if client_name == np.nan or client_name == "" or client_name is None:
+        if client_name == "" or client_name is None:
             raise InvalidClientNameError
 
         client_name = str(client_name)
@@ -270,8 +274,8 @@ class ExcelParser():
         return client_name
 
     def getColor(self, row):
-        color = row["Kleur"]
-        if color == np.nan or color == "" or color is None:
+        color = row["Soort"]
+        if color == "" or color is None:
             raise InvalidColorError
 
         color = str(color)
@@ -280,7 +284,7 @@ class ExcelParser():
 
     def getQuantity(self, row):
         quantity = row["Aantal"]
-        if quantity == np.nan or quantity == "" or quantity is None:
+        if np.isnan(quantity) or quantity == "" or quantity is None:
             raise InvalidQuantityError
 
         quantity = int(quantity)
@@ -289,7 +293,7 @@ class ExcelParser():
 
     def getGridWidth(self, row):
         grid_width = row["Rolbreedte"]
-        if grid_width == np.nan or grid_width == "" or grid_width is None:
+        if np.isnan(grid_width) or grid_width == "" or grid_width is None:
             raise InvalidGridWidthError
 
         grid_width = int(grid_width)
@@ -298,14 +302,19 @@ class ExcelParser():
 
     def getMaterial(self, row):
         material = row["Materiaal"]
-        if material == np.nan or material == "" or material is None:
+        if material == "" or material is None:
             raise InvalidMaterialError
+        
+        material = str(row["Materiaal"])
 
         return material
 
     def getArticleName(self, row):
         article_name = row["Artikelnaam"]
-        if article_name == np.nan or article_name == "" or article_name is None:
+        print(article_name)
+        if article_name == "" or article_name is None:
             raise InvalidArticleName
-
+        article_name = str(article_name)
+        print(article_name)
+        print()
         return article_name

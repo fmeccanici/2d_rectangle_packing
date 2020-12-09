@@ -105,7 +105,7 @@ class DatabaseManager(object):
             print("No grids available yet")
             print("Creating first grid")
 
-            grid = Grid(width=width, height=1500, name=1, article_name='', material=material, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=1, article_name=article_name, material=material, brand=brand, color=color)
             self.addGrid(grid)
             
         return grid

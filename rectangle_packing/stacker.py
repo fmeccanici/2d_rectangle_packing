@@ -160,6 +160,8 @@ class Stacker(object):
             if not self.isGridAvailable(rectangle):
                 print("Grid not available")
                 print("Create unique grid with material " + str(rectangle.getMaterial()))
+                print("Create unique grid with article name " + str(rectangle.getArticleName()))
+
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), article_name=rectangle.getArticleName(), material=rectangle.getMaterial(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesAndSortOnArea(self):
