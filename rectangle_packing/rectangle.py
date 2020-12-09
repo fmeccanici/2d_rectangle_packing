@@ -8,10 +8,11 @@ from dxfwrite import DXFEngine as dxf
 import random
 
 class Rectangle(object):
-    def __init__(self, width=-1, height=-1, name="-1", material="Kokos", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
+    def __init__(self, width=-1, height=-1, name="-1", article_name='default', material="Kokos", brand='kokos', color='naturel', grid_width=100, position=np.array([-1, -1]), grid_number=-1, is_stacked=False, quantity=1, client_name='', coupage_batch="batch"):
         self.position = np.asarray(position)
         self.setWidth(width)
         self.setHeight(height)
+        self.setArticleName(article_name)
         self.setMaterial(material)
         self.setName(name)
         self.setBrand(brand)
@@ -54,8 +55,15 @@ class Rectangle(object):
 
     def getDxfFileName(self):
         hour = Helper.getCurrentHour()
-        return str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        return str(hour) + "h" + "_" + str(self.getArticleName()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+        # return str(hour) + "h" + "_" + str(self.getBrand()) + "_" + str(self.getColor()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
         # return str(hour) + "h" + "_" + str(self.getMaterial()) + "_" + str(self.getClientName()) + "_" + str(self.getName()) + "_" + str(self.getCoupageBatch()) + ".dxf"
+
+    def getArticleName(self):
+        return self.article_name
+
+    def setArticleName(self, article_name):
+        self.article_name = article_name
 
     def getMaterial(self):
         return self.material

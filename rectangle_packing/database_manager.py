@@ -92,20 +92,20 @@ class DatabaseManager(object):
         
         return names
 
-    def createUniqueGrid(self, width=100, material='kokos', brand='kokos', color='naturel'):
+    def createUniqueGrid(self, width=100, article_name='', material='kokos', brand='kokos', color='naturel'):
         try:
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
             print("Creating unique grid with number: " + str(unique_name))
-            grid = Grid(width=width, height=1500, name=unique_name, material=material, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=unique_name, article_name=article_name, material=material, brand=brand, color=color)
             self.addGrid(grid)
 
         except IndexError:
             print("No grids available yet")
             print("Creating first grid")
 
-            grid = Grid(width=width, height=1500, name=1, material=material, brand=brand, color=color)
+            grid = Grid(width=width, height=1500, name=1, article_name='', material=material, brand=brand, color=color)
             self.addGrid(grid)
             
         return grid
@@ -115,13 +115,14 @@ class DatabaseManager(object):
         height = grid.getHeight()
         num_rectangles = grid.getNumStackedRectangles()
         name = grid.getName()
+        article_name = grid.getArticleName()
         material = grid.getMaterial()
         brand = grid.getBrand()
         color = grid.getColor()
         is_full = grid.isFull()
         is_cut = grid.isCut()
 
-        return { "name": name, "width": width, "height": height, "material": material, "brand": brand, "color": color, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
+        return { "name": name, "width": width, "height": height, "article_name": article_name, "material": material, "brand": brand, "color": color, "numRectangles" : num_rectangles, "isFull" : is_full, "isCut": is_cut}
     
     def convertGridsNotCutToDxf(self):
         grids_not_cut = self.getGridsNotCut()
@@ -134,7 +135,7 @@ class DatabaseManager(object):
         cursor = self.grids_collection.find({})
         for document in cursor:
             print("getGridsNotCut material = " + str(document['material']))
-            grid = Grid(width=document['width'], height=document['height'], name=document['name'], material=document['material'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], name=document['name'], article_name=document['article_name'], material=document['material'], color=document['color'], brand=document['brand'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -162,7 +163,7 @@ class DatabaseManager(object):
     
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], article_name=document['article_name'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -172,13 +173,12 @@ class DatabaseManager(object):
 
         return grids
 
-
     def getGridsCut(self):
         grids = []
 
         cursor = self.grids_collection.find({})
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], article_name=document['article_name'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -201,7 +201,7 @@ class DatabaseManager(object):
     
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], material=document['material'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], article_name=document['article_name'], material=document['material'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)
             
@@ -218,13 +218,12 @@ class DatabaseManager(object):
 
         for document in cursor:
                 print("Loaded grid " + str(document["name"]) + " from database")
-                grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+                grid = Grid(width=document['width'], height=document['height'], article_name=document['article_name'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                 rectangles = self.getRectangles(grid)
                 grid.setStackedRectangles(rectangles)
                 grids.append(grid)
         
         return grids
-
 
     def getGrid(self, grid_number, for_cutting=False):
         """ 
@@ -237,7 +236,7 @@ class DatabaseManager(object):
 
         cursor = self.grids_collection.find(query)
         for document in cursor:
-            grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+            grid = Grid(width=document['width'], height=document['height'], article_name=document['article_name'], brand=document['brand'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             if for_cutting == True:
                 rectangles = self.getRectangles(grid, for_cutting)
             else:
@@ -256,7 +255,7 @@ class DatabaseManager(object):
 
             for document in cursor:
                     print("Loaded grid " + str(document["name"]) + " from database")
-                    grid = Grid(width=document['width'], height=document['height'], material=document['material'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
+                    grid = Grid(width=document['width'], height=document['height'], article_name=document['article_name'], material=document['material'], brand=document['brand'], color=document['color'], name=document['name'], is_cut=document['isCut'])
                     rectangles = self.getRectangles(grid)
                     grid.setStackedRectangles(rectangles)
                     
@@ -272,7 +271,8 @@ class DatabaseManager(object):
         width = rectangle.getWidth()
         height = rectangle.getHeight()
         material = rectangle.getMaterial()
-        # print("Material set in database: " + str(material))
+        article_name = rectangle.getArticleName()
+        print("Article name set in database: " + str(article_name))
 
         brand = rectangle.getBrand()
         color = rectangle.getColor()
@@ -297,7 +297,7 @@ class DatabaseManager(object):
         if h % 2 > 0:
             h += 1
         
-        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "material": material, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity, 'client_name': client_name, "coupage_batch": coupage_batch}
+        return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "article_name": article_name, "material": material, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity, 'client_name': client_name, "coupage_batch": coupage_batch}
 
     def addGrid(self, grid):
         document = self.createGridDocument(grid)
@@ -350,9 +350,9 @@ class DatabaseManager(object):
 
         document = self.rectangles_collection.find_one(query)
         if not for_cutting:
-            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], material=document['material'], brand=document['brand'], color=document['color'], grid_width=document['grid_width'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
+            rectangle = Rectangle(width=document['width'], height=document['height'], name=document['name'], article_name=document['article_name'], material=document['material'], brand=document['brand'], color=document['color'], grid_width=document['grid_width'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
         else: 
-            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], material=document['material'], brand=document['brand'], color=document['color'], grid_width=document['grid_width'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
+            rectangle = Rectangle(width=document['exact_width'], height=document['exact_height'], name=document['name'], article_name=document['article_name'], material=document['material'], brand=document['brand'], color=document['color'], grid_width=document['grid_width'], position=[document['x position'], document['y position']], grid_number=document['grid_number'], is_stacked=document['isStacked'], client_name=document['client_name'], coupage_batch=document["coupage_batch"])
 
         return rectangle        
 
@@ -370,9 +370,9 @@ class DatabaseManager(object):
         rectangles = []
         for rectangle in rectangles_dict:
             if for_cutting == True:
-                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
+                rectangles.append(Rectangle(rectangle['exact_width'], rectangle['exact_height'], rectangle['name'], article_name=rectangle['article_name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
             else:
-                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
+                rectangles.append(Rectangle(rectangle['width'], rectangle['height'], rectangle['name'], article_name=rectangle['article_name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], position=[rectangle['x position'], rectangle['y position']], grid_number=rectangle['grid_number'], is_stacked=rectangle['isStacked'], client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
             print("Rectangle " + str(rectangle['name']) + " loaded from database")
         return rectangles
     
@@ -418,9 +418,9 @@ class DatabaseManager(object):
         rectangles = []
         for rectangle in rectangles_dict:
             if not for_cutting:
-                rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
+                rectangles.append(Rectangle(width=rectangle['width'], height=rectangle['height'], name=rectangle['name'], article_name=rectangle['article_name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
             elif for_cutting:
-                rectangles.append(Rectangle(width=rectangle['exact_width'], height=rectangle['exact_height'], name=rectangle['name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
+                rectangles.append(Rectangle(width=rectangle['exact_width'], height=rectangle['exact_height'], name=rectangle['name'], article_name=rectangle['article_name'], material=rectangle['material'], brand=rectangle['brand'], color=rectangle['color'], grid_width=rectangle['grid_width'],client_name=rectangle['client_name'], coupage_batch=rectangle["coupage_batch"]))
 
         return rectangles
     

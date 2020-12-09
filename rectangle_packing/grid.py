@@ -27,10 +27,11 @@ class InvalidGridPositionError(Error):
     pass
 
 class Grid(object):
-    def __init__(self, width=-1, height=-1, name="-1", material='kokos', brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
+    def __init__(self, width=-1, height=-1, name="-1", article_name='default', material='kokos', brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.setWidth(width)
         self.setHeight(height)
         self.setName(name)
+        self.setArticleName(article_name)
         self.setMaterial(material)
         self.setBrand(brand)
         self.setColor(color)
@@ -56,8 +57,9 @@ class Grid(object):
     def createDxfFilePath(self):
         dxf_path = Helper.createAndGetDxfFolder()
         hour = Helper.getCurrentHour()
-        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
-        # self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getMaterial() + "_" + str(self.getWidth()) + "cm" + ".dxf"
+
+        # self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
+        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getArticleName() + "_" + str(self.getWidth()) + "cm" + ".dxf"
         
     def getWidth(self):
         return self.width
@@ -82,6 +84,13 @@ class Grid(object):
 
     def setMaterial(self, material):
         self.material = material
+
+    def getArticleName(self):
+        return self.article_name
+
+    def setArticleName(self, article_name):
+        print("Setting article name of grid " + str(self.getName()) +  " to " + str(article_name))
+        self.article_name = article_name
 
     def getBrand(self):
         return self.brand

@@ -52,6 +52,10 @@ class InvalidMaterialError(Error):
     """Raised when material field has an invalid value"""
     pass
 
+class InvalidArticleNameError(Error):
+    """Raised when article_name field has an invalid value"""
+    pass
+
 class ExcelParser():
     def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx", sheet_name='paklijst_zonder_opmaak'):
         self.path = path
@@ -96,7 +100,7 @@ class ExcelParser():
         self.df.columns = ['Aantal', 'Merk', 'Omschrijving', 'Breedte', 'Lengte', 'Orderdatum', 'Coupage/Batch', 'Ordernummer', 'Klantnaam', 'Kleur', 'Rolbreedte']
 
     def loadBasicExcel(self):
-        self.df = pd.read_excel(self.path + self.file_name, sheet_name=self.sheet_name)        
+        self.df = pd.read_excel(self.path + self.file_name, sheet_name=self.sheet_name)     
         self.df[['Ordernummer']] = self.df[['Ordernummer']].astype(str)
 
     def parseDuplicateOrderNumbers(self):
@@ -123,7 +127,7 @@ class ExcelParser():
         return len(duplicates) > 0
     
     def getOrders(self):
-        return self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam', 'Materiaal']]
+        return self.df[['Breedte', 'Lengte', 'Ordernummer', 'Merk', 'Omschrijving', 'Coupage/Batch', 'Kleur', 'Rolbreedte', 'Aantal', 'Klantnaam', 'Materiaal', 'Artikelnaam']]
     
     def convertOrdersToRectangles(self, orders):
         unstacked_rectangles = []
@@ -139,25 +143,27 @@ class ExcelParser():
                 quantity = self.getQuantity(row)
                 grid_width = self.getGridWidth(row)
                 material = self.getMaterial(row)
+                article_name = self.getArticleName(row)
+
                 # print("Material set in excel parser: " + str(material))
                 if quantity > 1:
                     for i in range(1, quantity+1):
-                        rectangle = Rectangle(width=width, height=height, name=name+'-'+str(i), material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
+                        rectangle = Rectangle(width=width, height=height, name=name+'-'+str(i), article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
                         unstacked_rectangles.append(rectangle)
                 else:   
                     # cut rectangle in two when width and height are larger then grid width        
                     if width > grid_width and height > grid_width:
                         if width > height:
-                            rectangle_part1 = Rectangle(width=width/2.0, height=height, name=name+'part1', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part1", coupage_batch=coupage_batch)
-                            rectangle_part2 = Rectangle(width=width/2.0, height=height, name=name+'part2', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part2", coupage_batch=coupage_batch)
+                            rectangle_part1 = Rectangle(width=width/2.0, height=height, name=name+'part1', article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part1", coupage_batch=coupage_batch)
+                            rectangle_part2 = Rectangle(width=width/2.0, height=height, name=name+'part2', article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part2", coupage_batch=coupage_batch)
                         elif height > width:
-                            rectangle_part1 = Rectangle(width=width, height=height/2.0, name=name+'part1', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part1", coupage_batch=coupage_batch)
-                            rectangle_part2 = Rectangle(width=width, height=height/2.0, name=name+'part2', material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part2", coupage_batch=coupage_batch)
+                            rectangle_part1 = Rectangle(width=width, height=height/2.0, name=name+'part1', article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part1", coupage_batch=coupage_batch)
+                            rectangle_part2 = Rectangle(width=width, height=height/2.0, name=name+'part2', article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name+"-part2", coupage_batch=coupage_batch)
 
                         unstacked_rectangles.append(rectangle_part1)
                         unstacked_rectangles.append(rectangle_part2)
                     else:
-                        rectangle = Rectangle(width=width, height=height, name=name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
+                        rectangle = Rectangle(width=width, height=height, name=name, article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
                         unstacked_rectangles.append(rectangle)
 
             except InvalidHeightError:
@@ -296,3 +302,10 @@ class ExcelParser():
             raise InvalidMaterialError
 
         return material
+
+    def getArticleName(self, row):
+        article_name = row["Artikelnaam"]
+        if article_name == np.nan or article_name == "" or article_name is None:
+            raise InvalidArticleName
+
+        return article_name
