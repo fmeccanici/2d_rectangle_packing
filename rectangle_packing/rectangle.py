@@ -227,10 +227,10 @@ class Rectangle(object):
         width = self.getWidth()
         height = self.getHeight()
 
-        if self.isCoupage() and (height > width) and height <= self.getGridWidth():
-            # rotate when more optimal
-            width = self.getHeight()
-            height = self.getWidth()
+        # if self.isCoupage() and (height > width) and height <= self.getGridWidth():
+        #     # rotate when more optimal
+        #     width = self.getHeight()
+        #     height = self.getWidth()
 
         if for_prime_center == True:
             x = Helper.toMillimeters(x)
