@@ -201,6 +201,7 @@ class StackerTest(unittest.TestCase):
         self.stacker.setExcelParser(self.excel_path, file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
+        self.stacker.setStandardSizesToFill(Rectangle.getStandardSizesSortedOnMostSold())
         self.stacker.start()
         grid_1 = self.stacker.db_manager.getGrid(1, for_cutting=True)
 
