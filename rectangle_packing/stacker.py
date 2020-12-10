@@ -325,9 +325,6 @@ class Stacker(object):
     
     def getRectanglesExactWidthHeight(self):
         self.exact_rectangles = self.db_manager.getRectangles(self.grid, for_cutting=True, sort=True)
-        print()
-        print("Exact rectangles = " + str([r.getName() for r in self.exact_rectangles]))
-        print()
 
     def moveRectangleVertically(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)

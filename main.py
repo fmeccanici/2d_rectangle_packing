@@ -146,10 +146,29 @@ class Gui(QWidget):
         self.start_stacking_button = QPushButton("Start")
         self.stop_stacking_button = QPushButton("Stop")
         self.start_stacking_automatic_button = QPushButton("Automatic")
+        
+        standard_orders_layout = QGridLayout()
+        self.standard_orders_label = QLabel("Standard orders")
+        self.standard_order_60_80_checkbox = QCheckBox("60 x 80")
+        self.standard_order_60_80_checkbox.setChecked(True)
+        self.standard_order_100_80_checkbox = QCheckBox("100 x 80")
+        self.standard_order_50_80_checkbox = QCheckBox("50 x 80")
+        self.standard_order_40_70_checkbox = QCheckBox("40 x 70")
 
         layout.addWidget(self.start_stacking_button)
         layout.addWidget(self.stop_stacking_button)
         layout.addWidget(self.start_stacking_automatic_button)
+        layout.addWidget(self.standard_orders_label)
+        
+        standard_orders_layout.addWidget(self.standard_order_60_80_checkbox, 0, 0)
+        standard_orders_layout.addWidget(self.standard_order_100_80_checkbox, 1, 0)
+        standard_orders_layout.addWidget(self.standard_order_50_80_checkbox, 0, 1)
+        standard_orders_layout.addWidget(self.standard_order_40_70_checkbox, 1, 1)
+        layout.addLayout(standard_orders_layout)
+
+        self.fill_orders_with_smaller_in_larger_grid_widths_radiobutton = QRadioButton("Fill orders with smaller grid widths in larger ones")
+        self.fill_orders_with_smaller_in_larger_grid_widths_radiobutton.setChecked(True)
+        layout.addWidget(self.fill_orders_with_smaller_in_larger_grid_widths_radiobutton)
 
         code_status_label = QLabel("Status")
         self.code_status_line_edit = QLineEdit()
@@ -240,6 +259,7 @@ class Gui(QWidget):
         grid = self.db_manager.getGrid(grid_number)
         self.updateCodeStatus("Stacking started for grid " + str(grid_number))
         self.stacker.setGrid(grid)
+        self.setFillParameters()
         self.stacker.start(automatic=False)
         self.refreshGrid(grid_number)
         self.refreshNewOrders()
@@ -252,7 +272,23 @@ class Gui(QWidget):
         self.stacker.stopStacking()
 
     def onStartStackingAutomaticClick(self):
+        self.setFillParameters()
         self.loadOrdersCreateNecessaryGridsAndStartStacking()
+
+    def setFillParameters(self):
+        standard_sizes = []
+        if self.standard_order_60_80_checkbox.isChecked():
+            standard_sizes.append((60, 80))
+        if self.standard_order_100_80_checkbox.isChecked():
+            standard_sizes.append((100, 80))        
+        if self.standard_order_50_80_checkbox.isChecked():
+            standard_sizes.append((50, 80))
+        if self.standard_order_40_70_checkbox.isChecked():
+            standard_sizes.append((40, 70))
+        self.stacker.setStandardSizesToFill(standard_sizes)
+
+        if self.fill_orders_with_smaller_in_larger_grid_widths_radiobutton.isChecked():
+            self.stacker.setFillOrdersWithSmallerGridWidths(True)
 
     def loadOrdersCreateNecessaryGridsAndStartStacking(self):
         self.updateCodeStatus("Creating grids, stacking and exporting. Please wait...")
