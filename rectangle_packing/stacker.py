@@ -124,6 +124,7 @@ class Stacker(object):
                         self.stackOrdersWithSmallerGridWidths()
                     
                     if len(self.standard_sizes_to_fill) > 0:
+                        self.shrinkGridToHeighestVerticalStackedPoint()
                         self.stackStandardRectangles()
 
                     self.enlargeGridToStandardSize()
