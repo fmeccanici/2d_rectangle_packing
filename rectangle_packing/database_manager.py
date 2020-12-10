@@ -56,7 +56,7 @@ class DatabaseManager(object):
     def removeRectangle(self, rectangle):
         print("Rectangle " + str(rectangle.getName()) + " removed from database")
         query = {"name": rectangle.getName()}
-        y = self.rectangles_collection.delete_one(query)
+        y = self.rectangles_collection.delete_many(query)
         print("Deleted " + str(y.deleted_count) + " amount of rectangles from database")
     
     def clearDatabase(self):

@@ -330,7 +330,7 @@ class Stacker(object):
         print()
 
     def moveRectangleVertically(self, step_size):
-        # self.grid.removeRectangle(self.optimized_rectangle)
+        self.grid.removeRectangle(self.optimized_rectangle)
 
         x = self.optimized_rectangle.getPosition()[0]
         y = self.optimized_rectangle.getPosition()[1]
@@ -347,7 +347,7 @@ class Stacker(object):
             print("Moved x to " + str(x_new))
 
     def moveRectangleHorizontally(self, step_size):
-        # self.grid.removeRectangle(self.optimized_rectangle)
+        self.grid.removeRectangle(self.optimized_rectangle)
 
         x = self.optimized_rectangle.getPosition()[0]
         y = self.optimized_rectangle.getPosition()[1]
