@@ -54,10 +54,11 @@ class DatabaseManager(object):
         print(x.deleted_count)
 
     def removeRectangle(self, rectangle):
-        query = {"rectangle": rectangle.getName()}
-        y = self.rectangles_collection.delete_many(query)
-        print(y.deleted_count)
-
+        print("Rectangle " + str(rectangle.getName()) + " removed from database")
+        query = {"name": rectangle.getName()}
+        y = self.rectangles_collection.delete_one(query)
+        print("Deleted " + str(y.deleted_count) + " amount of rectangles from database")
+    
     def clearDatabase(self):
         try:
             self.client.drop_database("stacked_rectangles_database")            
@@ -147,6 +148,7 @@ class DatabaseManager(object):
             grids = sorted(grids, key=lambda g: g.getWidth(), reverse=True)
 
         print("Grid widths are " + str([grid.getWidth() for grid in grids]))
+        print("Grid heights are " + str([grid.getHeight() for grid in grids]))
 
         return grids
 
@@ -346,6 +348,7 @@ class DatabaseManager(object):
         return is_present
 
     def getRectangle(self, rectangle_number, for_cutting=False):
+        print("Getting rectangle " + str(rectangle_number) + " from database")
         query = {"name" : str(rectangle_number)}
 
         document = self.rectangles_collection.find_one(query)
@@ -428,14 +431,19 @@ class DatabaseManager(object):
         print("Updating grid " + str(grid.getName()) + " in database")
         print("isCut = " + str(grid.isCut()))
         print("numRectangles = " + str(grid.getNumStackedRectangles()))
-
+        print("height = " + str(grid.getHeight()))
+        print()
+        print()
         query = {"name" : grid.getName()}
 
-        new_values = { "$set": { "numRectangles" : grid.getNumStackedRectangles() + 1 , "isCut": grid.isCut()} }
+        new_values = { "$set": { "numRectangles" : grid.getNumStackedRectangles() + 1 ,
+            "isCut": grid.isCut(), "height": grid.getHeight(),
+            "width": grid.getWidth()} }
+
         self.grids_collection.update_one(query, new_values)
     
     def updateRectangle(self, rectangle):
-        print("Updating rectangle in database")
+        print("Updating rectangle " + str(rectangle.getName()) + " in database")
         query = {"name" : rectangle.getName()}
         
         width = rectangle.getWidth()

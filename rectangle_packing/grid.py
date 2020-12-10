@@ -29,8 +29,8 @@ class InvalidGridPositionError(Error):
 class Grid(object):
     def __init__(self, width=-1, height=-1, name="-1", article_name='default', material='kokos', brand = "kokos", color = "naturel", stacked_rectangles = [], is_full = False, is_cut = False):
         self.setWidth(width)
-        self.setHeight(height)
         self.setName(name)
+        self.setHeight(height)
         self.setArticleName(article_name)
         self.setMaterial(material)
         self.setBrand(brand)
@@ -71,6 +71,7 @@ class Grid(object):
         return self.height
     
     def setHeight(self, height):
+        print("Setting height of grid " + str(self.getName()) + " to " + str(height))
         self.height = int(height)
 
     def getName(self):
@@ -279,13 +280,13 @@ class Grid(object):
 
     def addRectanglesToDxf(self, for_prime_center):
         for rectangle in self.stacked_rectangles:
-            rectangle_dxf = rectangle.getRectangleDxf()
-            label_dxf = rectangle.getLabelDxf()
+            rectangle_dxf = rectangle.getRectangleDxf(for_prime_center)
+            label_dxf = rectangle.getLabelDxf(for_prime_center)
             self.dxf_drawing.add(rectangle_dxf)
             self.dxf_drawing.add(label_dxf)
             
     def toPdf(self):
-        self.toDxf(remove_duplicates=False)
+        self.toDxf(remove_duplicates=False, for_prime_center=False)
         dox, auditor = recover.readfile(self.dxf_file_path)
         if not auditor.has_errors:
             file_path = './pdf/' + self.getBrand() + '/' + self.getColor() + '/' + str(self.getWidth()) 
@@ -298,9 +299,10 @@ class Grid(object):
     def addRectangle(self, rectangle):
         self.stacked_rectangles.append(copy.deepcopy(rectangle))
 
-    def deleteRectangle(self, rectangle):
+    def removeRectangle(self, rectangle):
         for i, stacked_rectangle in enumerate(self.getStackedRectangles()):
             if stacked_rectangle.getName() == rectangle.getName():
+                print("Removed " + str(self.stacked_rectangles[i].getName()) + " from grid " + str(self.getName()))
                 del self.stacked_rectangles[i]
                 break
 

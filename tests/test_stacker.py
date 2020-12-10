@@ -204,7 +204,7 @@ class StackerTest(unittest.TestCase):
         self.stacker.start()
         grid_1 = self.stacker.db_manager.getGrid(1, for_cutting=True)
 
-        self.assertEqual(round(grid_1.getUncutArea(), 2),0) 
+        self.assertEqual(round(grid_1.getUncutArea(), 2), 2000) 
     
 if __name__ == '__main__':
     unittest.main()
