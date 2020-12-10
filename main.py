@@ -289,6 +289,8 @@ class Gui(QWidget):
 
         if self.fill_orders_with_smaller_in_larger_grid_widths_radiobutton.isChecked():
             self.stacker.setFillOrdersWithSmallerGridWidths(True)
+        else:
+            self.stacker.setFillOrdersWithSmallerGridWidths(False)
 
     def loadOrdersCreateNecessaryGridsAndStartStacking(self):
         self.updateCodeStatus("Creating grids, stacking and exporting. Please wait...")
