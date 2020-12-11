@@ -67,35 +67,36 @@ class StackerTest(unittest.TestCase):
     #     self.assertEqual(rectangle1.getPosition()[0], 75)
     #     self.assertEqual(rectangle1.getPosition()[1], 40)
 
-    def testStartMillimeters(self):
-        file_name = "paklijst4.xlsx"
+    # def testStartMillimeters(self):
+    #     file_name = "paklijst4.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
-        self.stacker.db_manager.clearDatabase()
-        self.stacker.loadOrdersAndAddToDatabase()
-        self.stacker.start()
+    #     self.stacker.setExcelParser(self.excel_path, file_name)
+    #     self.stacker.db_manager.clearDatabase()
+    #     self.stacker.loadOrdersAndAddToDatabase()
+    #     self.stacker.start()
 
-        grid_1 = self.stacker.getGrid()
-        rectangles = grid_1.getStackedRectangles()
+    #     grid_1 = self.stacker.getGrid()
+    #     rectangles = grid_1.getStackedRectangles()
 
-        for rectangle in rectangles:
-            if rectangle.getName() == "1":
-                self.assertEqual(round(rectangle.getPosition()[0], 2), 75.27)
-                self.assertEqual(round(rectangle.getPosition()[1], 2), 40.25)
-                self.assertEqual(rectangle.getWidth(), 50.1)
-                self.assertEqual(rectangle.getHeight(), 80.5)            
+    #     for rectangle in rectangles:
+    #         if rectangle.getName() == "1":
+    #             print(rectangle.getPosition()[0])
+    #             self.assertEqual(round(rectangle.getPosition()[0], 2), 25.05)
+    #             self.assertEqual(round(rectangle.getPosition()[1], 2), 40.25)
+    #             self.assertEqual(rectangle.getWidth(), 50.1)
+    #             self.assertEqual(rectangle.getHeight(), 80.5)            
             
-            elif rectangle.getName() == "2":
-                self.assertEqual(round(rectangle.getPosition()[0], 2), 25.11)
-                self.assertEqual(round(rectangle.getPosition()[1], 2), 40.10)
-                self.assertEqual(rectangle.getWidth(), 50.2)
-                self.assertEqual(rectangle.getHeight(), 80.2)            
+    #         elif rectangle.getName() == "2":
+    #             self.assertEqual(round(rectangle.getPosition()[0], 2), 75.2)
+    #             self.assertEqual(round(rectangle.getPosition()[1], 2), 40.10)
+    #             self.assertEqual(rectangle.getWidth(), 50.2)
+    #             self.assertEqual(rectangle.getHeight(), 80.2)            
             
-            elif rectangle.getName() == "3":
-                self.assertEqual(round(rectangle.getPosition()[0], 2), 72.62)
-                self.assertEqual(round(rectangle.getPosition()[1], 2), 37.05)
-                self.assertEqual(rectangle.getWidth(), 44.8)
-                self.assertEqual(rectangle.getHeight(), 74.1)            
+    #         elif rectangle.getName() == "3":
+    #             self.assertEqual(round(rectangle.getPosition()[0], 2), 37.05)
+    #             self.assertEqual(round(rectangle.getPosition()[1], 2), 102.9)
+    #             self.assertEqual(rectangle.getWidth(), 74.1)
+    #             self.assertEqual(rectangle.getHeight(), 44.8)            
 
     # def testComputeStackingPosition1(self):
     #     self.stacker = Stacker()
@@ -169,21 +170,21 @@ class StackerTest(unittest.TestCase):
     #     self.assertEqual(stacking_position[0], 100)
     #     self.assertEqual(stacking_position[1], 1125)
     
-    # # only turn on when working on more optimal stacking
-    # # of smaller grid widths in larger ones
+    # only turn on when working on more optimal stacking
+    # of smaller grid widths in larger ones
     
-    # # this functionality doesnt work with millimeter accuracy
-    # def testStackSmallerGridWidthInLarger1(self):
-    #     file_name = "paklijst_kokos.xlsx"
+    # this functionality doesnt work with millimeter accuracy
+    def testStackSmallerGridWidthInLarger1(self):
+        file_name = "paklijst_kokos.xlsx"
 
-    #     self.stacker.setExcelParser(self.excel_path, file_name)
-    #     self.stacker.db_manager.clearDatabase()
-    #     self.stacker.loadOrdersAndAddToDatabase()
-    #     self.stacker.setFillOrdersWithSmallerGridWidths(True)
-    #     self.stacker.start()
-    #     grid_1 = self.stacker.db_manager.getGrid(1, for_cutting=True)
+        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.db_manager.clearDatabase()
+        self.stacker.loadOrdersAndAddToDatabase()
+        self.stacker.setFillOrdersWithSmallerGridWidths(True)
+        self.stacker.start()
+        grid_1 = self.stacker.db_manager.getGrid(1, for_cutting=True)
 
-    #     self.assertEqual(round(grid_1.getUncutArea(), 2), 0.00) 
+        self.assertEqual(round(grid_1.getUncutArea(), 2), 0.00) 
     
     # def testStackSmallerGridWidthInLarger2(self):
     #     file_name = "paklijst_kokos2.xlsx"

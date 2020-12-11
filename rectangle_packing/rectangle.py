@@ -87,6 +87,7 @@ class Rectangle(object):
         return self.is_stacked
 
     def setStacked(self):
+        print("Rectangle " + str(self.getName()) + " stacked")
         self.is_stacked = True
 
     def setUnstacked(self):
@@ -252,3 +253,17 @@ class Rectangle(object):
 
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
+    
+    def roundWidth(self):
+        rounded_width = int(np.ceil(self.getWidth()))
+        if rounded_width % 2 > 0:
+            rounded_width += 1
+        
+        self.setWidth(rounded_width)
+
+    def roundHeight(self):
+        rounded_height = int(np.ceil(self.getHeight()))
+        if rounded_height % 2 > 0:
+            rounded_height += 1
+        
+        self.setHeight(rounded_height)
