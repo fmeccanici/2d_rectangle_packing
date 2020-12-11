@@ -116,8 +116,8 @@ class Stacker(object):
                 print([r.getPosition() for r in self.db_manager.getUnstackedRectangles(for_cutting=True)])
                 print()
                 self.setGrid(grid)
-                # self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesSortedOnArea()
-                self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
+                self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesSortedOnArea()
+                # self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
                 self.stackUnstackedRectanglesInGrid()
                 
                 # some grids are empty and should not be exported
@@ -133,8 +133,8 @@ class Stacker(object):
                     self.enlargeGridToStandardSize()
                     self.convertRectanglesToMillimetersOptimizeAndExportGrid()
 
-                elif not grid.isEmpty() and len(self.unstacked_rectangles) > 0:
-                    self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+                # elif not grid.isEmpty() and len(self.unstacked_rectangles) > 0:
+                #     self.convertRectanglesToMillimetersOptimizeAndExportGrid()
 
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
@@ -278,7 +278,7 @@ class Stacker(object):
     def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesSortedOnArea(self):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(), brand=self.grid.getBrand(), grid_width=self.grid.getWidth())
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)
-
+        
     def getAllUnstackedRectanglesFromDatabaseAndSortOnArea(self):
         self.unstacked_rectangles = self.db_manager.getUnstackedRectangles()
         self.unstacked_rectangles = self.computeRectangleOrderArea(self.unstacked_rectangles)

@@ -92,10 +92,10 @@ class StackerTest(unittest.TestCase):
                 self.assertEqual(rectangle.getHeight(), 80.2)            
             
             elif rectangle.getName() == "3":
-                self.assertEqual(round(rectangle.getPosition()[0], 2), 37.05)
-                self.assertEqual(round(rectangle.getPosition()[1], 2), 102.91)
-                self.assertEqual(rectangle.getWidth(), 74.1)
-                self.assertEqual(rectangle.getHeight(), 44.8)            
+                self.assertEqual(round(rectangle.getPosition()[0], 2), 72.62)
+                self.assertEqual(round(rectangle.getPosition()[1], 2), 37.05)
+                self.assertEqual(rectangle.getWidth(), 44.8)
+                self.assertEqual(rectangle.getHeight(), 74.1)            
 
     # def testComputeStackingPosition1(self):
     #     self.stacker = Stacker()
