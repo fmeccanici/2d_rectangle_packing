@@ -142,16 +142,16 @@ class Stacker(object):
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
         
-        for grid in self.grids:
-            self.setGrid(grid)
-            print(not self.grid.isEmpty())
-            if not self.grid.isEmpty():
-                self.convertRectanglesToMillimetersOptimizeAndExportGrid()
-                print('check2')
-                print()
-                print([r.getName() for r in self.grid.getStackedRectangles()])
-                print([r.getPosition() for r in self.grid.getStackedRectangles()])
-                print()
+        # for grid in self.grids:
+        #     self.setGrid(grid)
+        #     print(not self.grid.isEmpty())
+        #     if not self.grid.isEmpty():
+        #         self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+        #         print('check2')
+        #         print()
+        #         print([r.getName() for r in self.grid.getStackedRectangles()])
+        #         print([r.getPosition() for r in self.grid.getStackedRectangles()])
+        #         print()
 
     def stackOrdersWithSmallerGridWidths(self):
         self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
