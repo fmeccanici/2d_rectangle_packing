@@ -116,8 +116,7 @@ class Stacker(object):
             for grid in self.grids:
                 self.rectangles = []
                 self.setGrid(grid)
-                self.getUnstackedRectanglesFromDatabaseMatchingGridPropertiesSortedOnArea()
-                # self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
+                self.getUnstackedRectanglesFromDatabaseMatchingAllGridPropertiesSortedOnArea()
                 self.stackUnstackedRectanglesInGrid()
                 
                 # some grids are empty and should not be exported
@@ -133,9 +132,6 @@ class Stacker(object):
                     self.enlargeGridToStandardSize()
                     self.convertRectanglesToMillimetersOptimizeAndExportGrid()
 
-                # elif not grid.isEmpty() and len(self.unstacked_rectangles) > 0:
-                #     self.convertRectanglesToMillimetersOptimizeAndExportGrid()
-
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
                     break
@@ -144,7 +140,7 @@ class Stacker(object):
 
     def stackOrdersWithSmallerGridWidths(self):
         self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
-        self.stackUnstackedRectanglesInGrid(smaller=True)
+        self.stackUnstackedRectanglesInGrid()
 
     def shrinkGridToHeighestVerticalStackedPoint(self):
         # set height to heighest point because we only want to stack in the gaps
@@ -232,13 +228,6 @@ class Stacker(object):
 
                 else: break
     
-    # def removeRectangleFromUnstackedRectangles(self):
-    #     for i, unstacked_rectangle in enumerate(self.getUnstackedRectangles()):
-    #         if unstacked_rectangle.getName() == self.rectangle.getName():
-    #             print("Removed " + str(self.unstacked_rectangles[i].getName()) + " from unstacked rectangles")
-    #             del self.unstacked_rectangles[i]
-    #             break
-
     def getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea(self):
         self.rectangles = []
 
@@ -257,9 +246,6 @@ class Stacker(object):
     def anyUnstackedRectangles(self):
         return len(self.getUnstackedRectangles()) > 0
 
-    # def getUnstackedRectangles(self):
-    #     return self.unstacked_rectangles
-
     def createGridInDatabaseIfNotAvailable(self):
         for rectangle in self.rectangles:
             if not self.isGridAvailable(rectangle):
@@ -269,9 +255,18 @@ class Stacker(object):
 
                 self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), article_name=rectangle.getArticleName(), material=rectangle.getMaterial(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
-    def getUnstackedRectanglesFromDatabaseMatchingGridPropertiesSortedOnArea(self):
+    def getUnstackedRectanglesFromDatabaseMatchingAllGridPropertiesSortedOnArea(self):
         self.rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(),
             brand=self.grid.getBrand(), grid_width=self.grid.getWidth(), for_cutting=True)
+
+        self.rectangles = self.computeRectangleOrderArea(self.rectangles)
+        for rectangle in self.rectangles:
+            rectangle.roundWidth()
+            rectangle.roundHeight()
+
+    def getUnstackedRectanglesFromDatabaseMatchingGridColorBrandSortedOnArea(self):
+        self.rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(),
+            brand=self.grid.getBrand(), for_cutting=True)
 
         self.rectangles = self.computeRectangleOrderArea(self.rectangles)
         for rectangle in self.rectangles:
@@ -292,11 +287,8 @@ class Stacker(object):
 
         return len(self.db_manager.getGridsNotCutByWidthBrandColor(width=grid_width, color=color, brand=brand)) > 0        
 
-    def rectangleAndGridPropertiesMatch(self, smaller=False):
-        if not smaller:
-            return (self.grid.getBrand() == self.rectangle.getBrand()) and (self.grid.getColor() == self.rectangle.getColor()) and (self.grid.getWidth() == self.rectangle.getGridWidth())
-        else:
-            return (self.grid.getBrand() == self.rectangle.getBrand()) and (self.grid.getColor() == self.rectangle.getColor())
+    def rectangleAndGridPropertiesMatch(self):
+        return (self.grid.getBrand() == self.rectangle.getBrand()) and (self.grid.getColor() == self.rectangle.getColor())
 
     def createNewGridAndStackRectangle(self):
 
@@ -317,10 +309,6 @@ class Stacker(object):
     def convertRectanglesToMillimetersOptimizeAndExportGrid(self):
         print("Optimizing grid and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
-        print()
-        print([r.getName() for r in self.grid.getStackedRectangles()])
-        print([r.getPosition() for r in self.grid.getStackedRectangles()])
-        print()
 
         # size to move rectangles in x and y direction
         step_size = 0.001
@@ -340,26 +328,11 @@ class Stacker(object):
 
             self.db_manager.updateRectangle(self.optimized_rectangle)
             self.grid.addRectangle(self.optimized_rectangle)
-            print(self.optimized_rectangle.getName())
-            print(self.optimized_rectangle.getPosition())
-            print()
-            print([r.getName() for r in self.grid.getStackedRectangles()])
-            print([r.getPosition() for r in self.grid.getStackedRectangles()])
-            print()
-
-        print()
-        print([r.getName() for r in self.grid.getStackedRectangles()])
-        print([r.getPosition() for r in self.grid.getStackedRectangles()])
-        print()
 
         self.grid.toDxf(remove_duplicates=False, for_prime_center=True)
     
     def getRectanglesExactWidthHeight(self):
         self.exact_rectangles = self.db_manager.getRectangles(self.grid, for_cutting=True, sort=True)
-        print("EXACT RECTANGLES")
-        print([r.getName() for r in self.exact_rectangles])
-        print([r.getPosition() for r in self.exact_rectangles])
-        print()
 
     def moveRectangleVertically(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)
@@ -413,16 +386,12 @@ class Stacker(object):
         for rectangle in self.rectangles:
             self.setRectangle(rectangle)
 
-            print(self.rectangleAndGridPropertiesMatch(smaller))
-            print(not rectangle.isStacked())
-            if self.rectangleAndGridPropertiesMatch(smaller) and not rectangle.isStacked():
+            if self.rectangleAndGridPropertiesMatch() and not rectangle.isStacked():
                 try:
                     self.stackOriginalOrRotatedRectangleAndUpdateDatabase()
-                    # self.removeRectangleFromUnstackedRectangles()
                 except RotatedAndOriginalRectangleDoNotFitError:
                     print("Both rotated and original do not fit in grid")
                     self.createNewGridAndStackRectangle()
-                    # self.removeRectangleFromUnstackedRectangles()
                     continue
 
                 # stop the loop if user presses stop button
@@ -520,10 +489,6 @@ class Stacker(object):
 
     def computeStackingPosition(self):        
         stacking_position = [self.grid.getWidth(), self.grid.getHeight()]
-        print("Rectangle width = " + str(self.rectangle.getWidth()))
-        print("Rectangle height = " + str(self.rectangle.getHeight()))
-        # print("Vertical loop range = " + str(list(self.getVerticalLoopRange())))
-        # print("Horizontal loop range = " + str(list(self.getHorizontalLoopRange())))
 
         if self.grid.getWidth() > self.rectangle.getWidth():
             for x in self.getHorizontalLoopRange():
@@ -542,7 +507,6 @@ class Stacker(object):
                 self.rectangle.setPosition(position)
                 if self.grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
-        print("stacking position = " + str(stacking_position))
         return stacking_position
 
     def getHorizontalLoopRange(self):
