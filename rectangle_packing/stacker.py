@@ -123,9 +123,6 @@ class Stacker(object):
                 # some grids are empty and should not be exported
                 if not grid.isEmpty() and len(self.getUnstackedRectangles()) == 0:
                     if self.fill_orders_with_smaller_grid_widths:
-                        print("CHGECKHECIGCI*U")
-                        print(self.grid.getWidth())
-                        print(self.rectangle.getGridWidth())
                         self.shrinkGridToHeighestVerticalStackedPoint()
                         self.stackOrdersWithSmallerGridWidths()
                     
@@ -144,21 +141,9 @@ class Stacker(object):
                     break
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
-        
-        # for grid in self.grids:
-        #     self.setGrid(grid)
-        #     print(not self.grid.isEmpty())
-        #     if not self.grid.isEmpty():
-        #         self.convertRectanglesToMillimetersOptimizeAndExportGrid()
-        #         print('check2')
-        #         print()
-        #         print([r.getName() for r in self.grid.getStackedRectangles()])
-        #         print([r.getPosition() for r in self.grid.getStackedRectangles()])
-        #         print()
 
     def stackOrdersWithSmallerGridWidths(self):
         self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
-        print([r.getGridWidth() for r in self.rectangles])
         self.stackUnstackedRectanglesInGrid(smaller=True)
 
     def shrinkGridToHeighestVerticalStackedPoint(self):
