@@ -54,6 +54,10 @@ class Grid(object):
         self.createDxfFilePath()
         self.dxf_drawing = dxf.drawing(self.dxf_file_path)
 
+    def getDxfFileName(self):
+        hour = Helper.getCurrentHour()
+        return str(hour) + "h" + "_" + str(self.getArticleName()) + "_" + str(self.getWidth()) + "cm" + "_batch.dxf"
+
     def createDxfFilePath(self):
         dxf_path = Helper.createAndGetDxfFolder()
         hour = Helper.getCurrentHour()

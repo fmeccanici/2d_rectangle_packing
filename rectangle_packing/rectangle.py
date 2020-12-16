@@ -27,6 +27,24 @@ class Rectangle(object):
 
         self.initEmptyDxfDrawing()
 
+    def toPrimeCenterFormat(self):
+        self.rotate()
+
+        x = Helper.toMillimeters(self.getPosition()[0])
+        y = Helper.toMillimeters(self.getPosition()[1])
+        width = Helper.toMillimeters(self.getWidth())
+        height = Helper.toMillimeters(self.getHeight())
+
+        self.setPosition([x, y])
+        self.setWidth(width)
+        self.setHeight(height)
+        # return Rectangle(width=width, height=height, name=self.getName(),
+        #     article_name=self.getArticleName(), material=self.getMaterial(),
+        #     brand=self.getBrand(), color=self.getColor(), grid_width=self.getGridWidth(),
+        #     position=np.array([x, y]), grid_number=self.getGridNumber(),
+        #     is_stacked=self.isStacked(), quantity=self.getQuantity(),
+        #     client_name=self.getClientName(), coupage_batch=self.getCoupagBatch())
+
     @staticmethod
     def getMinimumSize():
         min_width = 100

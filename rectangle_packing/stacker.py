@@ -52,7 +52,8 @@ class Stacker(object):
 
         # stacking position of current rectangle rotated
         self.stacking_position_rotated = []
-     
+        self.zcc_creator = ZccCreator()
+
     def setRectangle(self, rectangle):
         self.rectangle = rectangle
 
@@ -184,8 +185,8 @@ class Stacker(object):
             # largest side points upwards
             coupage.toDxf(for_prime_center=True)
             coupage.setStacked()
-            self.zcc_creator = ZccCreator(coupage)
-            self.zcc_creator.save()
+            self.zcc_creator.setCoupage(coupage)
+            self.zcc_creator.save(coupage=True)
             self.db_manager.updateRectangle(coupage)
             
     def loadOrdersAndAddToDatabase(self):
@@ -330,7 +331,9 @@ class Stacker(object):
             self.grid.addRectangle(self.optimized_rectangle)
 
         self.grid.toDxf(remove_duplicates=False, for_prime_center=True)
-    
+        self.zcc_creator.setGrid(self.grid)
+        self.zcc_creator.save(grid=True, coupage=False)
+
     def getRectanglesExactWidthHeight(self):
         self.exact_rectangles = self.db_manager.getRectangles(self.grid, for_cutting=True, sort=True)
 

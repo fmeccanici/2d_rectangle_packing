@@ -1,4 +1,6 @@
 from rectangle_packing.helper import Helper
+from rectangle_packing.rectangle import Rectangle
+from rectangle_packing.grid import Grid
 
 import xml.etree.cElementTree as ET
 from xml.etree.ElementTree import ElementTree
@@ -6,22 +8,50 @@ from xml.etree.ElementTree import ElementTree
 import ezdxf
 from datetime import datetime
 from xml.dom import minidom
+import copy
 
 class ZccCreator(object):
-    def __init__(self, coupage):
+    def __init__(self, grid=Grid(), coupage=Rectangle()):
         self.zcc_path = Helper.createAndGetFolderOnDesktop('zcc')
+        self.grid = grid
         self.coupage = coupage
 
         Helper.createAndGetFolderOnDesktop("zcc")
 
-        self.dxf_path = Helper.createAndGetDxfFolder()
-        self.dxf_file_name = self.coupage.getDxfFileName()
-        self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
+    def setGrid(self, grid):
+        self.grid = grid
+
+    def getGrid(self):
+        return self.grid
+
+    def setCoupage(self, coupage):
+        self.coupage = coupage
+
+    def getCoupage(self):
+        return self.coupage
+
+    def createCoupageZcc(self):
         self.createInitialTemplate()
         self.addMaterial()
-        self.addGeometry()
+        self.addCoupageGeometry()
         self.addLabel()
         self.addRegister()
+
+    def createGridZcc(self):
+        self.createInitialTemplate()
+        self.addMaterial()
+        self.addGridGeometry()
+        self.addLabel()
+        self.addRegister()
+
+    def fillXmlWithLineTo(self, x, y):
+        ET.SubElement(self.outline, "LineTo", {"X": str(round(x, 3)), "Y": str(round(y, 3))})
+
+    def fillXmlWithMoveTo(self, x, y):
+        ET.SubElement(self.outline, "MoveTo", {"X": str(round(x, 3)), "Y": str(round(y, 3))})
+
+    def fillXmlWithMethod(self, parent, method_type, name):
+        ET.SubElement(parent, "Method", {"Type": method_type, "Name": name})
         
     def createInitialTemplate(self):
         self.root = ET.Element("ZCC_cmd", {"MessageID": "887", "CommandID": "jobdescription", 
@@ -41,26 +71,40 @@ class ZccCreator(object):
 
     def addMaterial(self):
         self.material = ET.SubElement(self.job, "Material", {"Name": self.coupage.getMaterial()})
-
-        # self.material = ET.SubElement(self.job, "Material", {"Name": self.coupage.getBrand(), 
-        # "GUID": '{8323b713-b552-4e06-974a-d41fc21723e2}'})
-        # self.material_setting = ET.SubElement(self.material, "MaterialSettings", {"Thickness": "9"})
-        # self.parameter_vacuum_level = ET.SubElement(self.material_setting, "Parameter", {"Id": "VacuumLevel", 
-        # "TypeId": "98", "Value": "0"})
-        # self.parameter_use_prev_page_trans = ET.SubElement(self.material_setting, "Parameter", {"Id": "UsePrevPageTrans", 
-        # "TypeId": "189", "Value": "0"})
-        # self.parameter_feed_compensation = ET.SubElement(self.material_setting, "Parameter", {"Id": "FeedCompensation", 
-        # "TypeId": "166", "Value": "0"})
     
-    def addGeometry(self):
+    def addCoupageGeometry(self):
         self.geometry = ET.SubElement(self.job, "Geometry")
         self.outline = ET.SubElement(self.geometry, "Outline")
-        self.move_to = ET.SubElement(self.outline, "MoveTo", {"X": "0.000", "Y": "0.000"})
-        self.line_to1 = ET.SubElement(self.outline, "LineTo", {"X": str(round(self.coupage.getHeight()*10, 3)), "Y": "0.000"})
-        self.line_to2 = ET.SubElement(self.outline, "LineTo", {"X": str(round(self.coupage.getHeight()*10, 3)), "Y": str(round(self.coupage.getWidth()*10, 3))})
-        self.line_to3 = ET.SubElement(self.outline, "LineTo", {"X": "0.000", "Y": str(round(self.coupage.getWidth()*10, 3))})
-        self.line_to4 = ET.SubElement(self.outline, "LineTo", {"X": "0.000", "Y": "0.000"})
-        self.method = ET.SubElement(self.outline, "Method", {"Type": "Thru-cut", "Name": "0"})
+        self.fillXmlWithMoveTo(0, 0)
+        self.fillXmlWithLineTo(round(self.coupage.getHeight()*10, 3), 0)
+        self.fillXmlWithLineTo(round(self.coupage.getHeight()*10, 3), round(self.coupage.getWidth()*10, 3))
+        self.fillXmlWithLineTo(round(self.coupage.getHeight()*10, 3), round(self.coupage.getWidth()*10, 3))
+        self.fillXmlWithLineTo(0, round(self.coupage.getWidth()*10, 3))
+        self.fillXmlWithLineTo(0, 0)
+        self.fillXmlWithMethod(self.outline, "Thru-cut", "0")
+    
+    def addGridGeometry(self):
+        self.geometry = ET.SubElement(self.job, "Geometry")
+
+        for r in self.grid.getStackedRectangles():
+            rectangle = copy.deepcopy(r)
+            print("before")
+            print(rectangle.getTopLeft())
+            rectangle.toPrimeCenterFormat()
+            print("after")
+            print(rectangle.getTopLeft())
+            self.outline = ET.SubElement(self.geometry, "Outline")
+
+            self.fillXmlWithMoveTo(rectangle.getBottomLeft()[0], rectangle.getBottomLeft()[1])
+            self.fillXmlWithLineTo(rectangle.getBottomRight()[0], rectangle.getBottomRight()[1])
+            self.fillXmlWithLineTo(rectangle.getTopRight()[0], rectangle.getTopRight()[1])
+            self.fillXmlWithLineTo(rectangle.getTopLeft()[0], rectangle.getTopLeft()[1])
+            self.fillXmlWithLineTo(rectangle.getBottomLeft()[0], rectangle.getBottomLeft()[1])
+
+            self.label = ET.SubElement(self.geometry, "Label", {"Text": rectangle.getClientName(), 
+            "Height": "100.00", "Angle": "0.000", "Deformation": "1.000"})
+            self.label_position = ET.SubElement(self.label, "Position", {"X": str(rectangle.getBottomLeft()[0]), "Y": str(rectangle.getTopLeft()[1])})
+            self.label_method = ET.SubElement(self.label, "Method", {"Type": "{none}", "Name": "TEXT"})
     
     def addLabel(self):
         self.label = ET.SubElement(self.geometry, "Label", {"Text": self.coupage.getClientName(), 
@@ -74,15 +118,32 @@ class ZccCreator(object):
         {"Type": "Register", "Color": "000000", 
         "RegistrationType": "borderFrontRight"})
     
-    def save(self, binary=True, string=True):
-        if string:
+    def save(self, binary=True, string=True, grid=False, coupage=True):
+        if coupage:
+            self.dxf_path = Helper.createAndGetDxfFolder()
+            self.dxf_file_name = self.coupage.getDxfFileName()
+            self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
+
+            self.createCoupageZcc()
+
+            if string:
+                xmlstr = minidom.parseString(ET.tostring(self.root)).toprettyxml(indent = "   ", encoding='UTF-8')
+                with open(self.getZccPath() + self.coupage.getDxfFileName() + ".zcc", 'wb+') as f:
+                    f.write(xmlstr)
+            if binary:
+                tree = ElementTree(self.root)
+                tree.write(open(self.getBinPath() + self.coupage.getDxfFileName() + ".zcc.BIN", 'wb+'))
+
+        if grid:
+            self.dxf_path = Helper.createAndGetDxfFolder()
+            self.dxf_file_name = self.grid.getDxfFileName()
+            self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
+            
+            self.createGridZcc()
             xmlstr = minidom.parseString(ET.tostring(self.root)).toprettyxml(indent = "   ", encoding='UTF-8')
-            with open(self.getZccPath() + self.dxf_file_name + ".zcc", 'wb+') as f:
+            with open(self.getZccPath() + self.grid.getDxfFileName() + ".zcc", 'wb+') as f:
                 f.write(xmlstr)
-        if binary:
-            tree = ElementTree(self.root)
-            tree.write(open(self.getBinPath() + self.dxf_file_name + ".zcc.BIN", 'wb+'))
-        
+
     def getZccPath(self):
         return Helper.createAndGetFolderOnDesktop('zcc')
     
