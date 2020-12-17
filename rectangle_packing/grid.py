@@ -189,10 +189,21 @@ class Grid(object):
                 self.addLinesToDxf()            
             else:
                 self.addRectanglesToDxf(for_prime_center)
+                if for_prime_center:
+                    self.addLargeHorizontalLineAtTop()
 
             self.dxf_drawing.save()
         except PermissionError:
             print("DXF file opened in another program")
+    
+    def addLargeHorizontalLineAtTop(self):
+        y_start = Helper.toMillimeters(self.getHighestVerticalPoint())
+        x_start = 0
+        y_end = Helper.toMillimeters(self.getHighestVerticalPoint())
+        x_end = Helper.toMillimeters(self.getWidth() + 20)
+
+        line = dxf.line((y_start, x_start), (y_end, x_end))
+        self.dxf_drawing.add(line)
     """
     1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
     2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower

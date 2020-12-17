@@ -41,7 +41,6 @@ class ZccCreator(object):
         self.createInitialTemplate()
         self.addMaterial()
         self.addGridGeometry()
-        self.addLabel()
         self.addRegister()
 
     def fillXmlWithLineTo(self, x, y):
@@ -100,12 +99,26 @@ class ZccCreator(object):
             self.fillXmlWithLineTo(rectangle.getTopRight()[0], rectangle.getTopRight()[1])
             self.fillXmlWithLineTo(rectangle.getTopLeft()[0], rectangle.getTopLeft()[1])
             self.fillXmlWithLineTo(rectangle.getBottomLeft()[0], rectangle.getBottomLeft()[1])
-
+            
             self.label = ET.SubElement(self.geometry, "Label", {"Text": rectangle.getClientName(), 
             "Height": "100.00", "Angle": "0.000", "Deformation": "1.000"})
             self.label_position = ET.SubElement(self.label, "Position", {"X": str(rectangle.getBottomLeft()[0]), "Y": str(rectangle.getTopLeft()[1])})
             self.label_method = ET.SubElement(self.label, "Method", {"Type": "{none}", "Name": "TEXT"})
-    
+
+        self.outline = ET.SubElement(self.geometry, "Outline")
+        self.fillXmlWithLargeHorizontalLineAtTop()
+
+    def fillXmlWithLargeHorizontalLineAtTop(self):
+
+        y_start = Helper.toMillimeters(self.grid.getHighestVerticalPoint())
+        x_start = 0
+        y_end = Helper.toMillimeters(self.grid.getHighestVerticalPoint())
+        x_end = Helper.toMillimeters(self.grid.getWidth() + 20)
+
+        # x/y swapped for prime center
+        self.fillXmlWithMoveTo(y_start, x_start)
+        self.fillXmlWithLineTo(y_end, x_end)
+        
     def addLabel(self):
         self.label = ET.SubElement(self.geometry, "Label", {"Text": self.coupage.getClientName(), 
         "Height": "100.00", "Angle": "0.000", "Deformation": "1.000"})
