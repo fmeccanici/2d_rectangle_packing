@@ -1,6 +1,7 @@
 # my own classes
 from rectangle_packing.rectangle import Rectangle
 from rectangle_packing.helper import Helper
+from rectangle_packing.zcc_creator import ZccCreator
 
 # external dependencies
 import numpy as np
@@ -158,6 +159,7 @@ class Grid(object):
             if vertical_point > highest_vertical_point:
                 highest_vertical_point = vertical_point 
 
+        print("Highest vertical point = " + str(highest_vertical_point))
         return highest_vertical_point
         
     def isValidPosition(self, rectangle):
@@ -182,15 +184,12 @@ class Grid(object):
     
         return False
 
-    def toDxf(self, remove_duplicates=True, for_prime_center=False):
+    def toDxf(self, for_prime_center=False):
         try:
-            if remove_duplicates == True:
-                self.removeDuplicateLines(for_prime_center)
-                self.addLinesToDxf()            
-            else:
-                self.addRectanglesToDxf(for_prime_center)
-                if for_prime_center:
-                    self.addLargeHorizontalLineAtTop()
+
+            self.addRectanglesToDxf(for_prime_center)
+            if for_prime_center:
+                self.addLargeHorizontalLineAtTop()
 
             self.dxf_drawing.save()
         except PermissionError:
@@ -204,25 +203,6 @@ class Grid(object):
 
         line = dxf.line((y_start, x_start), (y_end, x_end))
         self.dxf_drawing.add(line)
-    """
-    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
-    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
-    than the current start x value, this is chosen as starting value x_start.  
-    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_end. Use the point with the lowest
-    y value as y_start
-    """
-    def removeDuplicateLines(self, for_prime_center=False):            
-        self.lines = []        
-        self.points = []
-
-        self.convertRectanglesToPoints()
-        self.x_, self.y_ = self.getXYfromPointsAndRound()
-
-        self.x_unique = self.getUniqueValues(self.x_)
-        self.y_unique = self.getUniqueValues(self.y_)
-
-        self.removeDuplicateVerticalLines(for_prime_center)
-        self.removeDuplicateHorizontalLines(for_prime_center)
 
     def convertRectanglesToPoints(self):
         for rectangle in self.stacked_rectangles:
@@ -240,43 +220,6 @@ class Grid(object):
     
     def getUniqueValues(self, array):
         return np.unique(array)
-
-    def removeDuplicateVerticalLines(self, for_prime_center):
-
-        for y in self.y_unique:
-            x_start = max(self.x_)
-            x_end = 0
-            for point in self.points:
-                if round(point[1], 2) == y and round(point[0], 2) > x_end:
-                    x_end = round(point[0], 2)
-                if round(point[1], 2) == y and round(point[0], 2) < x_start:
-                    x_start = round(point[0], 2)
-
-            if for_prime_center == True:
-                x_start = Helper.toMillimeters(x_start)
-                x_end = Helper.toMillimeters(x_end)
-                y = Helper.toMillimeters(y)
-                self.lines.append(dxf.line((y, x_start), (y, x_end)))
-            else:
-                self.lines.append(dxf.line((x_start, y), (x_end, y)))
-            
-    def removeDuplicateHorizontalLines(self, for_prime_center):
-        for x in self.x_unique:
-            y_start = max(self.y_)
-            y_end = 0
-            for point in self.points:
-                if round(point[0], 2) == x and round(point[1], 2) > y_end:
-                    y_end = round(point[1], 2)
-                if round(point[0], 2) == x and round(point[1], 2) < y_start:
-                    y_start = round(point[1], 2)
-
-            if for_prime_center == True:
-                y_start = Helper.toMillimeters(y_start)
-                y_end = Helper.toMillimeters(y_end)
-                x = Helper.toMillimeters(x)
-                self.lines.append(dxf.line((y_start, x), (y_end, x)))
-            else:
-                self.lines.append(dxf.line((x, y_start), (x, y_end)))
 
     def addLinesToDxf(self):
         for line in self.lines:
@@ -361,3 +304,12 @@ class Grid(object):
         # displaying the model  
         # show(graph) 
         save(graph)
+    
+    def toZcc(self):
+        self.getHighestVerticalPoint()
+        self.zcc_creator = ZccCreator(self.getMaterial(), self.getDxfFileName())
+        self.getHighestVerticalPoint()
+
+        self.zcc_creator.addGrid(self)
+        self.zcc_creator.save()
+        self.getHighestVerticalPoint()

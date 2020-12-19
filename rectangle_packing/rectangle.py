@@ -1,5 +1,6 @@
 # my own classes
 from rectangle_packing.helper import Helper
+from rectangle_packing.zcc_creator import ZccCreator
 
 # external dependencies
 import numpy as np
@@ -285,3 +286,11 @@ class Rectangle(object):
             rounded_height += 1
         
         self.setHeight(rounded_height)
+    
+    def toZcc(self):
+        self.zcc_creator = ZccCreator(self.getMaterial(), self.getDxfFileName())
+        
+        # bottom left is (0, 0)
+        self.setPosition([self.getWidth()/2, self.getHeight()/2])
+        self.zcc_creator.addRectangle(self)
+        self.zcc_creator.save()

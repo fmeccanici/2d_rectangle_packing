@@ -97,7 +97,7 @@ class Gui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
-        self.excel_file_line_edit = QLineEdit("tjeerd.xlsm")
+        self.excel_file_line_edit = QLineEdit("Paklijst0.tmp.xlsm")
         
         self.grid_color_label = QLabel("Color")
         self.grid_color_line_edit = QLineEdit("Naturel")
