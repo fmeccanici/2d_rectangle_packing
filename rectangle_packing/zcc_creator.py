@@ -44,10 +44,10 @@ class ZccCreator(object):
         self.addRegister()
 
     def fillXmlWithLineTo(self, x, y):
-        ET.SubElement(self.outline, "LineTo", {"X": str(round(x, 3)), "Y": str(round(y, 3))})
+        ET.SubElement(self.outline, "LineTo", {"X": str(int(x)), "Y": str(int(y))})
 
     def fillXmlWithMoveTo(self, x, y):
-        ET.SubElement(self.outline, "MoveTo", {"X": str(round(x, 3)), "Y": str(round(y, 3))})
+        ET.SubElement(self.outline, "MoveTo", {"X": str(int(x)), "Y": str(int(y))})
 
     def fillXmlWithMethod(self, parent, method_type, name):
         ET.SubElement(parent, "Method", {"Type": method_type, "Name": name})
@@ -102,7 +102,7 @@ class ZccCreator(object):
             
             self.label = ET.SubElement(self.geometry, "Label", {"Text": rectangle.getClientName(), 
             "Height": "100.00", "Angle": "0.000", "Deformation": "1.000"})
-            self.label_position = ET.SubElement(self.label, "Position", {"X": str(rectangle.getBottomLeft()[0]), "Y": str(rectangle.getTopLeft()[1])})
+            self.label_position = ET.SubElement(self.label, "Position", {"X": str(round(rectangle.getBottomLeft()[0])), "Y": str(round(rectangle.getTopLeft()[1]))})
             self.label_method = ET.SubElement(self.label, "Method", {"Type": "{none}", "Name": "TEXT"})
 
         self.outline = ET.SubElement(self.geometry, "Outline")
@@ -135,7 +135,7 @@ class ZccCreator(object):
         if coupage:
             self.dxf_path = Helper.createAndGetDxfFolder()
             self.dxf_file_name = self.coupage.getDxfFileName()
-            self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
+            # self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
 
             self.createCoupageZcc()
 
@@ -150,7 +150,7 @@ class ZccCreator(object):
         if grid:
             self.dxf_path = Helper.createAndGetDxfFolder()
             self.dxf_file_name = self.grid.getDxfFileName()
-            self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
+            # self.dxf = ezdxf.readfile(self.dxf_path + "/" + self.dxf_file_name)
             
             self.createGridZcc()
             xmlstr = minidom.parseString(ET.tostring(self.root)).toprettyxml(indent = "   ", encoding='UTF-8')
