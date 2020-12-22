@@ -69,6 +69,7 @@ class Stacker(object):
         self.is_stacking = False
 
     def setGrid(self, grid):
+        print("Set grid to " + str(grid.getName()))
         self.grid = grid
     
     def getGrid(self):
@@ -130,7 +131,7 @@ class Stacker(object):
                         self.stackStandardRectangles()
 
                     self.enlargeGridToStandardSize()
-                    self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+                    # self.convertRectanglesToMillimetersOptimizeAndExportGrid()
 
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
@@ -138,6 +139,11 @@ class Stacker(object):
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
+        self.grids = self.db_manager.getGridsNotCut(sort=True)
+        for grid in self.grids:
+            self.setGrid(grid)
+            self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+            
     def stackOrdersWithSmallerGridWidths(self):
         self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
         self.stackUnstackedRectanglesInGrid()
@@ -306,7 +312,7 @@ class Stacker(object):
             print("Something went wrong, rectangle does not fit in completely new grid")
 
     def convertRectanglesToMillimetersOptimizeAndExportGrid(self):
-        print("Optimizing grid and exporting to DXF...")
+        print("Optimizing grid " + str(self.grid.getName()) + " and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
 
         # size to move rectangles in x and y direction
@@ -328,9 +334,7 @@ class Stacker(object):
             self.db_manager.updateRectangle(self.optimized_rectangle)
             self.grid.addRectangle(self.optimized_rectangle)
 
-        print('check')
-        # self.grid.toDxf(for_prime_center=True)
-        print('check2')
+        self.grid.toDxf(for_prime_center=True)
         self.grid.toZcc()
 
     def getRectanglesExactWidthHeight(self):

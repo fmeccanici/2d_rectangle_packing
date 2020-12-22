@@ -57,14 +57,14 @@ class Grid(object):
 
     def getDxfFileName(self):
         hour = Helper.getCurrentHour()
-        return str(hour) + "h" + "_" + str(self.getArticleName()) + "_" + str(self.getWidth()) + "cm" + "_batch.dxf"
+        return str(hour) + "h" + "_" + str(self.getArticleName()) + "_" + str(self.getWidth()) + "cm" + "_batch_" + str(self.getName()) + ".dxf"
 
     def createDxfFilePath(self):
         dxf_path = Helper.createAndGetDxfFolder()
         hour = Helper.getCurrentHour()
         print("Article name for export dxf = " + str(self.getArticleName()))
         # self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getBrand() + "_" + self.getColor() + "_" + str(self.getWidth()) + "cm" + ".dxf"
-        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getArticleName() + "_" + str(self.getWidth()) + "cm" + "_batch.dxf"
+        self.dxf_file_path = dxf_path + "/" + str(hour) + "h" + "_" + self.getArticleName() + "_" + str(self.getWidth()) + "cm" + "_batch_" + str(self.getName()) + ".dxf"
         
     def getWidth(self):
         return self.width

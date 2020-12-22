@@ -126,6 +126,7 @@ class ZccCreator(object):
         # x/y swapped for prime center
         self.fillXmlWithMoveTo(y_start, x_start)
         self.fillXmlWithLineTo(y_end, x_end)
+        self.addThruCutLayer()
         
     def addLabel(self):
         self.label = ET.SubElement(self.geometry, "Label", {"Text": self.coupage.getClientName(), 
@@ -133,14 +134,22 @@ class ZccCreator(object):
         self.label_position = ET.SubElement(self.label, "Position", {"X": "0.000", "Y": str(round(self.coupage.getWidth()*10, 3))})
         self.label_method = ET.SubElement(self.label, "Method", {"Type": "{none}", "Name": "TEXT"})
     
-    def addRegister(self):
+    def addMethods(self):
         self.methods = ET.SubElement(self.job, "Methods")
-        self.method_register = ET.SubElement(self.methods, "Method", \
+        self.method_register = ET.SubElement(self.methods, "Method",
         {"Type": "Register", "Color": "000000", 
         "RegistrationType": "borderFrontRight"})
-    
+        self.method_thru_cut = ET.SubElement(self.methods, "Method",
+        {"Type": "Thru-cut", "Color": "0000ff", 
+        "AllowReverseDirection": "false",
+        "Name": "0", "CuttingMode": "standard"})
+        self.method_none = ET.SubElement(self.methods, "Method",
+        {"Type": "{none}", "Color": "808080", 
+        "AllowReverseDirection": "false",
+        "Name": "TEXT"})
+
     def save(self):
-        self.addRegister()
+        self.addMethods()
 
         xmlstr = minidom.parseString(ET.tostring(self.root)).toprettyxml(indent = "   ", encoding='UTF-8')
         with open(self.getZccPath() + self.getFileName() + ".zcc", 'wb+') as f:
