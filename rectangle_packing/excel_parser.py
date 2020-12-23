@@ -62,8 +62,6 @@ class ExcelParser():
     def __init__(self, data_logger=DataLogger(), path="./paklijsten/", file_name="paklijst.xlsx", sheet_name='paklijst_zonder_opmaak'):
         self.path = path
         self.file_name = file_name
-        print(path)
-        print(file_name)
         self.names = []
         self.data_logger = data_logger
 
@@ -145,6 +143,8 @@ class ExcelParser():
     
     def convertOrdersToRectangles(self, orders):
         unstacked_rectangles = []
+        self.data_logger.setTotalRectanglesToStack(len(orders))
+
         for index, row in orders.iterrows():
             try:
                 width = self.getWidth(row)
@@ -182,6 +182,7 @@ class ExcelParser():
                         unstacked_rectangles.append(rectangle)
             
             except Exception as e:
+                name = self.getName(row)
                 print("Something went wrong parsing order " + str(name) + ": " + str(e))
                 self.data_logger.addErrorData("Order " + str(name) + " not included due to excel parser error: " + str(e))
                 continue
@@ -233,7 +234,7 @@ class ExcelParser():
 
         width = float(width)
 
-        if width == np.nan or width <= 0 or width is None:
+        if width == np.nan or width <= 0 or width is None or np.isnan(width):
             raise InvalidWidthError
 
         return width
@@ -249,14 +250,15 @@ class ExcelParser():
 
         height = float(height)
 
-        if np.isnan(height) or height <= 0 or height is None:
+        if np.isnan(height) or height <= 0 or height is None or np.isnan(height):
             raise InvalidHeightError
 
         return height
 
     def getName(self, row):
         name = str(row['Ordernummer'])
-        if name == "" or name is None:
+        print(name)
+        if name == "" or name is None or np.isnan(name):
             raise InvalidNameError
 
         name = str(name)
@@ -265,7 +267,7 @@ class ExcelParser():
     
     def getBrand(self, row):
         brand = row["Merk"]
-        if brand == "" or brand is None:
+        if brand == "" or brand is None or np.isnan(brand):
             raise InvalidBrandError
 
         brand = str(brand)
@@ -274,7 +276,8 @@ class ExcelParser():
 
     def getCoupageBatch(self, row):
         coupage_batch = row["Coupage/Batch"]
-        if coupage_batch == "" or coupage_batch is None:
+        
+        if coupage_batch == "" or coupage_batch is None or np.isnan(coupage_batch):
             raise InvalidCoupageBatchError
 
         # lower needed because somewhere else in the code it is checked for
@@ -285,7 +288,7 @@ class ExcelParser():
 
     def getClientName(self, row):
         client_name = row["Klantnaam"]
-        if client_name == "" or client_name is None:
+        if client_name == "" or client_name is None or np.isnan(client_name):
             raise InvalidClientNameError
 
         client_name = str(client_name)
@@ -294,7 +297,7 @@ class ExcelParser():
 
     def getColor(self, row):
         color = row["Soort"]
-        if color == "" or color is None:
+        if color == "" or color is None or np.isnan(color):
             raise InvalidColorError
 
         color = str(color)
@@ -303,7 +306,7 @@ class ExcelParser():
 
     def getQuantity(self, row):
         quantity = row["Aantal"]
-        if np.isnan(quantity) or quantity == "" or quantity is None:
+        if np.isnan(quantity) or quantity == "" or quantity is None or np.isnan(quantity):
             raise InvalidQuantityError
 
         quantity = int(quantity)
@@ -312,7 +315,7 @@ class ExcelParser():
 
     def getGridWidth(self, row):
         grid_width = row["Rolbreedte"]
-        if np.isnan(grid_width) or grid_width == "" or grid_width is None:
+        if np.isnan(grid_width) or grid_width == "" or grid_width is None or np.isnan(grid_width):
             raise InvalidGridWidthError
 
         grid_width = int(grid_width)
@@ -321,7 +324,7 @@ class ExcelParser():
 
     def getMaterial(self, row):
         material = row["Materiaal"]
-        if material == "" or material is None:
+        if material == "" or material is None or np.isnan(material):
             raise InvalidMaterialError
         
         material = str(row["Materiaal"])
@@ -331,7 +334,7 @@ class ExcelParser():
     def getArticleName(self, row):
         article_name = row["Artikelnaam"]
         print(article_name)
-        if article_name == "" or article_name is None:
+        if article_name == "" or article_name is None or np.isnan(article_name):
             raise InvalidArticleName
         article_name = str(article_name)
         print(article_name)

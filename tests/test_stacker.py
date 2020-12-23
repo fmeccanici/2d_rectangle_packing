@@ -33,7 +33,7 @@ class StackerTest(unittest.TestCase):
     def testStart1(self):
         file_name = "paklijst2.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.setExcelParser(path=self.excel_path, file_name=file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
         self.stacker.start()
@@ -52,7 +52,7 @@ class StackerTest(unittest.TestCase):
     def testStart2(self):
         file_name = "paklijst3.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.setExcelParser(path=self.excel_path, file_name=file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
         self.stacker.start()
@@ -70,7 +70,7 @@ class StackerTest(unittest.TestCase):
     def testStartMillimeters(self):
         file_name = "paklijst4.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.setExcelParser(path=self.excel_path, file_name=file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
         self.stacker.start()
@@ -177,7 +177,7 @@ class StackerTest(unittest.TestCase):
     def testStackSmallerGridWidthInLarger1(self):
         file_name = "paklijst_kokos.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.setExcelParser(path=self.excel_path, file_name=file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
         self.stacker.setFillOrdersWithSmallerGridWidths(True)
@@ -189,7 +189,7 @@ class StackerTest(unittest.TestCase):
     def testStackSmallerGridWidthInLarger2(self):
         file_name = "paklijst_kokos2.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.setExcelParser(path=self.excel_path, file_name=file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
         self.stacker.setFillOrdersWithSmallerGridWidths(True)
@@ -201,7 +201,7 @@ class StackerTest(unittest.TestCase):
     def testStackStandardRectangles(self):
         file_name = "paklijst_kokos3.xlsx"
 
-        self.stacker.setExcelParser(self.excel_path, file_name)
+        self.stacker.setExcelParser(path=self.excel_path, file_name=file_name)
         self.stacker.db_manager.clearDatabase()
         self.stacker.loadOrdersAndAddToDatabase()
         self.stacker.setStandardSizesToFill(Rectangle.getStandardSizesSortedOnMostSold())

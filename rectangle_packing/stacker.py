@@ -63,8 +63,8 @@ class Stacker(object):
     def setRectangle(self, rectangle):
         self.rectangle = rectangle
 
-    def setExcelParser(self, data_logger, path, file_name):
-        self.excel_parser = ExcelParser(data_logger=data_logger, path=path, file_name=file_name)
+    def setExcelParser(self, path, file_name):
+        self.excel_parser = ExcelParser(data_logger=self.data_logger, path=path, file_name=file_name)
 
     def stackingStopped(self):
         return not self.is_stacking
@@ -121,7 +121,6 @@ class Stacker(object):
 
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
         total_amount_of_unstacked_rectangles = len(self.getUnstackedRectangles())
-        self.data_logger.setTotalRectanglesToStack(total_amount_of_unstacked_rectangles)
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
             if automatic:
@@ -158,7 +157,7 @@ class Stacker(object):
         self.optimizeOnMillimetersAndExportNonEmptyGrids()
         self.total_time = time.time() - self.start_time
         self.data_logger.setTotalExecutionTime(self.total_time)
-        self.data_logger.setSuccessfullyStackedRectangles(total_amount_of_unstacked_rectangles - len(self.getUnstackedRectangles()))
+        self.data_logger.setSuccessfullyStackedRectangles(total_amount_of_unstacked_rectangles)
         self.data_logger.storeData()
         
     def optimizeOnMillimetersAndExportNonEmptyGrids(self):
