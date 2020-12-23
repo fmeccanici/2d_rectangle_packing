@@ -37,7 +37,7 @@ class PopupWindowTriggerThread(QThread):
             if self.finished_stacking:
                 self.finished_stacking_signal.emit(True)
                 self.finished_stacking = False
-            time.sleep(60)
+            time.sleep(10)
             
 # class that enables multithreading with Qt
 class Worker(QRunnable):
@@ -307,16 +307,20 @@ class Gui(QWidget):
         popup_message = ""
         popup_message += str(self.stacker.getDataLogger().getTotalRectanglesToStack()) + "/" + str(self.stacker.getDataLogger().getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
         popup_message += "Total execution time is " + str(round(self.stacker.getDataLogger().getTotalExecutionTime()/60, 2)) + "min \n \n"
-        popup_message += str(self.stacker.getDataLogger().getAmountOfErrors()) + " amount of errors occured: \n"
+        popup_message += str(self.stacker.getDataLogger().getAmountOfErrors()) + " errors occured: \n"
         if self.stacker.getDataLogger().getAmountOfErrors() > 0:
-            popup_message += [str(error) + "\n" for error in self.stacker.getDataLogger().getErrorData()]
+            for error in self.stacker.getDataLogger().getErrorData():
+                popup_message += str(error) + "\n"
 
         self.popup_window.setText(popup_message)
         self.popup_window.setIcon(QMessageBox.Information)
-        self.popup_window.setWindowTitle("Finished stacking")
-        self.popup_window.raise_()
-        self.popup_window.exec()
+        self.popup_window.setWindowTitle("Stacker finished")
 
+        # https://stackoverflow.com/questions/6087887/bring-window-to-front-raise-show-activatewindow-don-t-work
+        self.popup_window.setWindowState(self.popup_window.windowState() & ~Qt.WindowActive)
+        self.popup_window.show()
+        self.popup_window.activateWindow()
+        
     def setFillParameters(self):
         standard_sizes = []
         if self.standard_order_60_80_checkbox.isChecked():

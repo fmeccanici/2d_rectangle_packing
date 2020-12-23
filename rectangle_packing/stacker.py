@@ -380,6 +380,7 @@ class Stacker(object):
             self.optimized_rectangle.setPosition([x, y])
             self.is_optimized_y = True
         else:
+            pass
             # move y to y_new
 
     def moveRectangleHorizontally(self, step_size):
@@ -397,6 +398,7 @@ class Stacker(object):
             self.optimized_rectangle.setPosition([x, y])
             self.is_optimized_x = True
         else:
+            pass
             # move x to x_new
 
     def createAndAddNewGrid(self, width=100, article_name='default', material='kokos', brand='kokos', color='naturel'):
