@@ -12,51 +12,104 @@ class Error(Exception):
 
 class EmptyExcelError(Error):
     """Raised when excel is empty"""
-    pass
+    def __init__(self, message="Excel is empty"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
+
 
 class InvalidWidthError(Error):
     """Raised when width field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid width"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
+
 
 class InvalidHeightError(Error):
     """Raised when height field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid height"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class InvalidNameError(Error):
     """Raised when name field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid name"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class InvalidBrandError(Error):
     """Raised when brand field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid brand"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
+
 
 class InvalidCoupageBatchError(Error):
     """Raised when coupage/batch field has an invalid value"""
-    pass
+    def __init__(self, message="Definition of coupage/batch invalid"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class InvalidClientNameError(Error):
     """Raised when clientname field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid client name"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
+
 
 class InvalidColorError(Error):
     """Raised when color field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid color"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class InvalidQuantityError(Error):
     """Raised when quantity field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid quantity"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
+
 
 class InvalidGridWidthError(Error):
     """Raised when gridwidth field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid grid width"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class InvalidMaterialError(Error):
     """Raised when material field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid material"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class InvalidArticleNameError(Error):
     """Raised when article_name field has an invalid value"""
-    pass
+    def __init__(self, message="Invalid article name"):
+        self.message = message
+
+    def __str__(self):
+        return f'{self.message}'
 
 class ExcelParser():
     def __init__(self, data_logger=DataLogger(), path="./paklijsten/", file_name="paklijst.xlsx", sheet_name='paklijst_zonder_opmaak'):
@@ -95,7 +148,8 @@ class ExcelParser():
         return unstacked_rectangles
     
     def reloadExcel(self, basic_excel=True):
-    
+        self.data_logger.clearErrorData()
+
         # basic means only columns and rows, no other opmaak things as "PAKLIJST" large at the top
         if not basic_excel: 
             self.loadNonBasicExcel()
@@ -184,40 +238,8 @@ class ExcelParser():
             except Exception as e:
                 name = self.getName(row)
                 print("Something went wrong parsing order " + str(name) + ": " + str(e))
-                self.data_logger.addErrorData("Order " + str(name) + " not included due to excel parser error: " + str(e))
+                self.data_logger.addErrorData("Order " + str(name) + ": " + str(e))
                 continue
-
-            # except InvalidHeightError:
-            #     print("Invalid height value")
-            #     continue
-
-            # except InvalidWidthError:
-            #     print("Invalid width value")
-            #     continue
-            
-            # except InvalidNameError:
-            #     print("Invalid name value")
-            #     continue
-            
-            # except InvalidBrandError:
-            #     print("Invalid brand value")
-            #     continue
-            
-            # except InvalidCoupageBatchError:
-            #     print("Invalid coupage/batch value")
-            #     continue
-        
-            # except InvalidClientNameError:
-            #     print("Invalid clientname value")
-            #     continue
-
-            # except InvalidColorError:
-            #     print("Invalid color value")
-            #     continue
-            
-            # except InvalidQuantityError:
-            #     print("Invalid quantity value")
-            #     continue
         
         if len(unstacked_rectangles) == 0:
             raise EmptyExcelError    
@@ -234,7 +256,7 @@ class ExcelParser():
 
         width = float(width)
 
-        if width == np.nan or width <= 0 or width is None or np.isnan(width):
+        if np.isnan(width) or width <= 0 or width is None or self.isNan(width):
             raise InvalidWidthError
 
         return width
@@ -247,18 +269,17 @@ class ExcelParser():
         except AttributeError:
             height = row['Lengte']
  
-
         height = float(height)
 
-        if np.isnan(height) or height <= 0 or height is None or np.isnan(height):
+        if np.isnan(height) or height <= 0 or height is None or self.isNan(height):
             raise InvalidHeightError
 
         return height
 
     def getName(self, row):
-        name = str(row['Ordernummer'])
-        print(name)
-        if name == "" or name is None or np.isnan(name):
+        name = int(row['Ordernummer'])
+
+        if name == "" or name is None or self.isNan(name):
             raise InvalidNameError
 
         name = str(name)
@@ -267,17 +288,18 @@ class ExcelParser():
     
     def getBrand(self, row):
         brand = row["Merk"]
-        if brand == "" or brand is None or np.isnan(brand):
+        if brand == "" or brand is None or self.isNan(brand):
             raise InvalidBrandError
 
         brand = str(brand)
 
         return brand
 
+
     def getCoupageBatch(self, row):
         coupage_batch = row["Coupage/Batch"]
-        
-        if coupage_batch == "" or coupage_batch is None or np.isnan(coupage_batch):
+
+        if coupage_batch == "" or coupage_batch is None or self.isNan(coupage_batch):
             raise InvalidCoupageBatchError
 
         # lower needed because somewhere else in the code it is checked for
@@ -288,7 +310,7 @@ class ExcelParser():
 
     def getClientName(self, row):
         client_name = row["Klantnaam"]
-        if client_name == "" or client_name is None or np.isnan(client_name):
+        if client_name == "" or client_name is None or self.isNan(client_name):
             raise InvalidClientNameError
 
         client_name = str(client_name)
@@ -297,7 +319,7 @@ class ExcelParser():
 
     def getColor(self, row):
         color = row["Soort"]
-        if color == "" or color is None or np.isnan(color):
+        if color == "" or color is None or self.isNan(color):
             raise InvalidColorError
 
         color = str(color)
@@ -306,7 +328,7 @@ class ExcelParser():
 
     def getQuantity(self, row):
         quantity = row["Aantal"]
-        if np.isnan(quantity) or quantity == "" or quantity is None or np.isnan(quantity):
+        if np.isnan(quantity) or quantity == "" or quantity is None or self.isNan(quantity):
             raise InvalidQuantityError
 
         quantity = int(quantity)
@@ -315,7 +337,7 @@ class ExcelParser():
 
     def getGridWidth(self, row):
         grid_width = row["Rolbreedte"]
-        if np.isnan(grid_width) or grid_width == "" or grid_width is None or np.isnan(grid_width):
+        if np.isnan(grid_width) or grid_width == "" or grid_width is None or self.isNan(grid_width):
             raise InvalidGridWidthError
 
         grid_width = int(grid_width)
@@ -324,7 +346,7 @@ class ExcelParser():
 
     def getMaterial(self, row):
         material = row["Materiaal"]
-        if material == "" or material is None or np.isnan(material):
+        if material == "" or material is None or self.isNan(material):
             raise InvalidMaterialError
         
         material = str(row["Materiaal"])
@@ -333,10 +355,11 @@ class ExcelParser():
 
     def getArticleName(self, row):
         article_name = row["Artikelnaam"]
-        print(article_name)
-        if article_name == "" or article_name is None or np.isnan(article_name):
-            raise InvalidArticleName
+        if article_name == "" or article_name is None or self.isNan(article_name):
+            raise InvalidArticleNameError
         article_name = str(article_name)
-        print(article_name)
-        print()
+
         return article_name
+
+    def isNan(self, string):
+        return string != string

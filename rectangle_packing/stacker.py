@@ -114,7 +114,6 @@ class Stacker(object):
         """
 
         self.start_time = time.time()
-
         self.getAndExportCoupages()
         self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()

@@ -37,7 +37,7 @@ class PopupWindowTriggerThread(QThread):
             if self.finished_stacking:
                 self.finished_stacking_signal.emit(True)
                 self.finished_stacking = False
-            time.sleep(10)
+            time.sleep(30)
             
 # class that enables multithreading with Qt
 class Worker(QRunnable):
