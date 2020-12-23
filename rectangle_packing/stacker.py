@@ -141,8 +141,9 @@ class Stacker(object):
 
         self.grids = self.db_manager.getGridsNotCut(sort=True)
         for grid in self.grids:
-            self.setGrid(grid)
-            self.convertRectanglesToMillimetersOptimizeAndExportGrid()
+            if not grid.isEmpty():
+                self.setGrid(grid)
+                self.convertRectanglesToMillimetersOptimizeAndExportGrid()
             
     def stackOrdersWithSmallerGridWidths(self):
         self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
