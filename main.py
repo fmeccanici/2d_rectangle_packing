@@ -10,13 +10,33 @@ from rectangle_packing.helper import Helper
 import sys
 import os
 from PyQt5 import QtWebEngineWidgets, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot, QRect
+from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot, QRect, QThread
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
                              QMenu, QPushButton, QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QSlider, QLabel,
-                             QLineEdit, QListWidget, QListWidgetItem, QMainWindow)
+                             QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox,
+                             QDialog)
 from PyQt5.QtGui import QPainter, QBrush, QPen, QPixmap, QColor
 import pandas as pd
 import numpy as np
+
+
+
+# used to trigger a popup window from other thread
+# has to be in main thread to be executed without failing
+class PopupWindowTriggerThread(QThread):    
+    finished_stacking_signal = pyqtSignal(bool)
+    def __init__(self, parent=None):
+        super(PopupWindowTriggerThread, self).__init__(parent=parent)
+        self.finished_stacking = False
+    
+    def setFinishedStacking(self, finished_stacking):
+        self.finished_stacking = finished_stacking
+
+    def run(self):
+        while True:
+            if self.finished_stacking:
+                self.finished_stacking_signal.emit(True)
+                self.finished_stacking = False
 
 # class that enables multithreading with Qt
 class Worker(QRunnable):
@@ -55,7 +75,10 @@ class Gui(QWidget):
 
         # Multithreading
         self.threadpool = QThreadPool()
-
+        self.popup_window_trigger_thread = PopupWindowTriggerThread(self)
+        self.popup_window_trigger_thread.finished_stacking_signal.connect(self.displayPopupWindowFinishedStacking)
+        self.popup_window_trigger_thread.start()
+        
         # Create all the layouts and button events
         self.createButtonsLayout()
         self.createButtonEvents()
@@ -97,7 +120,7 @@ class Gui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
-        self.excel_file_line_edit = QLineEdit("Paklijst2.tmp.xlsm")
+        self.excel_file_line_edit = QLineEdit("tjeerd2.xlsm")
         
         self.grid_color_label = QLabel("Color")
         self.grid_color_line_edit = QLineEdit("Naturel")
@@ -273,7 +296,18 @@ class Gui(QWidget):
 
     def onStartStackingAutomaticClick(self):
         self.setFillParameters()
-        self.loadOrdersCreateNecessaryGridsAndStartStacking()
+        self.loadOrdersCreateNecessaryGridsAndStartStacking()        
+        
+        # signal thread that we should execute popup window 
+        self.popup_window_trigger_thread.setFinishedStacking(True)
+        
+    def displayPopupWindowFinishedStacking(self):
+        self.popup_window = QMessageBox()
+        self.popup_window.setText("Finished stacking!")
+        self.popup_window.setIcon(QMessageBox.Information)
+        self.popup_window.setWindowTitle("Finished stacking")
+        self.popup_window.raise_()
+        self.popup_window.exec()
 
     def setFillParameters(self):
         standard_sizes = []

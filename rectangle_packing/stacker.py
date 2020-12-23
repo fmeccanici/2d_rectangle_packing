@@ -203,7 +203,6 @@ class Stacker(object):
         self.coupage.setStacked()
         self.db_manager.updateRectangle(self.coupage)
 
-
     def loadOrdersAndAddToDatabase(self):
         try:
             self.rectangles = self.excel_parser.getUnstackedRectangles()
