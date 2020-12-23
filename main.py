@@ -7,7 +7,7 @@ from rectangle_packing.excel_parser import ExcelParser
 from rectangle_packing.helper import Helper
 
 # external dependencies
-import sys
+import sys, time
 import os
 from PyQt5 import QtWebEngineWidgets, QtWidgets
 from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot, QRect, QThread
@@ -37,7 +37,8 @@ class PopupWindowTriggerThread(QThread):
             if self.finished_stacking:
                 self.finished_stacking_signal.emit(True)
                 self.finished_stacking = False
-
+            time.sleep(60)
+            
 # class that enables multithreading with Qt
 class Worker(QRunnable):
     '''
@@ -305,7 +306,7 @@ class Gui(QWidget):
         self.popup_window = QMessageBox()
         popup_message = ""
         popup_message += str(self.stacker.getDataLogger().getTotalRectanglesToStack()) + "/" + str(self.stacker.getDataLogger().getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
-        popup_message += "Total execution time is " + str(round(self.stacker.getDataLogger().getTotalExecutionTime(), 2)/60) + "min \n \n"
+        popup_message += "Total execution time is " + str(round(self.stacker.getDataLogger().getTotalExecutionTime()/60, 2)) + "min \n \n"
         popup_message += str(self.stacker.getDataLogger().getAmountOfErrors()) + " amount of errors occured: \n"
         if self.stacker.getDataLogger().getAmountOfErrors() > 0:
             popup_message += [str(error) + "\n" for error in self.stacker.getDataLogger().getErrorData()]

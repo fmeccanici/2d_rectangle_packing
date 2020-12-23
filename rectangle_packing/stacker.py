@@ -120,8 +120,8 @@ class Stacker(object):
         # self.loadOrdersAndAddToDatabase()
 
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
-        self.total_amount_of_unstacked_rectangles = len(self.getUnstackedRectangles())
-        self.data_logger.setTotalRectanglesToStack(self.total_amount_of_unstacked_rectangles)
+        total_amount_of_unstacked_rectangles = len(self.getUnstackedRectangles())
+        self.data_logger.setTotalRectanglesToStack(total_amount_of_unstacked_rectangles)
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
             if automatic:
@@ -158,8 +158,9 @@ class Stacker(object):
         self.optimizeOnMillimetersAndExportNonEmptyGrids()
         self.total_time = time.time() - self.start_time
         self.data_logger.setTotalExecutionTime(self.total_time)
-        self.data_logger.setSuccessfullyStackedRectangles(self.total_amount_of_unstacked_rectangles - len(self.getUnstackedRectangles()))
-
+        self.data_logger.setSuccessfullyStackedRectangles(total_amount_of_unstacked_rectangles - len(self.getUnstackedRectangles()))
+        self.data_logger.storeData()
+        
     def optimizeOnMillimetersAndExportNonEmptyGrids(self):
         self.grids = self.db_manager.getGridsNotCut(sort=True)
         for grid in self.grids:
@@ -375,11 +376,11 @@ class Stacker(object):
         self.optimized_rectangle.setPosition([x_new, y])
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
-            print("Cannot optimize further in x direction")
+            print("Cannot optimize further in y direction")
             self.optimized_rectangle.setPosition([x, y])
             self.is_optimized_y = True
         else:
-            print("Moved x to " + str(x_new))
+            # move y to y_new
 
     def moveRectangleHorizontally(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)
@@ -392,11 +393,11 @@ class Stacker(object):
         self.optimized_rectangle.setPosition([x, y_new])
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
-            print("Cannot optimize further in y direction")
+            print("Cannot optimize further in x direction")
             self.optimized_rectangle.setPosition([x, y])
             self.is_optimized_x = True
         else:
-            print("Moved y to " + str(y_new))
+            # move x to x_new
 
     def createAndAddNewGrid(self, width=100, article_name='default', material='kokos', brand='kokos', color='naturel'):
         try:
@@ -525,7 +526,6 @@ class Stacker(object):
                 for y in self.getVerticalLoopRange():
                     position = np.array([x,y])
                     self.rectangle.setPosition(position)
-
                     if self.grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                         stacking_position = position
         

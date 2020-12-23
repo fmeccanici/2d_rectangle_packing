@@ -43,11 +43,20 @@ class DataLogger(object):
 
     def getAmountOfErrors(self):
         return len(self.error_data)
-        
-    def storeErrorData(self):
-        file_name = 'log.txt'
+    
+    def dataToString(self):
+        data_string = ""
+        data_string += str(self.stacker.getDataLogger().getTotalRectanglesToStack()) + "/" + str(self.stacker.getDataLogger().getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
+        data_string += "Total execution time is " + str(round(self.stacker.getDataLogger().getTotalExecutionTime()/60, 2)) + "min \n \n"
+        data_string += str(self.stacker.getDataLogger().getAmountOfErrors()) + " amount of errors occured: \n"
+        if self.stacker.getDataLogger().getAmountOfErrors() > 0:
+            data_string += [str(error) + "\n" for error in self.stacker.getDataLogger().getErrorData()]
+
+        return data_string
+
+    def storeData(self):
+        file_name = Helper.getCurrentHour() + '_log.txt'
         with open(self.getStoragePath() + file_name, 'w+'):
-            f.write("Errors:\n")
-            f.write(str(self.getErrorData()))
+            f.write(self.dataToString())
 
     
