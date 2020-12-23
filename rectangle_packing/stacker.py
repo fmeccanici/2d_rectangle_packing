@@ -90,6 +90,12 @@ class Stacker(object):
     def getUnstackedRectangles(self):
         return [rectangle for rectangle in self.rectangles if not rectangle.isStacked()]
 
+    def setCoupage(self, coupage):
+        self.coupage = coupage
+    
+    def getCoupage(self):
+        return self.coupage
+
     def start(self, automatic=True):     
         """ 
         Starts stacking the current unstacked rectangles from database in self.grid
@@ -100,7 +106,7 @@ class Stacker(object):
         When automatic is false, the user should manually set a grid to be used for stacking.
         """
 
-        self.exportCoupages()
+        self.getAndExportCoupages()
         self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()
 
@@ -131,7 +137,6 @@ class Stacker(object):
                         self.stackStandardRectangles()
 
                     self.enlargeGridToStandardSize()
-                    # self.convertRectanglesToMillimetersOptimizeAndExportGrid()
 
                 # break out of loop when operator presses stop button
                 if self.stackingStopped():
@@ -139,12 +144,15 @@ class Stacker(object):
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
+        self.optimizeOnMillimetersAndExportNonEmptyGrids()
+    
+    def optimizeOnMillimetersAndExportNonEmptyGrids(self):
         self.grids = self.db_manager.getGridsNotCut(sort=True)
         for grid in self.grids:
             if not grid.isEmpty():
                 self.setGrid(grid)
                 self.convertRectanglesToMillimetersOptimizeAndExportGrid()
-            
+
     def stackOrdersWithSmallerGridWidths(self):
         self.getUnstackedRectanglesOfAllSmallerGridWidthsThanOriginalSortedOnArea()
         self.stackUnstackedRectanglesInGrid()
@@ -169,31 +177,33 @@ class Stacker(object):
 
         return result
 
-    def exportCoupages(self):
+    def getAndExportCoupages(self):
         coupages = self.db_manager.getUnstackedRectangles(for_cutting=True, coupage_batch="coupage")
         for coupage in coupages:
-            _width = coupage.getWidth()
-            _height = coupage.getHeight()
+            self.setCoupage(coupage)
+            self.rotateCoupageToLargestSideUpwards()
+            self.exportAndUpdateCoupage()
+    
+    def rotateCoupageToLargestSideUpwards(self):
+        _width = self.coupage.getWidth()
+        _height = self.coupage.getHeight()
 
-            if _width > _height:
-                print("Coupage width is larger than height")
-                width, height = Helper.swap(_width, _height)
-                print("Width before swap = " + str(coupage.getWidth()))
-                coupage.setWidth(width)
-                coupage.setHeight(height)
-                print("Width after swap = " + str(coupage.getWidth()))
-                self.db_manager.updateRectangle(coupage)
+        if _width > _height:
+            print("Coupage width is larger than height")
+            width, height = Helper.swap(_width, _height)
+            print("Width before swap = " + str(coupage.getWidth()))
+            self.coupage.setWidth(width)
+            self.coupage.setHeight(height)
+            print("Width after swap = " + str(self.coupage.getWidth()))
+            self.db_manager.updateRectangle(self.coupage)
 
-            # for some reason for_prime_center has to be false
-            # to be rotated correctly for Zund prime center
-            # side with largest length should point sidewards
-            # in Prime center it will be rotated 90deg such that the 
-            # largest side points upwards
-            coupage.toDxf(for_prime_center=True)
-            coupage.setStacked()
-            coupage.toZcc()
-            self.db_manager.updateRectangle(coupage)
-            
+    def exportAndUpdateCoupage(self):
+        self.coupage.toDxf(for_prime_center=True)
+        self.coupage.toZcc()
+        self.coupage.setStacked()
+        self.db_manager.updateRectangle(self.coupage)
+
+
     def loadOrdersAndAddToDatabase(self):
         try:
             self.rectangles = self.excel_parser.getUnstackedRectangles()
