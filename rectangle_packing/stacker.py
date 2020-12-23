@@ -35,7 +35,7 @@ class Stacker(object):
     millimeter size and moved left and downwards until they cannot be moved further. The result is a millimeter accuracy stacked grid.
     """
 
-    def __init__(self):
+    def __init__(self, data_logger=DataLogger()):
         self.db_manager = DatabaseManager()
         self.setStandardSizesToFill([])
         self.setFillOrdersWithSmallerGridWidths(False)
@@ -46,6 +46,7 @@ class Stacker(object):
         # current rectangle to stack in current grid
         self.rectangle = Rectangle()
         self.grid = Grid()
+        self.setDataLogger(data_logger)
 
         # stacking position of current rectangle
         self.stacking_position = []
@@ -53,12 +54,18 @@ class Stacker(object):
         # stacking position of current rectangle rotated
         self.stacking_position_rotated = []
 
+    def setDataLogger(self, data_logger):
+        self.data_logger = data_logger
+    
+    def getDataLogger(self):
+        return self.data_logger
+
     def setRectangle(self, rectangle):
         self.rectangle = rectangle
 
-    def setExcelParser(self, path, file_name):
-        self.excel_parser = ExcelParser(path, file_name)
-    
+    def setExcelParser(self, data_logger, path, file_name):
+        self.excel_parser = ExcelParser(data_logger=data_logger, path=path, file_name=file_name)
+
     def stackingStopped(self):
         return not self.is_stacking
 
@@ -106,11 +113,15 @@ class Stacker(object):
         When automatic is false, the user should manually set a grid to be used for stacking.
         """
 
+        self.start_time = time.time()
+
         self.getAndExportCoupages()
         self.is_stacking = True
         # self.loadOrdersAndAddToDatabase()
 
         self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
+        self.total_amount_of_unstacked_rectangles = len(self.getUnstackedRectangles())
+        self.data_logger.setTotalRectanglesToStack(self.total_amount_of_unstacked_rectangles)
 
         while self.anyUnstackedRectangles() and not self.stackingStopped():
             if automatic:
@@ -145,7 +156,10 @@ class Stacker(object):
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
 
         self.optimizeOnMillimetersAndExportNonEmptyGrids()
-    
+        self.total_time = time.time() - self.start_time
+        self.data_logger.setTotalExecutionTime(self.total_time)
+        self.data_logger.setSuccessfullyStackedRectangles(self.total_amount_of_unstacked_rectangles - len(self.getUnstackedRectangles()))
+
     def optimizeOnMillimetersAndExportNonEmptyGrids(self):
         self.grids = self.db_manager.getGridsNotCut(sort=True)
         for grid in self.grids:

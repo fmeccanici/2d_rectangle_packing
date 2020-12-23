@@ -95,8 +95,8 @@ class Gui(QWidget):
         desktop = Helper.getDesktopPath()
         path = desktop + "/paklijsten/"
         file_name = "paklijst.xlsx"
-        self.excel_parser = ExcelParser(path, file_name, sheet_name='Paklijst')
-        self.stacker.setExcelParser(path, file_name)
+        self.excel_parser = ExcelParser(data_logger=self.stacker.getDataLogger(), path=path, file_name=file_name, sheet_name='Paklijst')
+        self.stacker.setExcelParser(data_logger=self.stacker.getDataLogger(), path=path, file_name=file_name)
 
     # this creates the middle side of the GUI
     def createButtonsLayout(self):
@@ -303,7 +303,14 @@ class Gui(QWidget):
         
     def displayPopupWindowFinishedStacking(self):
         self.popup_window = QMessageBox()
-        self.popup_window.setText("Finished stacking!")
+        popup_message = ""
+        popup_message += str(self.stacker.getDataLogger().getTotalRectanglesToStack()) + "/" + str(self.stacker.getDataLogger().getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
+        popup_message += "Total execution time is " + str(round(self.stacker.getDataLogger().getTotalExecutionTime(), 2)/60) + "min \n \n"
+        popup_message += str(self.stacker.getDataLogger().getAmountOfErrors()) + " amount of errors occured: \n"
+        if self.stacker.getDataLogger().getAmountOfErrors() > 0:
+            popup_message += [str(error) + "\n" for error in self.stacker.getDataLogger().getErrorData()]
+
+        self.popup_window.setText(popup_message)
         self.popup_window.setIcon(QMessageBox.Information)
         self.popup_window.setWindowTitle("Finished stacking")
         self.popup_window.raise_()
@@ -342,8 +349,8 @@ class Gui(QWidget):
         path = desktop + "/paklijsten/"
 
         self.excel_parser.setFileName(file_name)
-        self.stacker.setExcelParser(path, file_name)
-        
+        self.stacker.setExcelParser(data_logger=self.stacker.getDataLogger(), path=path, file_name=file_name)
+
         unstacked_rectangles = self.excel_parser.getUnstackedRectangles()
         self.db_manager.addRectangles(unstacked_rectangles)
         self.refreshNewOrders()

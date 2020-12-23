@@ -2,6 +2,8 @@
 import pandas as pd
 import numpy as np
 from rectangle_packing.rectangle import Rectangle
+from rectangle_packing.data_logger import DataLogger
+
 import os
 
 class Error(Exception):
@@ -57,12 +59,22 @@ class InvalidArticleNameError(Error):
     pass
 
 class ExcelParser():
-    def __init__(self, path="./paklijsten/", file_name="paklijst.xlsx", sheet_name='paklijst_zonder_opmaak'):
+    def __init__(self, data_logger=DataLogger(), path="./paklijsten/", file_name="paklijst.xlsx", sheet_name='paklijst_zonder_opmaak'):
         self.path = path
         self.file_name = file_name
+        print(path)
+        print(file_name)
         self.names = []
+        self.data_logger = data_logger
+
         self.setSheetName(sheet_name)
     
+    def setDataLogger(self, data_logger):
+        self.data_logger = data_logger
+    
+    def getDataLogger(self):
+        return self.data_logger
+
     def getSheetName(self):
         return self.sheet_name
 
@@ -71,9 +83,11 @@ class ExcelParser():
 
     def setPath(self, path):
         self.path = path
-    
+        print("Set path to " + str(self.path))
+
     def setFileName(self, file_name):
         self.file_name = file_name
+        print("Set file name to " + str(self.file_name))
 
     def getUnstackedRectangles(self):
         self.reloadExcel()
@@ -166,38 +180,43 @@ class ExcelParser():
                     else:
                         rectangle = Rectangle(width=width, height=height, name=name, article_name=article_name, material=material, brand=brand, color=color, grid_width=grid_width, quantity=quantity, client_name=client_name, coupage_batch=coupage_batch)
                         unstacked_rectangles.append(rectangle)
+            
+            except Exception as e:
+                print("Something went wrong parsing order " + str(name) + ": " + str(e))
+                self.data_logger.addErrorData("Order " + str(name) + " not included due to excel parser error: " + str(e))
+                continue
 
-            except InvalidHeightError:
-                print("Invalid height value")
-                continue
+            # except InvalidHeightError:
+            #     print("Invalid height value")
+            #     continue
 
-            except InvalidWidthError:
-                print("Invalid width value")
-                continue
+            # except InvalidWidthError:
+            #     print("Invalid width value")
+            #     continue
             
-            except InvalidNameError:
-                print("Invalid name value")
-                continue
+            # except InvalidNameError:
+            #     print("Invalid name value")
+            #     continue
             
-            except InvalidBrandError:
-                print("Invalid brand value")
-                continue
+            # except InvalidBrandError:
+            #     print("Invalid brand value")
+            #     continue
             
-            except InvalidCoupageBatchError:
-                print("Invalid coupage/batch value")
-                continue
+            # except InvalidCoupageBatchError:
+            #     print("Invalid coupage/batch value")
+            #     continue
         
-            except InvalidClientNameError:
-                print("Invalid clientname value")
-                continue
+            # except InvalidClientNameError:
+            #     print("Invalid clientname value")
+            #     continue
 
-            except InvalidColorError:
-                print("Invalid color value")
-                continue
+            # except InvalidColorError:
+            #     print("Invalid color value")
+            #     continue
             
-            except InvalidQuantityError:
-                print("Invalid quantity value")
-                continue
+            # except InvalidQuantityError:
+            #     print("Invalid quantity value")
+            #     continue
         
         if len(unstacked_rectangles) == 0:
             raise EmptyExcelError    
