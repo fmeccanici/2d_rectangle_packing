@@ -277,7 +277,7 @@ class ExcelParser():
         return height
 
     def getName(self, row):
-        name = int(row['Ordernummer'])
+        name = str(row['Ordernummer'])
 
         if name == "" or name is None or self.isNan(name):
             raise InvalidNameError
