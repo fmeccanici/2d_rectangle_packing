@@ -204,7 +204,7 @@ class Stacker(object):
         if _width > _height:
             print("Coupage width is larger than height")
             width, height = Helper.swap(_width, _height)
-            print("Width before swap = " + str(coupage.getWidth()))
+            print("Width before swap = " + str(self.coupage.getWidth()))
             self.coupage.setWidth(width)
             self.coupage.setHeight(height)
             print("Width after swap = " + str(self.coupage.getWidth()))
