@@ -49,7 +49,7 @@ class DataLogger(object):
         data_string = ""
         data_string += str(self.getTotalRectanglesToStack()) + "/" + str(self.getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
         data_string += "Total execution time is " + str(round(self.getTotalExecutionTime()/60, 2)) + "min \n \n"
-        data_string += str(self.getAmountOfErrors()) + " amount of errors occured: \n"
+        data_string += str(self.getAmountOfErrors()) + " error(s) occured: \n"
         if self.getAmountOfErrors() > 0:
             for error in self.getErrorData():
                 data_string += str(error) + "\n"
