@@ -204,7 +204,7 @@ class Stacker(object):
         if _width > _height:
             print("Coupage width is larger than height")
             width, height = Helper.swap(_width, _height)
-            print("Width before swap = " + str(coupage.getWidth()))
+            print("Width before swap = " + str(self.coupage.getWidth()))
             self.coupage.setWidth(width)
             self.coupage.setHeight(height)
             print("Width after swap = " + str(self.coupage.getWidth()))
@@ -337,7 +337,8 @@ class Stacker(object):
     def convertRectanglesToMillimetersOptimizeAndExportGrid(self):
         print("Optimizing grid " + str(self.grid.getName()) + " and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
-
+        self.grid.empty()
+        
         # size to move rectangles in x and y direction
         step_size = 0.001
 
@@ -362,7 +363,8 @@ class Stacker(object):
 
     def getRectanglesExactWidthHeight(self):
         self.exact_rectangles = self.db_manager.getRectangles(self.grid, for_cutting=True, sort=True)
-
+        # self.grid.setStackedRectangles(self.exact_rectangles)
+        
     def moveRectangleVertically(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)
 
@@ -370,7 +372,11 @@ class Stacker(object):
         y = self.optimized_rectangle.getPosition()[1]
 
         x_new = x - step_size
-
+        print('x xnew')
+        print(x_new)
+        print(x)
+        print(self.optimized_rectangle.getWidth(), self.optimized_rectangle.getHeight())
+        print('CHECK')
         self.optimized_rectangle.setPosition([x_new, y])
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
@@ -498,8 +504,8 @@ class Stacker(object):
         
         # check if rectangle was rotated in start function
         w = int(np.ceil(width_exact))
-        if w % 2 > 0:
-            w += 1
+        # if w % 2 > 0:
+        #     w += 1
 
         if w == self.rectangle.getHeight():
             t = height_exact
@@ -520,7 +526,9 @@ class Stacker(object):
 
     def computeStackingPosition(self):        
         stacking_position = [self.grid.getWidth(), self.grid.getHeight()]
-
+        print("CHECK")
+        print(self.grid.getWidth())
+        print(self.rectangle.getWidth())
         if self.grid.getWidth() > self.rectangle.getWidth():
             for x in self.getHorizontalLoopRange():
                 for y in self.getVerticalLoopRange():
@@ -531,7 +539,6 @@ class Stacker(object):
         
         elif self.grid.getWidth() == self.rectangle.getWidth():
             x = self.rectangle.getWidth() / 2
-            
             for y in self.getVerticalLoopRange():
                 position = np.array([x,y])
                 self.rectangle.setPosition(position)
@@ -540,10 +547,21 @@ class Stacker(object):
         return stacking_position
 
     def getHorizontalLoopRange(self):
-        return reversed(range(int(self.rectangle.width/2), int(self.grid.getWidth() - self.rectangle.width/2) + 1))        
+        if self.rectangle.getWidth() % 2 > 0:
+            width = self.rectangle.getWidth() + 1
+        else:
+            width = self.rectangle.getWidth()
+
+        return reversed(range(int(width/2), int(self.grid.getWidth() - width/2) + 1))        
+
 
     def getVerticalLoopRange(self):
-        return reversed(range(int(self.rectangle.height/2), int(self.grid.getHeight() - self.rectangle.height/2) + 1))        
+        if self.rectangle.getHeight() % 2 > 0:
+            height = self.rectangle.getHeight() + 1
+        else:
+            height = self.rectangle.getHeight()
+ 
+        return reversed(range(int(height/2), int(self.grid.getHeight() - height/2) + 1))        
 
     
 

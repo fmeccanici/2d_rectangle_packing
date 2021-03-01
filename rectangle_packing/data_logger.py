@@ -46,15 +46,19 @@ class DataLogger(object):
         return len(self.error_data)
     
     def dataToString(self):
-        data_string = ""
-        data_string += str(self.getTotalRectanglesToStack()) + "/" + str(self.getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
-        data_string += "Total execution time is " + str(round(self.getTotalExecutionTime()/60, 2)) + "min \n \n"
-        data_string += str(self.getAmountOfErrors()) + " error(s) occured: \n"
-        if self.getAmountOfErrors() > 0:
-            for error in self.getErrorData():
-                data_string += str(error) + "\n"
+        try:
+            data_string = ""
+            data_string += str(self.getTotalRectanglesToStack()) + "/" + str(self.getSuccessfullyStackedRectangles()) + " succesfully stacked orders \n \n"
+            data_string += "Total execution time is " + str(round(self.getTotalExecutionTime()/60, 2)) + "min \n \n"
+            data_string += str(self.getAmountOfErrors()) + " amount of errors occured: \n"
+            if self.getAmountOfErrors() > 0:
+                for error in self.getErrorData():
+                    data_string += str(error) + "\n"
 
-        return data_string
+            return data_string
+        
+        except AttributeError:
+            return ""
 
     def storeData(self):
         file_name = str(Helper.getCurrentHour()) + 'h_log.txt'

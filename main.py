@@ -121,7 +121,7 @@ class Gui(QWidget):
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
-        self.excel_file_line_edit = QLineEdit("tjeerd2.xlsm")
+        self.excel_file_line_edit = QLineEdit("tjeerd_bug.xlsm")
         
         self.grid_color_label = QLabel("Color")
         self.grid_color_line_edit = QLineEdit("Naturel")
@@ -307,7 +307,7 @@ class Gui(QWidget):
         popup_message = ""
         popup_message += str(self.stacker.getDataLogger().getSuccessfullyStackedRectangles()) + "/" + str(self.stacker.getDataLogger().getTotalRectanglesToStack()) + " succesfully stacked orders \n \n"
         popup_message += "Total execution time is " + str(round(self.stacker.getDataLogger().getTotalExecutionTime()/60, 2)) + "min \n \n"
-        popup_message += str(self.stacker.getDataLogger().getAmountOfErrors()) + " errors occured: \n"
+        popup_message += str(self.stacker.getDataLogger().getAmountOfErrors()) + " error(s) occured: \n"
         if self.stacker.getDataLogger().getAmountOfErrors() > 0:
             for error in self.stacker.getDataLogger().getErrorData():
                 popup_message += str(error) + "\n"
