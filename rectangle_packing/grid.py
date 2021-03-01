@@ -168,6 +168,13 @@ class Grid(object):
         
         for stacked_rectangle in self.stacked_rectangles:
             if rectangle.intersection(stacked_rectangle):
+                # print('Intersection with ' + str(stacked_rectangle.getName()))
+                # print(stacked_rectangle.getWidth())
+                # print(rectangle.getWidth())
+
+                # print(stacked_rectangle.getHeight())
+                # print(rectangle.getHeight())
+
                 return False
                 
         return True

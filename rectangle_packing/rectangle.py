@@ -275,15 +275,15 @@ class Rectangle(object):
     
     def roundWidth(self):
         rounded_width = int(np.ceil(self.getWidth()))
-        if rounded_width % 2 > 0:
-            rounded_width += 1
+        # if rounded_width % 2 > 0:
+        #     rounded_width += 1
         
         self.setWidth(rounded_width)
 
     def roundHeight(self):
         rounded_height = int(np.ceil(self.getHeight()))
-        if rounded_height % 2 > 0:
-            rounded_height += 1
+        # if rounded_height % 2 > 0:
+        #     rounded_height += 1
         
         self.setHeight(rounded_height)
     

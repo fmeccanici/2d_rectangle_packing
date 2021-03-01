@@ -290,14 +290,14 @@ class DatabaseManager(object):
         # ceiled with height needed to first stack the rectangles on cm accuracy
         w = int(np.ceil(width))
         h = int(np.ceil(height))
-        
+        print(w, h)
         # need to round the to the upper integer divisible by 2, for example width/2 is used in the computeStacking position loop.
         # this cannot be 0.5
-        if w % 2 > 0:
-            w += 1
+        # if w % 2 > 0:
+        #     w += 1
         
-        if h % 2 > 0:
-            h += 1
+        # if h % 2 > 0:
+        #     h += 1
         
         return { "name": name, "width": w , "height": h, "exact_width": width, "exact_height": height, "article_name": article_name, "material": material, "brand": brand, "color": color, "x position": int(position[0]), "y position": int(position[1]), "isStacked": is_stacked, "grid_number": grid_number, 'grid_width': grid_width, 'quantity': quantity, 'client_name': client_name, "coupage_batch": coupage_batch}
 
