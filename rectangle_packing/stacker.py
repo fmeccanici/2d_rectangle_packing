@@ -337,7 +337,8 @@ class Stacker(object):
     def convertRectanglesToMillimetersOptimizeAndExportGrid(self):
         print("Optimizing grid " + str(self.grid.getName()) + " and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
-
+        self.grid.empty()
+        
         # size to move rectangles in x and y direction
         step_size = 0.001
 
@@ -362,7 +363,8 @@ class Stacker(object):
 
     def getRectanglesExactWidthHeight(self):
         self.exact_rectangles = self.db_manager.getRectangles(self.grid, for_cutting=True, sort=True)
-
+        # self.grid.setStackedRectangles(self.exact_rectangles)
+        
     def moveRectangleVertically(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)
 
@@ -370,7 +372,11 @@ class Stacker(object):
         y = self.optimized_rectangle.getPosition()[1]
 
         x_new = x - step_size
-
+        print('x xnew')
+        print(x_new)
+        print(x)
+        print(self.optimized_rectangle.getWidth(), self.optimized_rectangle.getHeight())
+        print('CHECK')
         self.optimized_rectangle.setPosition([x_new, y])
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
@@ -533,8 +539,6 @@ class Stacker(object):
         
         elif self.grid.getWidth() == self.rectangle.getWidth():
             x = self.rectangle.getWidth() / 2
-            print('CHEKCHKEC')
-            print(x)
             for y in self.getVerticalLoopRange():
                 position = np.array([x,y])
                 self.rectangle.setPosition(position)
