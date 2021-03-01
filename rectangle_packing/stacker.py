@@ -547,10 +547,21 @@ class Stacker(object):
         return stacking_position
 
     def getHorizontalLoopRange(self):
-        return reversed(range(int(self.rectangle.width/2), int(self.grid.getWidth() - self.rectangle.width/2) + 1))        
+        if self.rectangle.getWidth() % 2 > 0:
+            width = self.rectangle.getWidth() + 1
+        else:
+            width = self.rectangle.getWidth()
+
+        return reversed(range(int(width/2), int(self.grid.getWidth() - width/2) + 1))        
+
 
     def getVerticalLoopRange(self):
-        return reversed(range(int(self.rectangle.height/2), int(self.grid.getHeight() - self.rectangle.height/2) + 1))        
+        if self.rectangle.getHeight() % 2 > 0:
+            height = self.rectangle.getHeight() + 1
+        else:
+            height = self.rectangle.getHeight()
+ 
+        return reversed(range(int(height/2), int(self.grid.getHeight() - height/2) + 1))        
 
     
 
