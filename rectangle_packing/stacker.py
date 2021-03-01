@@ -498,8 +498,8 @@ class Stacker(object):
         
         # check if rectangle was rotated in start function
         w = int(np.ceil(width_exact))
-        if w % 2 > 0:
-            w += 1
+        # if w % 2 > 0:
+        #     w += 1
 
         if w == self.rectangle.getHeight():
             t = height_exact
@@ -520,7 +520,9 @@ class Stacker(object):
 
     def computeStackingPosition(self):        
         stacking_position = [self.grid.getWidth(), self.grid.getHeight()]
-
+        print("CHECK")
+        print(self.grid.getWidth())
+        print(self.rectangle.getWidth())
         if self.grid.getWidth() > self.rectangle.getWidth():
             for x in self.getHorizontalLoopRange():
                 for y in self.getVerticalLoopRange():
@@ -531,7 +533,8 @@ class Stacker(object):
         
         elif self.grid.getWidth() == self.rectangle.getWidth():
             x = self.rectangle.getWidth() / 2
-            
+            print('CHEKCHKEC')
+            print(x)
             for y in self.getVerticalLoopRange():
                 position = np.array([x,y])
                 self.rectangle.setPosition(position)
