@@ -273,6 +273,14 @@ class Rectangle(object):
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
     
+    def getLines(self):
+        top_left_to_top_right = Line(self.getTopLeft(), self.getTopRight())
+        bottom_left_to_top_left = Line(self.getBottomLeft(), self.getTopLeft())
+        bottom_left_to_bottom_right = Line(self.getBottomLeft(), self.getBottomRight())
+        bottom_right_to_top_right = Line(self.getBottomRight(), self.getTopRight())
+
+        return top_left_to_top_right, bottom_left_to_top_left, bottom_left_to_bottom_right, bottom_right_to_top_right
+    
     def roundWidth(self):
         rounded_width = int(np.ceil(self.getWidth()))
         # if rounded_width % 2 > 0:
