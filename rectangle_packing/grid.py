@@ -192,14 +192,21 @@ class Grid(object):
     
         return False
 
-    def toDxf(self, for_prime_center=False):
+    def toDxf(self, for_prime_center=False, remove_overlap=True):
         try:
+            
+            # self.addRectanglesToDxf(for_prime_center)
+            if remove_overlap == True:
+                self.removeOverlappingLines()
+                self.addLinesToDxf()
+                self.addLabelsToDxf()
 
-            self.addRectanglesToDxf(for_prime_center)
             if for_prime_center:
                 self.addLargeHorizontalLineAtTop()
 
             self.dxf_drawing.save()
+            print("Lines count is " + str(len(self.lines_without_overlap)))
+
         except PermissionError:
             print("DXF file opened in another program")
     
@@ -212,33 +219,11 @@ class Grid(object):
         line = dxf.line((y_start, x_start), (y_end, x_end))
         self.dxf_drawing.add(line)
 
-    """
-    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
-    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
-    than the current start x value, this is chosen as starting value x_start.  
-    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_end. Use the point with the lowest
-    y value as y_start
-    """
-    def removeDuplicateLines(self, for_prime_center=False):            
-        self.lines = []        
-        self.points = []
-
-        # used to determine over which x and y values to check for
-        # overlapping lines (unique x and y values)
-        self.convertRectanglesToPoints()
-        self.x_, self.y_ = self.getXYfromPointsAndRound()
-
-        self.x_unique = self.getUniqueValues(self.x_)
-        self.y_unique = self.getUniqueValues(self.y_)
-
-        self.removeDuplicateVerticalLines(for_prime_center)
-        self.removeDuplicateHorizontalLines(for_prime_center)
-
     def convertRectanglesToLines(self):
         self.lines = []
 
         for rectangle in self.stacked_rectangles:
-            self.lines.append(rectangle.getLines())
+            self.lines.extend(rectangle.getLines())
 
     def getVerticalLinesPerXValue(self, x):
         result = []
@@ -247,6 +232,8 @@ class Grid(object):
             if line.start_point[0] == x and line.end_point[0] == x:
                 result.append(line)
 
+        return result
+
     def getHorizontalLinesPerYValue(self, y):
         result = []
 
@@ -254,6 +241,29 @@ class Grid(object):
             if line.start_point[1] == y and line.end_point[1] == y:
                 result.append(line)
 
+        return result
+
+    """
+    1) Make an array containing the points of all the vertices in the grid. The x and y values are extracted and the unique x, and y values are calculated. 
+    2) Loop over the unique y values and if there are more than two points with the same y value but different x value, use the point with the highest x value as the end point x_end. If the value is lower
+    than the current start x value, this is chosen as starting value x_start.  
+    3) Loop over the unique x values and if there are more than two points with the same x value but different y value, use the point with the highest y value as y_end. Use the point with the lowest
+    y value as y_start
+    """
+    def removeOverlappingLines(self, for_prime_center=True):            
+        self.points = []
+        self.lines = []
+
+        self.convertRectanglesToLines()
+        self.convertRectanglesToPoints()
+
+        self.x_, self.y_ = self.getXYfromPointsAndRound()
+
+        self.x_unique = self.getUniqueValues(self.x_)
+        self.y_unique = self.getUniqueValues(self.y_)
+
+        self.removeOverlappingHorizontalLines(for_prime_center)
+        self.removeOverlappingVerticalLines(for_prime_center)
 
     def convertRectanglesToPoints(self):
         for rectangle in self.stacked_rectangles:
@@ -272,60 +282,156 @@ class Grid(object):
     def getUniqueValues(self, array):
         return np.unique(array)
 
-    def resolveOverlappingLines(lines):
-        temp1 = []
-        temp2 = []
-        result = []
+    def thereAreOverlappingLines(self, lines):
+        if len(lines) == 1:
+            return False
 
         for l1 in lines:
             for l2 in lines:
-                if l1 != l2:
-                    temp1.append(l1.resolveOverlap(l2))
-
-        for l1 in temp1:
-            for l2 in temp1:
-                if (l1.start_point == l2.start_point) and (l1.end_point == l2.end_point):
-                    continue
-                else: 
-                    temp2.append(l1)
-
-    def removeDuplicateHorizontalLines(self, for_prime_center):
+                if l1.overlaps(l2):
+                    return True
         
+        return False
+
+    def removeOverlappingHorizontalLines(self, for_prime_center):
         for y in self.y_unique:
             horizontal_lines = self.getHorizontalLinesPerYValue(y)
+
+            i = 0
+            j = 1
             
-            for l1 in horizontal_lines:
-                for l2 in horizontal_lines:
+            while self.thereAreOverlappingLines(horizontal_lines):
+                print(self.thereAreOverlappingLines(horizontal_lines))
+                print(i, j)
+                print([x.start_point for x in horizontal_lines])
+                print([x.end_point for x in horizontal_lines])
+
+                l1 = horizontal_lines[i]
+                l2 = horizontal_lines[j]
+                
+                if i != j:
+                    if l1.overlaps(l2):
+                        if l2.end_point[0] > l1.end_point[0]:
+                            l1.setEndPoint(l2.end_point)
+
+                        if l2.start_point[0] < l1.start_point[0]:
+                            l1.setStartPoint(l2.start_point)
+
+                        del horizontal_lines[j]
+
+                        i = 0
+                        j = 1
+                    else:
+                        print(len(horizontal_lines))
+                        if (j + 1 >= len(horizontal_lines)):
+                            if (i + 1 >= len(horizontal_lines)):
+                                break
+                            else:
+                                print('increment i to ' + str(i + 1))
+                                i += 1
+                                j = 0
+                        else:
+                            print('increment j to ' + str(j + 1))
+                            j += 1
+                else:
+                    print(len(horizontal_lines))
+                    if (j + 1 >= len(horizontal_lines)):
+                        if (i + 1 >= len(horizontal_lines)):
+                            break
+                        else:
+                            print('increment i to ' + str(i + 1))
+                            i += 1
+                            j = 0
+                    else:
+                        print('increment j to ' + str(j + 1))
+                        j += 1            
+            
 
             if for_prime_center == True:
-                x_start = Helper.toMillimeters(x_start)
-                x_end = Helper.toMillimeters(x_end)
-                y = Helper.toMillimeters(y)
-                self.lines.append(dxf.line((y, x_start), (y, x_end)))
+                for line in horizontal_lines:
+                    line.setStartPoint([Helper.toMillimeters(line.start_point[0]), Helper.toMillimeters(line.start_point[1])])
+                    line.setEndPoint([Helper.toMillimeters(line.end_point[0]), Helper.toMillimeters(line.end_point[1])])               
+                    y = Helper.toMillimeters(y)
+
+                    self.lines_without_overlap.append(dxf.line((y, line.start_point[0]), (y, line.end_point[0])))
             else:
-                self.lines.append(dxf.line((x_start, y), (x_end, y)))
-            
-    def removeDuplicateHorizontalLines(self, for_prime_center):
+                for line in horizontal_lines:
+                    self.lines_without_overlap.append(dxf.line((line.start_point[0], y), (line.end_point[0], y)))
+
+    def removeOverlappingVerticalLines(self, for_prime_center):
+
         for x in self.x_unique:
-            y_start = max(self.y_)
-            y_end = 0
-            for point in self.points:
-                if round(point[0], 2) == x and round(point[1], 2) > y_end:
-                    y_end = round(point[1], 2)
-                if round(point[0], 2) == x and round(point[1], 2) < y_start:
-                    y_start = round(point[1], 2)
+            vertical_lines = self.getVerticalLinesPerXValue(x)
+
+            i = 0
+            j = 1
+
+            while self.thereAreOverlappingLines(vertical_lines):
+                print(self.thereAreOverlappingLines(vertical_lines))
+                print(i, j)
+                print([x.start_point for x in vertical_lines])
+                print([x.end_point for x in vertical_lines])
+
+                l1 = vertical_lines[i]
+                l2 = vertical_lines[j]
+                
+                if i != j:
+                    if l1.overlaps(l2):
+                        if l2.end_point[1] > l1.end_point[1]:
+                            l1.setEndPoint(l2.end_point)
+
+                        if l2.start_point[1] < l1.start_point[1]:
+                            l1.setStartPoint(l2.start_point)
+
+                        del vertical_lines[j]
+
+                        i = 0
+                        j = 1
+                    else:
+                        print(len(vertical_lines))
+                        if (j + 1 >= len(vertical_lines)):
+                            if (i + 1 >= len(vertical_lines)):
+                                break
+                            else:
+                                print('increment i to ' + str(i + 1))
+                                i += 1
+                                j = 0
+                        else:
+                            print('increment j to ' + str(j + 1))
+                            j += 1
+                else:
+                    print(len(vertical_lines))
+                    if (j + 1 >= len(vertical_lines)):
+                        if (i + 1 >= len(vertical_lines)):
+                            break
+                        else:
+                            print('increment i to ' + str(i + 1))
+                            i += 1
+                            j = 0
+                    else:
+                        print('increment j to ' + str(j + 1))
+                        j += 1            
+            
 
             if for_prime_center == True:
-                y_start = Helper.toMillimeters(y_start)
-                y_end = Helper.toMillimeters(y_end)
-                x = Helper.toMillimeters(x)
-                self.lines.append(dxf.line((y_start, x), (y_end, x)))
-            else:
-                self.lines.append(dxf.line((x, y_start), (x, y_end)))
+                for line in vertical_lines:
+                    line.setStartPoint([Helper.toMillimeters(line.start_point[0]), Helper.toMillimeters(line.start_point[1])])
+                    line.setEndPoint([Helper.toMillimeters(line.end_point[0]), Helper.toMillimeters(line.end_point[1])])               
+                    x = Helper.toMillimeters(x)
 
-    def addLinesToDxf(self):
-        for line in self.lines:
+                    self.lines_without_overlap.append(dxf.line((line.start_point[1], x), (line.end_point[1], x)))
+            else:
+                for line in vertical_lines:
+                    self.lines_without_overlap.append(dxf.line((x, line.start_point[1]), (x, line.end_point[1])))
+            
+    def addLinesToDxf(self, for_prime_center = True):
+        for line in self.lines_without_overlap:
             self.dxf_drawing.add(line)
+
+    def addLabelsToDxf(self, for_prime_center = True):
+        for rectangle in self.stacked_rectangles:
+            label_dxf = rectangle.getLabelDxf(for_prime_center)
+            self.dxf_drawing.add(label_dxf)
 
     def addRectanglesToDxf(self, for_prime_center):
         for rectangle in self.stacked_rectangles:

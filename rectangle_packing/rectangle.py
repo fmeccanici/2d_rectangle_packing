@@ -1,6 +1,7 @@
 # my own classes
 from rectangle_packing.helper import Helper
 from rectangle_packing.zcc_creator import ZccCreator
+from rectangle_packing.line import Line
 
 # external dependencies
 import numpy as np

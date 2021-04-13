@@ -1,3 +1,4 @@
+import numpy as np
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -19,19 +20,24 @@ class Line(object):
         if (start_point[0] > end_point[0]) or (start_point[1] > end_point[1]):
             raise StartPointCannotBeLargerThanEndPointException
         
-        if (start_point == end_point):
+        if (start_point[0] == end_point[0] and start_point[1] == end_point[1]):
             raise StartAndEndPointAreTheSameException
 
         self.start_point = start_point
         self.end_point = end_point
 
+    def setStartPoint(self, start_point):
+        self.start_point = start_point
+
+    def setEndPoint(self, end_point):
+        self.end_point = end_point
 
     """
     Resolves overlap with other line and returns 1 line or 2 Lines if no overlap
     :param others: other Line object
     :returns: 1 Line
     """
-    def resolveOverlap(other):
+    def resolveOverlap(self, other):
         if self.completelyOverlaps(other):
 
             if self.lenght > other.length:
@@ -48,19 +54,23 @@ class Line(object):
         else:
             return self, other
 
+    def overlaps(self, other):
+        if self.completelyOverlaps or self.partiallyOverlapsType1 or self.partiallyOverlapsType2:
+            return True
+
     # this line 
     # --------
     # other line
     # ----------------
-    def completelyOverlaps(other):
+    def completelyOverlaps(self, other):
         if (self.start_point >= other.start_point) and (self.end_point <= other.end_point):
             return True
-        
+    
     # this line 
     #         ---------------------
     # other line
     # ----------------
-    def partiallyOverlapsType1(other):
+    def partiallyOverlapsType1(self, other):
         if (self.start_point >= other.start_point) and (self.end_point <= other.end_point):
             return True
 
@@ -68,7 +78,7 @@ class Line(object):
     # ----------------
     # other line
     #            ----------------
-    def partiallyOverlapsType2(other):
+    def partiallyOverlapsType2(self, other):
         if (self.start_point <= other.start_point) and (self.end_point >= other.end_point):
             return True
 
@@ -77,7 +87,7 @@ class Line(object):
         dist_y = abs(self.self.end_point[1] - self.start_point[1])
         dist_x_squared = dist_x ** 2
         dist_y_squared = dist_y ** 2
-	    line_length = math.sqrt(dist_x_squared + dist_y_squared)
-        
+        line_length = math.sqrt(dist_x_squared + dist_y_squared)
+
         return line_length
     
