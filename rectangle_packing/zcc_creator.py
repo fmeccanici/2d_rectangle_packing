@@ -76,11 +76,14 @@ class ZccCreator(object):
         for r in grid.getStackedRectangles():
             rectangle = copy.deepcopy(r)
             rectangle.toPrimeCenterFormat()
+            self.addRectangleLabel(rectangle)
+
+        for line in grid.lines_without_overlap:
+
             self.addOutline()
 
-            self.addRectangleGeometry(rectangle)
+            self.addLineGeometry(line)
             self.addThruCutLayer()
-            self.addRectangleLabel(rectangle)
 
         self.addOutline()
         self.fillXmlWithLargeHorizontalLineAtTop(grid)
@@ -94,6 +97,11 @@ class ZccCreator(object):
         self.addRectangleGeometry(rectangle)
         self.addThruCutLayer()
         self.addRectangleLabel(rectangle)
+
+    def addLineGeometry(self, line):
+        self.fillXmlWithMoveTo(line.start_point[0], line.start_point[1])
+        # self.fillXmlWithLineTo(line.start_point[0], line.start_point[1])
+        self.fillXmlWithLineTo(line.end_point[0], line.end_point[1])
 
     def addRectangleGeometry(self, rectangle):
         self.fillXmlWithMoveTo(rectangle.getBottomLeft()[0], rectangle.getBottomLeft()[1])
@@ -113,6 +121,7 @@ class ZccCreator(object):
         "Height": "100.00", "Angle": "0.000", "Deformation": "1.000"})
         self.label_position = ET.SubElement(self.label, "Position", {"X": str(round(rectangle.getBottomLeft()[0])), "Y": str(round(rectangle.getTopLeft()[1]))})
         self.label_method = ET.SubElement(self.label, "Method", {"Type": "{none}", "Name": "TEXT"})
+    
 
     def addOutline(self):
         self.outline = ET.SubElement(self.geometry, "Outline")

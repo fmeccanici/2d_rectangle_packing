@@ -2,6 +2,7 @@
 from rectangle_packing.rectangle import Rectangle
 from rectangle_packing.helper import Helper
 from rectangle_packing.zcc_creator import ZccCreator
+from rectangle_packing.line import Line
 
 # external dependencies
 import numpy as np
@@ -46,6 +47,7 @@ class Grid(object):
         # used for removing duplicates
         self.points = []
         self.lines = []
+        self.dxf_lines_without_overlap = []
         self.lines_without_overlap = []
 
     def setDxfDrawing(self, path, file_name):
@@ -194,8 +196,6 @@ class Grid(object):
 
     def toDxf(self, for_prime_center=False, remove_overlap=True):
         try:
-            
-            # self.addRectanglesToDxf(for_prime_center)
             if remove_overlap == True:
                 self.removeOverlappingLines()
                 self.addLinesToDxf()
@@ -205,11 +205,19 @@ class Grid(object):
                 self.addLargeHorizontalLineAtTop()
 
             self.dxf_drawing.save()
-            print("Lines count is " + str(len(self.lines_without_overlap)))
+            print("Lines count is " + str(len(self.dxf_lines_without_overlap)))
 
         except PermissionError:
             print("DXF file opened in another program")
     
+    def isHeighestLine(self, line):
+        y_heighest = self.getHighestVerticalPoint()
+        
+        if line.start_point[1] == y_heighest and line.end_point[1] == y_heighest:
+            return True
+        else: 
+            return False
+        
     def addLargeHorizontalLineAtTop(self):
         y_start = Helper.toMillimeters(self.getHighestVerticalPoint())
         x_start = 0
@@ -218,6 +226,7 @@ class Grid(object):
 
         line = dxf.line((y_start, x_start), (y_end, x_end))
         self.dxf_drawing.add(line)
+        # self.lines_without_overlap.append(line)
 
     def convertRectanglesToLines(self):
         self.lines = []
@@ -265,6 +274,9 @@ class Grid(object):
         self.removeOverlappingHorizontalLines(for_prime_center)
         self.removeOverlappingVerticalLines(for_prime_center)
 
+        print([l.start_point for l in self.lines_without_overlap])
+        print([l.end_point for l in self.lines_without_overlap])
+
     def convertRectanglesToPoints(self):
         for rectangle in self.stacked_rectangles:
             top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
@@ -301,11 +313,7 @@ class Grid(object):
             j = 1
             
             while self.thereAreOverlappingLines(horizontal_lines):
-                print(self.thereAreOverlappingLines(horizontal_lines))
-                print(i, j)
-                print([x.start_point for x in horizontal_lines])
-                print([x.end_point for x in horizontal_lines])
-
+                
                 l1 = horizontal_lines[i]
                 l2 = horizontal_lines[j]
                 
@@ -349,14 +357,29 @@ class Grid(object):
 
             if for_prime_center == True:
                 for line in horizontal_lines:
-                    line.setStartPoint([Helper.toMillimeters(line.start_point[0]), Helper.toMillimeters(line.start_point[1])])
-                    line.setEndPoint([Helper.toMillimeters(line.end_point[0]), Helper.toMillimeters(line.end_point[1])])               
-                    y = Helper.toMillimeters(y)
+                    print(self.isHeighestLine(line))
+                    if self.isHeighestLine(line):
+                        print('heighest line is ' + str(line.start_point))
+                        continue
 
-                    self.lines_without_overlap.append(dxf.line((y, line.start_point[0]), (y, line.end_point[0])))
+                    new_line = Line()
+                    new_line.setStartPoint([Helper.toMillimeters(line.start_point[1]), Helper.toMillimeters(line.start_point[0])])
+                    new_line.setEndPoint([Helper.toMillimeters(line.end_point[1]), Helper.toMillimeters(line.end_point[0])])
+
+                    print('Setting start point to ' + str(line.start_point))
+                    print('Setting end point to ' + str(line.end_point))
+
+                    y = Helper.toMillimeters(y)
+                    
+                    self.lines_without_overlap.append(new_line)
+                    self.dxf_lines_without_overlap.append(dxf.line((y, new_line.start_point[0]), (y, new_line.end_point[0])))
             else:
                 for line in horizontal_lines:
-                    self.lines_without_overlap.append(dxf.line((line.start_point[0], y), (line.end_point[0], y)))
+                    if self.isHeighestLine(line):
+                        continue
+                    
+                    self.lines_without_overlap.append(line)
+                    self.dxf_lines_without_overlap.append(dxf.line((line.start_point[0], y), (line.end_point[0], y)))
 
     def removeOverlappingVerticalLines(self, for_prime_center):
 
@@ -367,11 +390,6 @@ class Grid(object):
             j = 1
 
             while self.thereAreOverlappingLines(vertical_lines):
-                print(self.thereAreOverlappingLines(vertical_lines))
-                print(i, j)
-                print([x.start_point for x in vertical_lines])
-                print([x.end_point for x in vertical_lines])
-
                 l1 = vertical_lines[i]
                 l2 = vertical_lines[j]
                 
@@ -415,17 +433,26 @@ class Grid(object):
 
             if for_prime_center == True:
                 for line in vertical_lines:
-                    line.setStartPoint([Helper.toMillimeters(line.start_point[0]), Helper.toMillimeters(line.start_point[1])])
-                    line.setEndPoint([Helper.toMillimeters(line.end_point[0]), Helper.toMillimeters(line.end_point[1])])               
-                    x = Helper.toMillimeters(x)
+                    print(line.start_point)
+                    print(line.end_point)
 
-                    self.lines_without_overlap.append(dxf.line((line.start_point[1], x), (line.end_point[1], x)))
+                    new_line = Line()
+                    new_line.setStartPoint([Helper.toMillimeters(line.start_point[1]), Helper.toMillimeters(line.start_point[0])])
+                    new_line.setEndPoint([Helper.toMillimeters(line.end_point[1]), Helper.toMillimeters(line.end_point[0])])    
+
+                    x = Helper.toMillimeters(x)
+                    print('Setting start point to ' + str(line.start_point))
+                    print('Setting end point to ' + str(line.end_point))
+
+                    self.lines_without_overlap.append(new_line)
+                    self.dxf_lines_without_overlap.append(dxf.line((new_line.start_point[1], x), (new_line.end_point[1], x)))
             else:
                 for line in vertical_lines:
-                    self.lines_without_overlap.append(dxf.line((x, line.start_point[1]), (x, line.end_point[1])))
+                    self.lines_without_overlap.append(line)
+                    self.dxf_lines_without_overlap.append(dxf.line((x, line.start_point[1]), (x, line.end_point[1])))
             
     def addLinesToDxf(self, for_prime_center = True):
-        for line in self.lines_without_overlap:
+        for line in self.dxf_lines_without_overlap:
             self.dxf_drawing.add(line)
 
     def addLabelsToDxf(self, for_prime_center = True):

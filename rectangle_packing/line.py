@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 class Error(Exception):
     """Base class for other exceptions"""
@@ -23,14 +24,14 @@ class Line(object):
         if (start_point[0] == end_point[0] and start_point[1] == end_point[1]):
             raise StartAndEndPointAreTheSameException
 
-        self.start_point = start_point
-        self.end_point = end_point
+        self.start_point = copy.deepcopy(start_point)
+        self.end_point = copy.deepcopy(end_point)
 
     def setStartPoint(self, start_point):
-        self.start_point = start_point
+        self.start_point = copy.deepcopy(start_point)
 
     def setEndPoint(self, end_point):
-        self.end_point = end_point
+        self.end_point = copy.deepcopy(end_point)
 
     """
     Resolves overlap with other line and returns 1 line or 2 Lines if no overlap
