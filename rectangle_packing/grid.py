@@ -195,9 +195,10 @@ class Grid(object):
         return False
 
     def toDxf(self, for_prime_center=False, remove_overlap=True):
+        
         try:
             if remove_overlap == True:
-                self.removeOverlappingLines()
+                self.removeOverlappingLines(for_prime_center)
                 self.addLinesToDxf()
                 self.addLabelsToDxf()
 
@@ -238,7 +239,7 @@ class Grid(object):
         result = []
 
         for line in self.lines:
-            if line.start_point[0] == x and line.end_point[0] == x:
+            if round(line.start_point[0], 2) == x and round(line.end_point[0], 2) == x:
                 result.append(line)
 
         return result
@@ -247,7 +248,7 @@ class Grid(object):
         result = []
 
         for line in self.lines:
-            if line.start_point[1] == y and line.end_point[1] == y:
+            if round(line.start_point[1], 2) == y and round(line.end_point[1], 2) == y:
                 result.append(line)
 
         return result
@@ -274,9 +275,6 @@ class Grid(object):
         self.removeOverlappingHorizontalLines(for_prime_center)
         self.removeOverlappingVerticalLines(for_prime_center)
 
-        print([l.start_point for l in self.lines_without_overlap])
-        print([l.end_point for l in self.lines_without_overlap])
-
     def convertRectanglesToPoints(self):
         for rectangle in self.stacked_rectangles:
             top_left, top_right, bottom_left, bottom_right = rectangle.getVertices()
@@ -288,7 +286,7 @@ class Grid(object):
     def getXYfromPointsAndRound(self):
         x_ = [round(k[0], 2) for k in self.points]
         y_ = [round(k[1], 2) for k in self.points]
-
+        
         return x_, y_
     
     def getUniqueValues(self, array):
@@ -298,10 +296,18 @@ class Grid(object):
         if len(lines) == 1:
             return False
 
+        print("There are overlapping lines...")
+        for l in lines:
+            print(str(l))
+
         for l1 in lines:
             for l2 in lines:
-                if l1.overlaps(l2):
-                    return True
+                print('lines are equal: ' + str((l1 == l2)))
+                if not (l1 == l2):
+                    if l1.overlaps(l2):
+                        return True
+        
+        print("No overlapping lines")
         
         return False
 
@@ -330,7 +336,6 @@ class Grid(object):
                         i = 0
                         j = 1
                     else:
-                        print(len(horizontal_lines))
                         if (j + 1 >= len(horizontal_lines)):
                             if (i + 1 >= len(horizontal_lines)):
                                 break
@@ -342,7 +347,6 @@ class Grid(object):
                             print('increment j to ' + str(j + 1))
                             j += 1
                 else:
-                    print(len(horizontal_lines))
                     if (j + 1 >= len(horizontal_lines)):
                         if (i + 1 >= len(horizontal_lines)):
                             break
@@ -357,7 +361,6 @@ class Grid(object):
 
             if for_prime_center == True:
                 for line in horizontal_lines:
-                    print(self.isHeighestLine(line))
                     if self.isHeighestLine(line):
                         print('heighest line is ' + str(line.start_point))
                         continue
@@ -375,19 +378,30 @@ class Grid(object):
                     self.dxf_lines_without_overlap.append(dxf.line((y, new_line.start_point[0]), (y, new_line.end_point[0])))
             else:
                 for line in horizontal_lines:
-                    if self.isHeighestLine(line):
-                        continue
+                    # if self.isHeighestLine(line):
+                    #     continue
                     
+                    print(line)
+
                     self.lines_without_overlap.append(line)
-                    self.dxf_lines_without_overlap.append(dxf.line((line.start_point[0], y), (line.end_point[0], y)))
+                    dxf_line = dxf.line((line.start_point[0], y), (line.end_point[0], y), color=random.randint(0, 255), thickness=100.0)
+                    # self.drawing.add(dxf_line)
+                    self.dxf_lines_without_overlap.append(dxf_line)
 
     def removeOverlappingVerticalLines(self, for_prime_center):
+        print(self.x_unique)
 
         for x in self.x_unique:
             vertical_lines = self.getVerticalLinesPerXValue(x)
+            if int(x) == 83:    
+                print("Printing lines for x is 83...")
+                for line in vertical_lines:
+                    print(str(line))
 
             i = 0
             j = 1
+
+            print(self.thereAreOverlappingLines(vertical_lines))
 
             while self.thereAreOverlappingLines(vertical_lines):
                 l1 = vertical_lines[i]
@@ -406,7 +420,6 @@ class Grid(object):
                         i = 0
                         j = 1
                     else:
-                        print(len(vertical_lines))
                         if (j + 1 >= len(vertical_lines)):
                             if (i + 1 >= len(vertical_lines)):
                                 break
@@ -418,7 +431,6 @@ class Grid(object):
                             print('increment j to ' + str(j + 1))
                             j += 1
                 else:
-                    print(len(vertical_lines))
                     if (j + 1 >= len(vertical_lines)):
                         if (i + 1 >= len(vertical_lines)):
                             break
@@ -430,12 +442,8 @@ class Grid(object):
                         print('increment j to ' + str(j + 1))
                         j += 1            
             
-
             if for_prime_center == True:
                 for line in vertical_lines:
-                    print(line.start_point)
-                    print(line.end_point)
-
                     new_line = Line()
                     new_line.setStartPoint([Helper.toMillimeters(line.start_point[1]), Helper.toMillimeters(line.start_point[0])])
                     new_line.setEndPoint([Helper.toMillimeters(line.end_point[1]), Helper.toMillimeters(line.end_point[0])])    
@@ -448,10 +456,13 @@ class Grid(object):
                     self.dxf_lines_without_overlap.append(dxf.line((new_line.start_point[1], x), (new_line.end_point[1], x)))
             else:
                 for line in vertical_lines:
+                    dxf_line = dxf.line((x, line.start_point[1]), (x, line.end_point[1]), color=random.randint(0, 255), thickness=100.0)
+                    # self.dxf_drawing.add(dxf_line)
                     self.lines_without_overlap.append(line)
-                    self.dxf_lines_without_overlap.append(dxf.line((x, line.start_point[1]), (x, line.end_point[1])))
+                    self.dxf_lines_without_overlap.append(dxf_line)
             
     def addLinesToDxf(self, for_prime_center = True):
+        print("Adding " + str(len(self.dxf_lines_without_overlap)) + " lines to DXF")
         for line in self.dxf_lines_without_overlap:
             self.dxf_drawing.add(line)
 
