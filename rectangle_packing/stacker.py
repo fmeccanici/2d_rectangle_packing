@@ -355,10 +355,19 @@ class Stacker(object):
             while not self.is_optimized_y:
                 self.moveRectangleVertically(step_size)
 
+            print("Width and height of optimized rectangle:")
+            print(self.optimized_rectangle.getWidth())
+            print(self.optimized_rectangle.getHeight())
+            
             self.db_manager.updateRectangle(self.optimized_rectangle)
             self.grid.addRectangle(self.optimized_rectangle)
-
-        self.grid.toDxf(for_prime_center=False)
+        
+        for rectangle in self.grid.getStackedRectangles():
+            print("Rectangle " + str(rectangle.getName()))
+            print(str(rectangle))
+            print()
+            
+        self.grid.toDxf(for_prime_center=True, remove_overlap=True)
         self.grid.toZcc()
 
     def getRectanglesExactWidthHeight(self):
@@ -372,11 +381,8 @@ class Stacker(object):
         y = self.optimized_rectangle.getPosition()[1]
 
         x_new = x - step_size
-        print('x xnew')
-        print(x_new)
-        print(x)
-        print(self.optimized_rectangle.getWidth(), self.optimized_rectangle.getHeight())
-        print('CHECK')
+        
+        print("New x position = " + str(x_new))
         self.optimized_rectangle.setPosition([x_new, y])
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
@@ -396,6 +402,8 @@ class Stacker(object):
         y_new = y - step_size
 
         self.optimized_rectangle.setPosition([x, y_new])
+        
+        print("New y position = " + str(y_new))
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
             print("Cannot optimize further in x direction")
@@ -526,9 +534,7 @@ class Stacker(object):
 
     def computeStackingPosition(self):        
         stacking_position = [self.grid.getWidth(), self.grid.getHeight()]
-        print("CHECK")
-        print(self.grid.getWidth())
-        print(self.rectangle.getWidth())
+        
         if self.grid.getWidth() > self.rectangle.getWidth():
             for x in self.getHorizontalLoopRange():
                 for y in self.getVerticalLoopRange():
@@ -536,7 +542,7 @@ class Stacker(object):
                     self.rectangle.setPosition(position)
                     if self.grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                         stacking_position = position
-        
+                        
         elif self.grid.getWidth() == self.rectangle.getWidth():
             x = self.rectangle.getWidth() / 2
             for y in self.getVerticalLoopRange():
@@ -544,6 +550,7 @@ class Stacker(object):
                 self.rectangle.setPosition(position)
                 if self.grid.isValidPosition(self.rectangle) and np.linalg.norm(position) < np.linalg.norm(stacking_position):
                     stacking_position = position
+        
         return stacking_position
 
     def getHorizontalLoopRange(self):
