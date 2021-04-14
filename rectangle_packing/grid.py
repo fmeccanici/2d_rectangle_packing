@@ -198,8 +198,8 @@ class Grid(object):
         try:
             if remove_overlap == True:
                 self.removeOverlappingLines()
-                self.addLinesToDxf()
-                self.addLabelsToDxf()
+                self.addLinesToDxf(for_prime_center)
+                self.addLabelsToDxf(for_prime_center)
 
             if for_prime_center:
                 self.addLargeHorizontalLineAtTop()

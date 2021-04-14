@@ -358,7 +358,7 @@ class Stacker(object):
             self.db_manager.updateRectangle(self.optimized_rectangle)
             self.grid.addRectangle(self.optimized_rectangle)
 
-        self.grid.toDxf(for_prime_center=True)
+        self.grid.toDxf(for_prime_center=False)
         self.grid.toZcc()
 
     def getRectanglesExactWidthHeight(self):
