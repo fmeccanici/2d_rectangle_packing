@@ -29,6 +29,18 @@ class Rectangle(object):
 
         self.initEmptyDxfDrawing()
 
+    def __str__(self):
+        string = ""
+        string += "Position: " + str(self.getPosition())
+        string += "\nWidth: " + str(self.getWidth())
+        string += "\nHeight: " + str(self.getHeight())
+        string += "\nTop Left: " + str(self.getTopLeft())
+        string += "\nBottom Left: " + str(self.getBottomLeft()) 
+        string += "\nBottom Right: " + str(self.getBottomRight())
+        string += "\nTop Right: " + str(self.getTopRight())
+
+        return string
+    
     def toPrimeCenterFormat(self):
         self.rotate()
 
@@ -273,7 +285,7 @@ class Rectangle(object):
 
     def getVertices(self):
         return self.getTopLeft(), self.getTopRight(), self.getBottomLeft(), self.getBottomRight()
-    
+
     def getLines(self):
         top_left_to_top_right = Line(self.getTopLeft(), self.getTopRight())
         bottom_left_to_top_left = Line(self.getBottomLeft(), self.getTopLeft())
