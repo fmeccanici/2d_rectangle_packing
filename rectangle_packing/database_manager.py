@@ -368,7 +368,8 @@ class DatabaseManager(object):
         })
         
         if sort == True:
-            rectangles_dict = sorted(rectangles_dict, key=lambda k: np.linalg.norm([k['x position'], k['y position']]))
+            # sort on area: length * width
+            rectangles_dict = reversed(sorted(rectangles_dict, key=lambda k: k['exact_width'] * k['exact_height']))
 
         rectangles = []
         for rectangle in rectangles_dict:

@@ -30,14 +30,17 @@ class Rectangle(object):
         self.initEmptyDxfDrawing()
 
     def __str__(self):
-        string = ""
-        string += "Position: " + str(self.getPosition())
+        string = "-------------------------------"
+        string += "\nRectangle " + str(self.getName())
+        string += "\n"
+        string += "\nPosition: " + str(self.getPosition())
         string += "\nWidth: " + str(self.getWidth())
         string += "\nHeight: " + str(self.getHeight())
         string += "\nTop Left: " + str(self.getTopLeft())
         string += "\nBottom Left: " + str(self.getBottomLeft()) 
         string += "\nBottom Right: " + str(self.getBottomRight())
         string += "\nTop Right: " + str(self.getTopRight())
+        string += "\n-------------------------------"
 
         return string
     
@@ -208,12 +211,14 @@ class Rectangle(object):
         self.setPosition([x, y])
 
     def intersection(self, other):
-        if self.getBottomRight()[0] <= other.getTopLeft()[0] or self.getTopLeft()[0] >= other.getBottomRight()[0]:
-            return False
         
-        if self.getBottomRight()[1] >= other.getTopLeft()[1] or self.getTopLeft()[1] <= other.getBottomRight()[1]:
+        if self.getBottomRight()[0] <= other.getBottomLeft()[0] or self.getBottomLeft()[0] >= other.getBottomRight()[0]:
             return False
 
+        if self.getBottomRight()[1] >= other.getTopRight()[1] or self.getTopLeft()[1] <= other.getBottomLeft()[1]:
+            return False
+        
+                
         return True
 
     def toDxf(self, for_prime_center=True):
