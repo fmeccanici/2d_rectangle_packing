@@ -89,11 +89,9 @@ class Line(object):
 
         if (start_1_x >= start_2_x) and (end_1_x <= end_2_x):
             if (start_1_y == start_2_y and end_1_y == end_2_y):
-                print("Complete overlap x")
                 return True
         elif (start_1_y >= start_2_y) and (end_1_y <= end_2_y):
             if (start_1_x == start_2_x and end_1_x == end_2_x):
-                print("Complete overlap y")
                 return True
 
         return False
@@ -104,16 +102,10 @@ class Line(object):
     # ----------------
     def partiallyOverlapsType1(self, other):
 
-        print("start points")
-        print(self.start_point[1])
-        print(other.start_point[1])
-
         if (self.start_point[0] > other.start_point[0] and self.start_point[0] < other.end_point[0]) and (self.end_point[0] > other.end_point[0]):
-            print("Partial overlap type 1 x")
             return True
         
         if (self.start_point[1] > other.start_point[1] and self.start_point[1] < other.end_point[1]) and (self.end_point[1] > other.end_point[1]):
-            print("Partial overlap type 1 y")
             return True
 
     # this line 
@@ -122,11 +114,9 @@ class Line(object):
     #            ----------------
     def partiallyOverlapsType2(self, other):
         if (self.start_point[0] < other.start_point[0]) and (self.end_point[0] > other.start_point[0]):
-            print("Partial overlap type 2 x")
             return True
 
         if (self.start_point[1] < other.start_point[1]) and (self.end_point[1] > other.start_point[1]):
-            print("Partial overlap type 2 y")
             return True
 
     def length(self):

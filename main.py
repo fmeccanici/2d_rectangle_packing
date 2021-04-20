@@ -668,6 +668,7 @@ class Gui(QWidget):
         
         rectangles = grid.getStackedRectangles()
         for rectangle in rectangles:
+            print(rectangle)
             self.drawRectangle(rectangle)
 
     def drawRectangle(self, rectangle, color=Qt.green):
@@ -675,8 +676,8 @@ class Gui(QWidget):
         painter.setPen(QPen(Qt.black, 1, Qt.SolidLine))
         painter.setBrush(QBrush(color, Qt.DiagCrossPattern))
 
-        x = rectangle.getPosition()[0] - rectangle.getWidth()/2
-        y = rectangle.getPosition()[1] + rectangle.getHeight()/2
+        x = rectangle.getTopLeft()[0]
+        y = rectangle.getTopLeft()[1]
         width = rectangle.getWidth() 
         height = rectangle.getHeight() 
 

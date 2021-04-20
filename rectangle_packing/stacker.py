@@ -152,13 +152,13 @@ class Stacker(object):
                     break
 
             self.getAllUnstackedRectanglesFromDatabaseAndSortOnArea()
-
+        
         self.optimizeOnMillimetersAndExportNonEmptyGrids()
         self.total_time = time.time() - self.start_time
         self.data_logger.setTotalExecutionTime(self.total_time)
         self.data_logger.setSuccessfullyStackedRectangles(total_amount_of_unstacked_rectangles)
         self.data_logger.storeData()
-        
+            
     def optimizeOnMillimetersAndExportNonEmptyGrids(self):
         self.grids = self.db_manager.getGridsNotCut(sort=True)
         for grid in self.grids:
@@ -343,6 +343,7 @@ class Stacker(object):
         step_size = 0.001
 
         for exact_rectangle in self.exact_rectangles:
+            print("Optimizing " + str(exact_rectangle.getName()) + '.....')
             self.is_optimized_x = False
             self.is_optimized_y = False
 
@@ -354,18 +355,9 @@ class Stacker(object):
                         
             while not self.is_optimized_y:
                 self.moveRectangleVertically(step_size)
-
-            print("Width and height of optimized rectangle:")
-            print(self.optimized_rectangle.getWidth())
-            print(self.optimized_rectangle.getHeight())
             
             self.db_manager.updateRectangle(self.optimized_rectangle)
             self.grid.addRectangle(self.optimized_rectangle)
-        
-        for rectangle in self.grid.getStackedRectangles():
-            print("Rectangle " + str(rectangle.getName()))
-            print(str(rectangle))
-            print()
             
         self.grid.toDxf(for_prime_center=True, remove_overlap=True)
         self.grid.toZcc()
@@ -374,7 +366,7 @@ class Stacker(object):
         self.exact_rectangles = self.db_manager.getRectangles(self.grid, for_cutting=True, sort=True)
         # self.grid.setStackedRectangles(self.exact_rectangles)
         
-    def moveRectangleVertically(self, step_size):
+    def moveRectangleHorizontally(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)
 
         x = self.optimized_rectangle.getPosition()[0]
@@ -382,18 +374,34 @@ class Stacker(object):
 
         x_new = x - step_size
         
-        print("New x position = " + str(x_new))
         self.optimized_rectangle.setPosition([x_new, y])
 
         if not self.grid.isValidPosition(self.optimized_rectangle):
             print("Cannot optimize further in y direction")
             self.optimized_rectangle.setPosition([x, y])
-            self.is_optimized_y = True
+            self.is_optimized_x = True
         else:
-            pass
-            # move y to y_new
+            if self.optimized_rectangle.getName() == '120404462-1':
+                print('x_new = ' + str(x_new))
 
-    def moveRectangleHorizontally(self, step_size):
+                for rectangle in self.grid.getStackedRectangles():
+                    if self.optimized_rectangle.getBottomRight()[0] <= rectangle.getBottomLeft()[0] or self.optimized_rectangle.getBottomLeft()[0] >= rectangle.getBottomRight()[0]:
+                        print("No x-intersection")
+
+                    else:
+                        if self.optimized_rectangle.getBottomRight()[1] <= rectangle.getTopRight()[1] or self.optimized_rectangle.getBottomRight()[0] >= rectangle.getBottomLeft()[0]:
+                            print("x-intersection")
+
+
+                    if self.optimized_rectangle.getBottomRight()[1] >= rectangle.getTopRight()[1] or self.optimized_rectangle.getTopLeft()[1] <= rectangle.getBottomLeft()[1]:
+                        print("No y-intersection")
+                    
+                    else:
+                        if self.optimized_rectangle.getBottomRight()[0] <= rectangle.getTopRight()[0] or self.optimized_rectangle.getBottomRight()[0] >= rectangle.getTopLeft()[0]:
+                            print("y-intersection")
+            # move x to x_new
+
+    def moveRectangleVertically(self, step_size):
         self.grid.removeRectangle(self.optimized_rectangle)
 
         x = self.optimized_rectangle.getPosition()[0]
@@ -403,15 +411,13 @@ class Stacker(object):
 
         self.optimized_rectangle.setPosition([x, y_new])
         
-        print("New y position = " + str(y_new))
-
         if not self.grid.isValidPosition(self.optimized_rectangle):
             print("Cannot optimize further in x direction")
             self.optimized_rectangle.setPosition([x, y])
-            self.is_optimized_x = True
+            self.is_optimized_y = True
         else:
             pass
-            # move x to x_new
+            # move y to y_new
 
     def createAndAddNewGrid(self, width=100, article_name='default', material='kokos', brand='kokos', color='naturel'):
         try:
@@ -500,6 +506,22 @@ class Stacker(object):
 
     def updateUnstackedRectangleInDatabase(self):
         self.rectangle.setPosition(self.stacking_position)
+        for stacked_rectangle in self.grid.getStackedRectangles():
+            print('Checking intersection of rectangle ' + str(self.rectangle.getName()) + ' with ' + str(stacked_rectangle.getName()))
+            print(self.rectangle)
+            print(stacked_rectangle)
+
+            if self.rectangle.intersection(stacked_rectangle): 
+                print('Intersection: True')
+
+            else:
+                print('Intersection: False')
+
+                if (self.rectangle.getBottomRight()[0] <= stacked_rectangle.getBottomLeft()[0]) or (self.rectangle.getBottomLeft()[0] >= stacked_rectangle.getBottomRight()[0]):
+                    print('No x-intersection')
+                
+                if (self.rectangle.getBottomRight()[1] >= stacked_rectangle.getTopRight()[1]) or (self.rectangle.getTopLeft()[1] <= stacked_rectangle.getBottomLeft()[1]):
+                    print('No y-intersection')
 
         self.rectangle.setStacked()
         self.rectangle.setGridNumber(self.grid.getName())
@@ -530,6 +552,7 @@ class Stacker(object):
 
         self.grid.addRectangle(self.rectangle)
         self.db_manager.updateRectangle(self.rectangle)
+
         self.db_manager.updateGrid(self.grid)
 
     def computeStackingPosition(self):        
