@@ -215,25 +215,9 @@ class Rectangle(object):
         if self.getBottomRight()[0] <= other.getBottomLeft()[0] or self.getBottomLeft()[0] >= other.getBottomRight()[0]:
             return False
 
-        # else:
-        #     if self.getBottomRight()[1] <= other.getTopRight()[1] and self.getBottomRight()[1] >= other.getBottomLeft()[1]:
-        #         return True
-
-        #     elif self.getBottomRight()[1] < other.getTopRight()[1] and self.getTopRight()[1] >= other.getBottomLeft()[1]:
-        #         return True
-
         if self.getBottomRight()[1] >= other.getTopRight()[1] or self.getTopLeft()[1] <= other.getBottomLeft()[1]:
             return False
         
-        # else:
-        #     if self.getBottomRight()[0] <= other.getTopRight()[0] and self.getBottomRight()[0] >= other.getTopLeft()[0]:
-        #         return True
-
-        #     elif self.getBottomRight()[0] < other.getTopRight()[0] and self.getBottomLeft()[0] <= other.getBottomLeft()[0]:
-        #         return True
-        
-        #     elif self.getBottomRight()[0] > other.getTopRight()[0] and self.getBottomLeft()[0] <= other.getBottomLeft()[0]:
-        #         return True
                 
         return True
 

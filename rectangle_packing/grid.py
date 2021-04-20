@@ -174,10 +174,6 @@ class Grid(object):
             if rectangle.intersection(stacked_rectangle):
                 return False
 
-            else:
-                pass
-                # print('Intersection: False')
-
         return True
     
     def isOutOfGrid(self, rectangle):

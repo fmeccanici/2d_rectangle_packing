@@ -158,7 +158,7 @@ class Stacker(object):
         self.data_logger.setTotalExecutionTime(self.total_time)
         self.data_logger.setSuccessfullyStackedRectangles(total_amount_of_unstacked_rectangles)
         self.data_logger.storeData()
-            
+        
     def optimizeOnMillimetersAndExportNonEmptyGrids(self):
         self.grids = self.db_manager.getGridsNotCut(sort=True)
         for grid in self.grids:
@@ -337,12 +337,15 @@ class Stacker(object):
     def convertRectanglesToMillimetersOptimizeAndExportGrid(self):
         print("Optimizing grid " + str(self.grid.getName()) + " and exporting to DXF...")
         self.getRectanglesExactWidthHeight()            
+
         self.grid.empty()
+        
         
         # size to move rectangles in x and y direction
         step_size = 0.001
 
         for exact_rectangle in self.exact_rectangles:
+
             print("Optimizing " + str(exact_rectangle.getName()) + '.....')
             self.is_optimized_x = False
             self.is_optimized_y = False
@@ -376,29 +379,14 @@ class Stacker(object):
         
         self.optimized_rectangle.setPosition([x_new, y])
 
+
         if not self.grid.isValidPosition(self.optimized_rectangle):
-            print("Cannot optimize further in y direction")
+            print("Cannot optimize further in x direction")
             self.optimized_rectangle.setPosition([x, y])
+            print(self.optimized_rectangle)
             self.is_optimized_x = True
         else:
-            if self.optimized_rectangle.getName() == '120404462-1':
-                print('x_new = ' + str(x_new))
-
-                for rectangle in self.grid.getStackedRectangles():
-                    if self.optimized_rectangle.getBottomRight()[0] <= rectangle.getBottomLeft()[0] or self.optimized_rectangle.getBottomLeft()[0] >= rectangle.getBottomRight()[0]:
-                        print("No x-intersection")
-
-                    else:
-                        if self.optimized_rectangle.getBottomRight()[1] <= rectangle.getTopRight()[1] or self.optimized_rectangle.getBottomRight()[0] >= rectangle.getBottomLeft()[0]:
-                            print("x-intersection")
-
-
-                    if self.optimized_rectangle.getBottomRight()[1] >= rectangle.getTopRight()[1] or self.optimized_rectangle.getTopLeft()[1] <= rectangle.getBottomLeft()[1]:
-                        print("No y-intersection")
-                    
-                    else:
-                        if self.optimized_rectangle.getBottomRight()[0] <= rectangle.getTopRight()[0] or self.optimized_rectangle.getBottomRight()[0] >= rectangle.getTopLeft()[0]:
-                            print("y-intersection")
+            pass
             # move x to x_new
 
     def moveRectangleVertically(self, step_size):
@@ -412,7 +400,7 @@ class Stacker(object):
         self.optimized_rectangle.setPosition([x, y_new])
         
         if not self.grid.isValidPosition(self.optimized_rectangle):
-            print("Cannot optimize further in x direction")
+            print("Cannot optimize further in y direction")
             self.optimized_rectangle.setPosition([x, y])
             self.is_optimized_y = True
         else:
@@ -506,23 +494,6 @@ class Stacker(object):
 
     def updateUnstackedRectangleInDatabase(self):
         self.rectangle.setPosition(self.stacking_position)
-        for stacked_rectangle in self.grid.getStackedRectangles():
-            print('Checking intersection of rectangle ' + str(self.rectangle.getName()) + ' with ' + str(stacked_rectangle.getName()))
-            print(self.rectangle)
-            print(stacked_rectangle)
-
-            if self.rectangle.intersection(stacked_rectangle): 
-                print('Intersection: True')
-
-            else:
-                print('Intersection: False')
-
-                if (self.rectangle.getBottomRight()[0] <= stacked_rectangle.getBottomLeft()[0]) or (self.rectangle.getBottomLeft()[0] >= stacked_rectangle.getBottomRight()[0]):
-                    print('No x-intersection')
-                
-                if (self.rectangle.getBottomRight()[1] >= stacked_rectangle.getTopRight()[1]) or (self.rectangle.getTopLeft()[1] <= stacked_rectangle.getBottomLeft()[1]):
-                    print('No y-intersection')
-
         self.rectangle.setStacked()
         self.rectangle.setGridNumber(self.grid.getName())
 
