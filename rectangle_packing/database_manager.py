@@ -93,20 +93,28 @@ class DatabaseManager(object):
         
         return names
 
-    def createUniqueGrid(self, width=100, article_name='', material='kokos', brand='kokos', color='naturel'):
+    def createUniqueGrid(self, width, height, article_name='', material='kokos', brand='kokos', color='naturel'):
+        
+        if brand.lower() == 'kokos' and width == 100:
+            height = 1230
+        elif brand.lower() == 'kokos' and width == 200:
+            height = 605
+        else:
+            height = 980
+
         try:
             used_names = self.listUsedGridNames()
             sorted_names = sorted(used_names)
             unique_name = int(sorted_names[-1] + 1)
             print("Creating unique grid with number: " + str(unique_name))
-            grid = Grid(width=width, height=1500, name=unique_name, article_name=article_name, material=material, brand=brand, color=color)
+            grid = Grid(width=width, height=height, name=unique_name, article_name=article_name, material=material, brand=brand, color=color)
             self.addGrid(grid)
 
         except IndexError:
             print("No grids available yet")
             print("Creating first grid")
 
-            grid = Grid(width=width, height=1500, name=1, article_name=article_name, material=material, brand=brand, color=color)
+            grid = Grid(width=width, height=height, name=1, article_name=article_name, material=material, brand=brand, color=color)
             self.addGrid(grid)
             
         return grid

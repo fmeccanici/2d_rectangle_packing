@@ -177,7 +177,14 @@ class Stacker(object):
         self.db_manager.updateGrid(self.grid)
 
     def enlargeGridToStandardSize(self):
-        self.grid.setHeight(1500)
+        if self.grid.getBrand().lower() == 'kokos' and self.grid.getWidth() == 100:
+            grid_height = 1230
+        elif self.grid.getBrand().lower() == 'kokos' and self.grid.getWidth() == 200:
+            grid_height = 605
+        else:
+            grid_height = 980
+
+        self.grid.setHeight(grid_height)
         self.db_manager.updateGrid(self.grid)
                     
     def getUncutAreasOfGrids(self):
@@ -280,8 +287,15 @@ class Stacker(object):
                 print("Grid not available")
                 print("Create unique grid with material " + str(rectangle.getMaterial()))
                 print("Create unique grid with article name " + str(rectangle.getArticleName()))
-
-                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), article_name=rectangle.getArticleName(), material=rectangle.getMaterial(), color=rectangle.getColor(), brand=rectangle.getBrand())
+                
+                if rectangle.getBrand().lower() == 'kokos' and rectangle.getGridWidth() == 100:
+                    grid_height = 1230
+                elif rectangle.getBrand().lower() == 'kokos' and rectangle.getGridWidth() == 200:
+                    grid_height = 605
+                else:
+                    grid_height = 980
+        
+                self.db_manager.createUniqueGrid(width=rectangle.getGridWidth(), height=grid_height, article_name=rectangle.getArticleName(), material=rectangle.getMaterial(), color=rectangle.getColor(), brand=rectangle.getBrand())
 
     def getUnstackedRectanglesFromDatabaseMatchingAllGridPropertiesSortedOnArea(self):
         self.rectangles = self.db_manager.getUnstackedRectangles(color=self.grid.getColor(),
@@ -320,8 +334,15 @@ class Stacker(object):
 
     def createNewGridAndStackRectangle(self):
 
-        new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), article_name=self.rectangle.getArticleName(),
-        material=self.rectangle.getMaterial(), brand=self.rectangle.getBrand(), color=self.rectangle.getColor())
+        if self.rectangle.getBrand().lower() == 'kokos' and self.rectangle.getGridWidth() == 100:
+            grid_height = 1230
+        elif self.rectangle.getBrand().lower() == 'kokos' and self.rectangle.getGridWidth() == 200:
+            grid_height = 605
+        else:
+            grid_height = 980
+
+        new_grid = self.db_manager.createUniqueGrid(width=self.rectangle.getGridWidth(), height = grid_height, 
+        article_name=self.rectangle.getArticleName(), material=self.rectangle.getMaterial(), brand=self.rectangle.getBrand(), color=self.rectangle.getColor())
         
         self.setGrid(new_grid)
 
@@ -407,16 +428,23 @@ class Stacker(object):
             pass
             # move y to y_new
 
-    def createAndAddNewGrid(self, width=100, article_name='default', material='kokos', brand='kokos', color='naturel'):
+    def createAndAddNewGrid(self, width, article_name='default', material='kokos', brand='kokos', color='naturel'):
+        if self.rectangle.getBrand().lower() == 'kokos' and self.rectangle.getGridWidth() == 100:
+            grid_height = 1230
+        elif self.rectangle.getBrand().lower() == 'kokos' and self.rectangle.getGridWidth() == 200:
+            grid_height = 605
+        else:
+            grid_height = 980
+
         try:
-            grid = Grid(width=width, height=1500, article_name=article_name, material=material, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
+            grid = Grid(width=width, height=grid_height, article_name=article_name, material=material, name=self.grids[-1].getName() + 1, brand=brand, color=color, stacked_rectangles=[])
             self.grids.append(grid)
 
             self.db_manager.addGrid(grid)
             print("Created and added new grid to database")
 
         except IndexError:
-            grid = Grid(width=200, height=1500, name=1)
+            grid = Grid(width=200, height=grid_height, name=1)
             self.grids.append(grid)
             self.db_manager.addGrid(grid)
             print("Created and added initial grid to database")
