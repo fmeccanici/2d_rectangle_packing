@@ -14,12 +14,10 @@ from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot,
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
                              QMenu, QPushButton, QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QSlider, QLabel,
                              QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox,
-                             QDialog)
+                             QDialog, QComboBox)
 from PyQt5.QtGui import QPainter, QBrush, QPen, QPixmap, QColor
 import pandas as pd
 import numpy as np
-
-
 
 # used to trigger a popup window from other thread
 # has to be in main thread to be executed without failing
@@ -38,7 +36,7 @@ class PopupWindowTriggerThread(QThread):
                 self.finished_stacking_signal.emit(True)
                 self.finished_stacking = False
             time.sleep(30)
-            
+  
 # class that enables multithreading with Qt
 class Worker(QRunnable):
     '''
@@ -104,27 +102,26 @@ class Gui(QWidget):
         self.buttons_layout = QVBoxLayout()
 
         group_box = QGroupBox("Grid")
-        self.export_button = QPushButton("Export")
-        self.export_dxf_radio_button = QRadioButton("DXF")
-        self.export_pdf_radio_button = QRadioButton("PDF")
-        self.export_html_radio_button = QRadioButton("HTML")
-        self.export_pdf_radio_button.setChecked(True)
-        self.create_grid_button = QPushButton("Create new")
+        self.create_grid_button = QPushButton("Create New Grid")
+        self.remove_grid_button = QPushButton("Remove Grid")
 
         grid_layout = QGridLayout()
-        grid_layout.addWidget(self.export_button, 0, 0)
-        grid_layout.addWidget(self.export_dxf_radio_button, 1, 0)
-        grid_layout.addWidget(self.export_pdf_radio_button, 2, 0)
-        grid_layout.addWidget(self.export_html_radio_button, 1, 1)
         grid_layout.addWidget(self.create_grid_button, 3, 0)
-        
+        grid_layout.addWidget(self.remove_grid_button, 3, 1)
+
         self.load_orders_button = QPushButton("Load new orders")
         self.clear_orders_button = QPushButton("Clear new orders")
 
         self.excel_file_line_edit = QLineEdit("test2.xlsm")
         
-        self.grid_color_label = QLabel("Color")
+        self.grid_color_label = QLabel("Type")
         self.grid_color_line_edit = QLineEdit("Naturel")
+        self.type_dropdown = QComboBox(self)
+        self.type_dropdown.addItem("Naturel")
+        self.type_dropdown.addItem("Rood")
+        self.type_dropdown.addItem("Rood-Bordeaux")
+
+        self.type_dropdown.activated[str].connect(self.onTypeDropdownChanged)      
 
         self.grid_brand_label = QLabel("Brand")
         self.grid_brand_line_edit = QLineEdit("Kokos")
@@ -132,37 +129,30 @@ class Gui(QWidget):
         grid_layout.addWidget(self.grid_color_label, 4, 0)
         grid_layout.addWidget(self.grid_brand_label, 4, 1)
 
-        grid_layout.addWidget(self.grid_color_line_edit, 5, 0)
+        grid_layout.addWidget(self.type_dropdown, 5, 0)
+
+        # grid_layout.addWidget(self.grid_color_line_edit, 5, 0)
         grid_layout.addWidget(self.grid_brand_line_edit, 5, 1)
         
         self.create_grid_grid_width_label = QLabel("Width")
         self.create_grid_grid_width_line_edit = QLineEdit("100")
+        self.create_grid_grid_height_label = QLabel("Length")
+        self.create_grid_grid_height_line_edit = QLineEdit("100")
 
         grid_layout.addWidget(self.create_grid_grid_width_label, 6, 0)
         grid_layout.addWidget(self.create_grid_grid_width_line_edit, 7, 0)
-
-        self.cut_button = QPushButton("Cut")
-        self.uncut_button = QPushButton("Uncut")
-        grid_layout.addWidget(self.cut_button, 8, 0)
-        grid_layout.addWidget(self.uncut_button, 9, 0)
-
-        self.empty_grid_button = QPushButton("Empty")
-        self.remove_grid_button = QPushButton("Remove")
-
-        grid_layout.addWidget(self.empty_grid_button, 8, 1)
-        grid_layout.addWidget(self.remove_grid_button, 9, 1)
+        grid_layout.addWidget(self.create_grid_grid_height_label, 6, 1)
+        grid_layout.addWidget(self.create_grid_grid_height_line_edit, 7, 1)
 
         group_box.setLayout(grid_layout)
         self.buttons_layout.addWidget(group_box)
         
-        self.make_database_backup_button = QPushButton("Make database backup")
         self.clear_database_button = QPushButton("Clear database")
 
         self.buttons_layout.addWidget(self.load_orders_button)
         self.buttons_layout.addWidget(self.excel_file_line_edit)
         self.buttons_layout.addWidget(self.clear_orders_button)
 
-        self.buttons_layout.addWidget(self.make_database_backup_button)
         self.buttons_layout.addWidget(self.clear_database_button)
 
         group_box = QGroupBox("Stacking")
@@ -205,9 +195,12 @@ class Gui(QWidget):
 
         self.buttons_layout.addStretch()
 
+    def onTypeDropdownChanged(self, text):
+        self.grid_color_line_edit.setText(text)
+
+
     def createButtonEvents(self):
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
-        self.empty_grid_button.clicked.connect(self.onEmptyGridClick)
         self.remove_grid_button.clicked.connect(self.onRemoveGridClick)
 
         self.start_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingClick))
@@ -217,12 +210,7 @@ class Gui(QWidget):
         self.load_orders_button.clicked.connect(self.onLoadOrdersClick)
         self.clear_orders_button.clicked.connect(self.onClearNewOrdersClick)
 
-        self.make_database_backup_button.clicked.connect(self.onMakeDatabaseBackupClick)
         self.clear_database_button.clicked.connect(self.onClearDatabaseClick)
-
-        self.export_button.clicked.connect(self.onExportClick)
-        self.cut_button.clicked.connect(self.onCutClick)
-        self.uncut_button.clicked.connect(self.onUncutClick)
 
     def useMultithread(self, function):
         worker = Worker(function)
@@ -232,7 +220,7 @@ class Gui(QWidget):
         brand = self.grid_brand_line_edit.text()
         width = self.create_grid_grid_width_line_edit.text()
         color = self.grid_color_line_edit.text()
-        grid = self.db_manager.createUniqueGrid(width=width, brand=brand, color=color)
+        grid = self.db_manager.createUniqueGrid(width=width, height=self.create_grid_grid_height_line_edit.text(), brand=brand, color=color)
 
         list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
         self.list_widget_grids.addItem(list_widget_item) 
