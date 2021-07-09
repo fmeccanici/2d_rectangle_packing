@@ -93,54 +93,56 @@ class DatabaseManager(object):
         
         return names
 
-    def createUniqueGrid(self, width, height, article_name='', material='kokos', brand='kokos', color='naturel'):
+    def createUniqueGrid(self, width, height=None, article_name='', material='kokos', brand='kokos', color='naturel'):
         
         brand_lower_case = brand.lower()
         material_lower_case = material.lower()
 
-        if brand_lower_case == 'kokos' and width == 100:
-            height = 1225
-        elif brand_lower_case == 'kokos' and width == 200:
-            height = 600
+        # only do this when the height is not specified
+        if height == None:
+            if brand_lower_case == 'kokos' and width == 100:
+                height = 1225
+            elif brand_lower_case == 'kokos' and width == 200:
+                height = 600
 
-        # ambiant except lobby
-        elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] != 'lobby' and width == 123:
-            height = 975
-        elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] != 'lobby' and width == 193:
-            height = 600   
-        
-        # ambiant lobby
-        elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] == 'lobby' and width == 123:
-            height = 975     
-        elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] == 'lobby' and width == 200:
-            height = 600  
+            # ambiant except lobby
+            elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] != 'lobby' and width == 123:
+                height = 975
+            elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] != 'lobby' and width == 193:
+                height = 600   
+            
+            # ambiant lobby
+            elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] == 'lobby' and width == 123:
+                height = 975     
+            elif brand_lower_case == 'ambiant' and material_lower_case.split()[1] == 'lobby' and width == 200:
+                height = 600  
 
-        # forbo
-        elif brand_lower_case.split()[0] == 'forbo' and width == 98:
-            height = 975
-        elif brand_lower_case.split()[0] == 'forbo' and width == 148:
-            height = 975
-        elif brand_lower_case.split()[0] == 'forbo' and width == 198:
-            height = 600
+            # forbo
+            elif brand_lower_case.split()[0] == 'forbo' and width == 98:
+                height = 975
+            elif brand_lower_case.split()[0] == 'forbo' and width == 148:
+                height = 975
+            elif brand_lower_case.split()[0] == 'forbo' and width == 198:
+                height = 600
 
-        # zeno protect
-        elif brand_lower_case.split()[0] == 'zeno' and width == 98:
-            height = 975
-        elif brand_lower_case.split()[0] == 'zeno' and width == 198:
-            height = 600
+            # zeno protect
+            elif brand_lower_case.split()[0] == 'zeno' and width == 98:
+                height = 975
+            elif brand_lower_case.split()[0] == 'zeno' and width == 198:
+                height = 600
 
-        # ondervloer
-        elif brand_lower_case == 'ondervloer 5 mm' and width == 135:
-            height = 700
-        elif brand_lower_case == 'ondervloer 3,6 mm' and width == 130:
-            height = 1100
+            # ondervloer
+            elif brand_lower_case == 'ondervloer 5 mm' and width == 135:
+                height = 700
+            elif brand_lower_case == 'ondervloer 3,6 mm' and width == 130:
+                height = 1100
 
-        elif brand_lower_case.split()[0] == 'squid' and width == 137:
-            height = 1500
-        
-        # TODO: might want to throw an exception here
-        else:
-            height = 980
+            elif brand_lower_case.split()[0] == 'squid' and width == 137:
+                height = 1500
+            
+            # TODO: might want to throw an exception here
+            else:
+                height = 980
 
         try:
             used_names = self.listUsedGridNames()
