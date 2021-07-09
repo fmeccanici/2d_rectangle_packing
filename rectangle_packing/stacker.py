@@ -283,6 +283,7 @@ class Stacker(object):
 
     def createGridInDatabaseIfNotAvailable(self):
         for rectangle in self.rectangles:
+            
             if not self.isGridAvailable(rectangle):
                 print("Grid not available")
                 print("Create unique grid with material " + str(rectangle.getMaterial()))
