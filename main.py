@@ -120,6 +120,7 @@ class Gui(QWidget):
         self.type_dropdown.addItem("Naturel")
         self.type_dropdown.addItem("Rood")
         self.type_dropdown.addItem("Rood-Bordeaux")
+        self.type_dropdown.addItem("82783-0")
 
         self.type_dropdown.activated[str].connect(self.onTypeDropdownChanged)      
 
@@ -157,7 +158,6 @@ class Gui(QWidget):
 
         group_box = QGroupBox("Stacking")
         layout = QVBoxLayout()
-        self.start_stacking_button = QPushButton("Start")
         self.stop_stacking_button = QPushButton("Stop")
         self.start_stacking_automatic_button = QPushButton("Automatic")
         
@@ -169,9 +169,8 @@ class Gui(QWidget):
         self.standard_order_50_80_checkbox = QCheckBox("50 x 80")
         self.standard_order_40_70_checkbox = QCheckBox("40 x 70")
 
-        layout.addWidget(self.start_stacking_button)
-        layout.addWidget(self.stop_stacking_button)
         layout.addWidget(self.start_stacking_automatic_button)
+        layout.addWidget(self.stop_stacking_button)
         layout.addWidget(self.standard_orders_label)
         
         standard_orders_layout.addWidget(self.standard_order_60_80_checkbox, 0, 0)
@@ -203,7 +202,6 @@ class Gui(QWidget):
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
         self.remove_grid_button.clicked.connect(self.onRemoveGridClick)
 
-        self.start_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingClick))
         self.stop_stacking_button.clicked.connect(lambda: self.useMultithread(self.onStopStackingClick))
         self.start_stacking_automatic_button.clicked.connect(lambda: self.useMultithread(self.onStartStackingAutomaticClick))
 
@@ -219,8 +217,10 @@ class Gui(QWidget):
     def onCreateGridClick(self):
         brand = self.grid_brand_line_edit.text()
         width = self.create_grid_grid_width_line_edit.text()
+        height = self.create_grid_grid_height_line_edit.text()
+
         color = self.grid_color_line_edit.text()
-        grid = self.db_manager.createUniqueGrid(width=width, height=self.create_grid_grid_height_line_edit.text(), brand=brand, color=color)
+        grid = self.db_manager.createUniqueGrid(width=width, height=height, brand=brand, color=color)
 
         list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
         self.list_widget_grids.addItem(list_widget_item) 
@@ -432,45 +432,32 @@ class Gui(QWidget):
         cut_uncut_group_box = QGroupBox("")
 
         self.cut_uncut_layout = QGridLayout()
-        grids_label = QLabel("Uncut grids")
+        grids_label = QLabel("Available Grids")
         self.cut_uncut_layout.addWidget(grids_label, 0, 0)
         self.cut_uncut_layout.addWidget(self.list_widget_grids, 1, 0)
         
-        cut_grids_label = QLabel("Cut grids")
-        self.cut_uncut_layout.addWidget(cut_grids_label, 0, 1)
-        self.cut_uncut_layout.addWidget(self.list_widget_cut_grids, 1, 1)
-        
-        cut_color_label = QLabel("Color")
-        cut_width_label = QLabel("Width")
-        cut_brand_label = QLabel("Brand")
-
-        self.cut_color_line_edit = QLineEdit()
-        self.cut_width_line_edit = QLineEdit()
-        self.cut_brand_line_edit = QLineEdit()
-
-        uncut_color_label = QLabel("Color")
+        uncut_color_label = QLabel("Type")
         uncut_width_label = QLabel("Width")
+        uncut_height_label = QLabel("Length")
+
         uncut_brand_label = QLabel("Brand")
         quantity_orders_in_grid_label_name = QLabel("Quantity: ")
 
         self.uncut_color_line_edit = QLineEdit()
         self.uncut_width_line_edit = QLineEdit()
         self.uncut_brand_line_edit = QLineEdit()
-        self.quantity_orders_in_grid_label_value = QLabel()
+        self.uncut_height_line_edit = QLineEdit()
 
-        self.cut_uncut_layout.addWidget(cut_color_label, 2, 1)
-        self.cut_uncut_layout.addWidget(self.cut_color_line_edit, 3, 1)
-        self.cut_uncut_layout.addWidget(cut_width_label, 4, 1)        
-        self.cut_uncut_layout.addWidget(self.cut_width_line_edit, 5, 1)
-        self.cut_uncut_layout.addWidget(cut_brand_label, 6, 1)        
-        self.cut_uncut_layout.addWidget(self.cut_brand_line_edit, 7, 1)
+        self.quantity_orders_in_grid_label_value = QLabel()
 
         self.cut_uncut_layout.addWidget(uncut_color_label, 2, 0)
         self.cut_uncut_layout.addWidget(self.uncut_color_line_edit, 3, 0)
         self.cut_uncut_layout.addWidget(uncut_width_label, 4, 0)
         self.cut_uncut_layout.addWidget(self.uncut_width_line_edit, 5, 0)
-        self.cut_uncut_layout.addWidget(uncut_brand_label, 6, 0)        
-        self.cut_uncut_layout.addWidget(self.uncut_brand_line_edit, 7, 0)
+        self.cut_uncut_layout.addWidget(uncut_height_label, 6, 0)        
+        self.cut_uncut_layout.addWidget(self.uncut_height_line_edit, 7, 0)
+        self.cut_uncut_layout.addWidget(uncut_brand_label, 8, 0)        
+        self.cut_uncut_layout.addWidget(self.uncut_brand_line_edit, 9, 0)
 
         cut_uncut_group_box.setLayout(self.cut_uncut_layout)
         self.grid_orders_layout.addWidget(cut_uncut_group_box)
@@ -486,8 +473,8 @@ class Gui(QWidget):
         grid_orders_layout.addWidget(self.list_widget_orders, 1, 0)
 
         order_width_label = QLabel("Width")
-        order_height_label = QLabel("Height")
-        order_color_label = QLabel("Color")
+        order_height_label = QLabel("Length")
+        order_color_label = QLabel("Type")
         order_grid_width_label = QLabel("Grid width")
         order_brand_label = QLabel("Brand")
 
@@ -519,8 +506,8 @@ class Gui(QWidget):
 
         self.unstacked_orders_group_box = QGroupBox("New orders")
         unstacked_order_width_label = QLabel("Width")
-        unstacked_order_height_label = QLabel("Height")
-        unstacked_order_color_label = QLabel("Color")
+        unstacked_order_height_label = QLabel("Length")
+        unstacked_order_color_label = QLabel("Type")
         unstacked_order_grid_width_label = QLabel("Grid width")
         unstacked_order_brand_label = QLabel("Brand")
 
@@ -628,6 +615,7 @@ class Gui(QWidget):
         
         self.uncut_color_line_edit.setText(grid.getColor())
         self.uncut_width_line_edit.setText(str(grid.getWidth()))
+        self.uncut_height_line_edit.setText(str(grid.height))
         self.uncut_brand_line_edit.setText(str(grid.getBrand()))
 
         self.drawGrid(grid)
