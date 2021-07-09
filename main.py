@@ -451,10 +451,12 @@ class Gui(QWidget):
         uncut_color_label = QLabel("Color")
         uncut_width_label = QLabel("Width")
         uncut_brand_label = QLabel("Brand")
+        quantity_orders_in_grid_label_name = QLabel("Quantity: ")
 
         self.uncut_color_line_edit = QLineEdit()
         self.uncut_width_line_edit = QLineEdit()
         self.uncut_brand_line_edit = QLineEdit()
+        self.quantity_orders_in_grid_label_value = QLabel()
 
         self.cut_uncut_layout.addWidget(cut_color_label, 2, 1)
         self.cut_uncut_layout.addWidget(self.cut_color_line_edit, 3, 1)
@@ -476,7 +478,12 @@ class Gui(QWidget):
         grid_orders_groupbox = QGroupBox("Orders in grid")
         grid_orders_layout = QGridLayout()
 
-        grid_orders_layout.addWidget(self.list_widget_orders, 0, 0)
+        quantity_orders_in_grid_layout = QHBoxLayout()
+        quantity_orders_in_grid_layout.addWidget(quantity_orders_in_grid_label_name)
+        quantity_orders_in_grid_layout.addWidget(self.quantity_orders_in_grid_label_value)
+
+        grid_orders_layout.addLayout(quantity_orders_in_grid_layout, 0, 0)
+        grid_orders_layout.addWidget(self.list_widget_orders, 1, 0)
 
         order_width_label = QLabel("Width")
         order_height_label = QLabel("Height")
@@ -490,24 +497,23 @@ class Gui(QWidget):
         self.grid_width_line_edit = QLineEdit()
         self.brand_line_edit = QLineEdit()
 
-        grid_orders_layout.addWidget(order_width_label, 1, 0)
-        grid_orders_layout.addWidget(self.width_line_edit, 2, 0)
+        grid_orders_layout.addWidget(order_width_label, 2, 0)
+        grid_orders_layout.addWidget(self.width_line_edit, 3, 0)
 
-        grid_orders_layout.addWidget(order_height_label, 3, 0)
-        grid_orders_layout.addWidget(self.height_line_edit, 4, 0)
+        grid_orders_layout.addWidget(order_height_label, 4, 0)
+        grid_orders_layout.addWidget(self.height_line_edit, 5, 0)
 
-        grid_orders_layout.addWidget(order_color_label, 1, 1)
-        grid_orders_layout.addWidget(self.color_line_edit, 2, 1)
+        grid_orders_layout.addWidget(order_color_label, 2, 1)
+        grid_orders_layout.addWidget(self.color_line_edit, 3, 1)
 
-        grid_orders_layout.addWidget(order_grid_width_label, 3, 1)
-        grid_orders_layout.addWidget(self.grid_width_line_edit, 4, 1)
+        grid_orders_layout.addWidget(order_grid_width_label, 4, 1)
+        grid_orders_layout.addWidget(self.grid_width_line_edit, 5, 1)
 
-        grid_orders_layout.addWidget(order_brand_label, 5, 1)
-        grid_orders_layout.addWidget(self.brand_line_edit, 6, 1)
+        grid_orders_layout.addWidget(order_brand_label, 6, 1)
+        grid_orders_layout.addWidget(self.brand_line_edit, 7, 1)
 
 
         grid_orders_groupbox.setLayout(grid_orders_layout)
-
 
         self.grid_orders_layout.addWidget(grid_orders_groupbox)
 
@@ -631,6 +637,9 @@ class Gui(QWidget):
             list_widget_item = QListWidgetItem("Order " + str(rectangle.getName())) 
             self.list_widget_orders.addItem(list_widget_item) 
         
+        quantity_orders_in_grid = len(stacked_rectangles)
+        self.quantity_orders_in_grid_label_value.setText(str(quantity_orders_in_grid))
+
         QApplication.processEvents()
 
     def refreshCutGrid(self):
