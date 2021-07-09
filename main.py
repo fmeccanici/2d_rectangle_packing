@@ -121,6 +121,7 @@ class Gui(QWidget):
         self.type_dropdown.addItem("Rood")
         self.type_dropdown.addItem("Rood-Bordeaux")
         self.type_dropdown.addItem("82783-0")
+        self.type_dropdown.addItem("13743-388576")
 
         self.type_dropdown.activated[str].connect(self.onTypeDropdownChanged)      
 
