@@ -10,7 +10,7 @@ from rectangle_packing.helper import Helper
 import sys, time
 import os
 from PyQt5 import QtWebEngineWidgets, QtWidgets
-from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot, QRect, QThread
+from PyQt5.QtCore import Qt, pyqtSignal, QUrl, QThreadPool, QRunnable, pyqtSlot, QRect, QThread, QEvent
 from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
                              QMenu, QPushButton, QRadioButton, QVBoxLayout, QHBoxLayout, QWidget, QSlider, QLabel,
                              QLineEdit, QListWidget, QListWidgetItem, QMainWindow, QMessageBox,
@@ -99,12 +99,65 @@ class Gui(QWidget):
 
         self.refreshNewOrders()
 
+    def getBrandsFromSitemanager(self):
+        cursor = self.db_sitemanager_cursor
+        cursor.execute("SELECT DISTINCT brandname from fsm_website_product WHERE fsm_website_id = 68")
+        result = cursor.fetchall()
+        brands = [x[0] for x in result]
+        brands.extend(["Ondervloer 3,6mm", "Ondervloer 5mm"])
+
+        return brands
+
+    def getProductNamesFromSitemanager(self, brand):
+        if brand == "Ondervloer 3,6mm" or brand == "Ondervloer 5mm":
+            self.grid_product_options_dropdown.clear()
+            self.grid_product_dropdown.clear()
+            return []
+        else:
+            brand = str("'" + brand + "'")
+            cursor = self.db_sitemanager_cursor
+            cursor.execute("SELECT fwpl.name, fwpl.fsm_website_product_id from fsm_website_product inner join fsm_website_product_language fwpl on fsm_website_product.id = fwpl.fsm_website_product_id WHERE fsm_website_id = 68 AND brandname = " + str(brand))
+            result = cursor.fetchall()
+
+            return [x[0] for x in result]
+
+    def getProductOptionsFromSitemanager(self, product_name):
+
+        product_name = str("'" + product_name + "'")
+        cursor = self.db_sitemanager_cursor
+        cursor.execute("SELECT DISTINCT fwpol.name from fsm_website_product inner join fsm_website_product_language fwpl inner join fsm_website_product_option fwpo on fsm_website_product.id = fwpo.fsm_website_product_id inner join fsm_website_product_option_language fwpol on fwpo.id = fwpol.fsm_website_product_option_id WHERE fsm_website_id = 68 and fwpl.name = " + str(product_name))
+        result = cursor.fetchall()
+
+        return [x[0] for x in result]
+
     def initExcel(self):
         desktop = Helper.getDesktopPath()
         path = desktop + "/paklijsten/"
         file_name = "paklijst.xlsx"
         self.excel_parser = ExcelParser(data_logger=self.stacker.getDataLogger(), path=path, file_name=file_name, sheet_name='Paklijst')
         self.stacker.setExcelParser(path=path, file_name=file_name)
+
+    def eventFilter(self, target ,event):
+        if target == self.grid_brand_dropdown and event.type() == QEvent.MouseButtonPress:
+            self.fillProductNames(self.grid_brand_dropdown.currentText())
+        elif target == self.grid_product_dropdown and event.type() == QEvent.MouseButtonPress:
+            self.fillProductOptions(self.grid_product_dropdown.currentText())
+
+        return False
+
+    def fillProductNames(self, brand):
+        product_names = self.getProductNamesFromSitemanager(brand)
+        self.grid_product_dropdown.clear()
+
+        for product_name in product_names:
+            self.grid_product_dropdown.addItem(product_name)
+
+    def fillProductOptions(self, product_name):
+        product_options = self.getProductOptionsFromSitemanager(product_name)
+        self.grid_product_options_dropdown.clear()
+
+        for product_option in product_options:
+            self.grid_product_options_dropdown.addItem(product_option)
 
     # this creates the middle side of the GUI
     def createButtonsLayout(self):
@@ -123,37 +176,41 @@ class Gui(QWidget):
 
         self.excel_file_line_edit = QLineEdit("test2.xlsm")
         
-        self.grid_color_label = QLabel("Type")
-        self.grid_color_line_edit = QLineEdit("Naturel")
-        self.type_dropdown = QComboBox(self)
-        self.type_dropdown.addItem("Naturel")
-        self.type_dropdown.addItem("Rood")
-        self.type_dropdown.addItem("Rood-Bordeaux")
-        self.type_dropdown.addItem("82783-0")
-        self.type_dropdown.addItem("13743-388576")
+        self.grid_product_label = QLabel("Product name")
+        self.grid_product_option_label = QLabel("Product option")
 
-        self.type_dropdown.activated[str].connect(self.onTypeDropdownChanged)      
+        self.grid_product_dropdown = QComboBox(self)
+        self.grid_product_options_dropdown = QComboBox(self)
+
+        self.grid_product_dropdown.activated[str].connect(self.onTypeDropdownChanged)      
 
         self.grid_brand_label = QLabel("Brand")
-        self.grid_brand_line_edit = QLineEdit("Kokos")
+        self.grid_brand_dropdown = QComboBox(self)
+        self.grid_brand_dropdown.installEventFilter(self)
+        self.grid_product_dropdown.installEventFilter(self)
 
-        grid_layout.addWidget(self.grid_color_label, 4, 0)
+        grid_layout.addWidget(self.grid_product_label, 4, 0)
         grid_layout.addWidget(self.grid_brand_label, 4, 1)
 
-        grid_layout.addWidget(self.type_dropdown, 5, 0)
+        grid_layout.addWidget(self.grid_product_dropdown, 5, 0)
+        grid_layout.addWidget(self.grid_product_option_label, 6, 0)
+        grid_layout.addWidget(self.grid_product_options_dropdown, 7, 0)
 
         # grid_layout.addWidget(self.grid_color_line_edit, 5, 0)
-        grid_layout.addWidget(self.grid_brand_line_edit, 5, 1)
+        grid_layout.addWidget(self.grid_brand_dropdown, 5, 1)
         
+        for brand in self.getBrandsFromSitemanager():
+            self.grid_brand_dropdown.addItem(str(brand))
+
         self.create_grid_grid_width_label = QLabel("Width")
         self.create_grid_grid_width_line_edit = QLineEdit("100")
         self.create_grid_grid_height_label = QLabel("Length")
         self.create_grid_grid_height_line_edit = QLineEdit("100")
 
-        grid_layout.addWidget(self.create_grid_grid_width_label, 6, 0)
-        grid_layout.addWidget(self.create_grid_grid_width_line_edit, 7, 0)
-        grid_layout.addWidget(self.create_grid_grid_height_label, 6, 1)
-        grid_layout.addWidget(self.create_grid_grid_height_line_edit, 7, 1)
+        grid_layout.addWidget(self.create_grid_grid_width_label, 8, 0)
+        grid_layout.addWidget(self.create_grid_grid_width_line_edit, 9, 0)
+        grid_layout.addWidget(self.create_grid_grid_height_label, 8, 1)
+        grid_layout.addWidget(self.create_grid_grid_height_line_edit, 9, 1)
 
         group_box.setLayout(grid_layout)
         self.buttons_layout.addWidget(group_box)
@@ -205,8 +262,8 @@ class Gui(QWidget):
         self.buttons_layout.addStretch()
 
     def onTypeDropdownChanged(self, text):
-        self.grid_color_line_edit.setText(text)
-
+        pass
+        # self.grid_color_line_edit.setText(text)
 
     def createButtonEvents(self):
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
@@ -236,6 +293,20 @@ class Gui(QWidget):
         self.list_widget_grids.addItem(list_widget_item) 
 
         self.list_widget_grids.repaint()
+
+    def getTypeFromProductNameAndProductOption(self, product_name, product_option):
+        product_name = str("'" + product_name + "'")
+        product_option = str("'" + product_option + "'")
+
+        cursor = self.db_sitemanager_cursor
+        cursor.execute("SELECT fwpl.fsm_website_product_id from fsm_website_product inner join fsm_website_product_language fwpl inner join fsm_website_product_option fwpo on fsm_website_product.id = fwpo.fsm_website_product_id inner join fsm_website_product_option_language fwpol on fwpo.id = fwpol.fsm_website_product_option_id WHERE fsm_website_id = 68 and fwpl.name = " + product_name)
+        product_name_code = cursor.fetchall()[0]
+
+        cursor = self.db_sitemanager_cursor
+        cursor.execute("SELECT fwpol.id from fsm_website_product inner join fsm_website_product_language fwpl inner join fsm_website_product_option fwpo on fsm_website_product.id = fwpo.fsm_website_product_id inner join fsm_website_product_option_language fwpol on fwpo.id = fwpol.fsm_website_product_option_id WHERE fsm_website_id = 68 and fwpl.name = " + product_name + " and " + "fwpol.name = " + product_option)
+        product_option_code = cursor.fetchall()[0]
+
+        return product_name_code + "." + product_option_code
 
     def onEmptyGridClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
