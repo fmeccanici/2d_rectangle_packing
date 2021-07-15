@@ -18,6 +18,7 @@ from PyQt5.QtWidgets import (QApplication, QCheckBox, QGridLayout, QGroupBox,
 from PyQt5.QtGui import QPainter, QBrush, QPen, QPixmap, QColor
 import pandas as pd
 import numpy as np
+import mysql.connector
 
 # used to trigger a popup window from other thread
 # has to be in main thread to be executed without failing
@@ -69,6 +70,14 @@ class Gui(QWidget):
         super(Gui, self).__init__(parent)
         # Other classes
         self.db_manager = DatabaseManager()
+        self.db_sitemanager = mysql.connector.connect(
+            host="srv-11.edyson.nl",
+            user="stacker",
+            password="7Yz3VE*AWc8R,Lsr",
+            database="frisonline_sitemanager"
+        )
+        self.db_sitemanager_cursor = self.db_sitemanager.cursor()
+
         self.stacker = Stacker()
         self.initExcel()
 
