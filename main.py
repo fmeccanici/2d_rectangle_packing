@@ -125,7 +125,7 @@ class Gui(QWidget):
 
         product_name = str("'" + product_name + "'")
         cursor = self.db_sitemanager_cursor
-        cursor.execute("SELECT DISTINCT fwpol.name from fsm_website_product inner join fsm_website_product_language fwpl inner join fsm_website_product_option fwpo on fsm_website_product.id = fwpo.fsm_website_product_id inner join fsm_website_product_option_language fwpol on fwpo.id = fwpol.fsm_website_product_option_id WHERE fsm_website_id = 68 and fwpl.name = " + str(product_name))
+        cursor.execute("SELECT fwpol.name FROM fsm_website_product p INNER JOIN fsm_website_product_language fwpl ON fwpl.fsm_website_product_id = p.id INNER JOIN fsm_website_product_option fwpo ON p.id = fwpo.fsm_website_product_id INNER JOIN fsm_website_product_option_language fwpol ON fwpo.id = fwpol.fsm_website_product_option_id WHERE p.fsm_website_id = 68 AND fwpl.name = " + product_name)
         result = cursor.fetchall()
 
         return [x[0] for x in result]
@@ -136,14 +136,6 @@ class Gui(QWidget):
         file_name = "paklijst.xlsx"
         self.excel_parser = ExcelParser(data_logger=self.stacker.getDataLogger(), path=path, file_name=file_name, sheet_name='Paklijst')
         self.stacker.setExcelParser(path=path, file_name=file_name)
-
-    def eventFilter(self, target ,event):
-        if target == self.grid_brand_dropdown and event.type() == QEvent.MouseButtonPress:
-            self.fillProductNames(self.grid_brand_dropdown.currentText())
-        elif target == self.grid_product_dropdown and event.type() == QEvent.MouseButtonPress:
-            self.fillProductOptions(self.grid_product_dropdown.currentText())
-
-        return False
 
     def fillProductNames(self, brand):
         product_names = self.getProductNamesFromSitemanager(brand)
@@ -181,14 +173,13 @@ class Gui(QWidget):
 
         self.grid_product_dropdown = QComboBox(self)
         self.grid_product_options_dropdown = QComboBox(self)
-
-        self.grid_product_dropdown.activated[str].connect(self.onTypeDropdownChanged)      
-
         self.grid_brand_label = QLabel("Brand")
         self.grid_brand_dropdown = QComboBox(self)
-        self.grid_brand_dropdown.installEventFilter(self)
-        self.grid_product_dropdown.installEventFilter(self)
-
+        
+        self.grid_product_dropdown.activated[str].connect(self.onProductNameDropdownChanged)      
+        self.grid_product_options_dropdown.activated[str].connect(self.onProductOptionsDropdownChanged)      
+        self.grid_brand_dropdown.activated[str].connect(self.onBrandDropdownChanged)      
+        
         grid_layout.addWidget(self.grid_product_label, 4, 0)
         grid_layout.addWidget(self.grid_brand_label, 4, 1)
 
@@ -261,9 +252,16 @@ class Gui(QWidget):
 
         self.buttons_layout.addStretch()
 
-    def onTypeDropdownChanged(self, text):
-        pass
-        # self.grid_color_line_edit.setText(text)
+    def onProductNameDropdownChanged(self):
+        self.fillProductOptions(self.grid_product_dropdown.currentText())
+
+    def onBrandDropdownChanged(self):
+        self.fillProductNames(self.grid_brand_dropdown.currentText())
+
+    def onProductOptionsDropdownChanged(self):
+        if self.grid_product_options_dropdown.currentText().split()[0] == "Rolbreedte":
+            print(self.grid_product_options_dropdown.currentText().split()[1])
+            self.create_grid_grid_width_line_edit.setText(self.grid_product_options_dropdown.currentText().split()[1])
 
     def createButtonEvents(self):
         self.create_grid_button.clicked.connect(self.onCreateGridClick)
@@ -282,11 +280,16 @@ class Gui(QWidget):
         self.threadpool.start(worker)
 
     def onCreateGridClick(self):
-        brand = self.grid_brand_line_edit.text()
+        brand = self.grid_brand_dropdown.currentText()
+
         width = self.create_grid_grid_width_line_edit.text()
         height = self.create_grid_grid_height_line_edit.text()
 
-        color = self.grid_color_line_edit.text()
+        product_name = self.grid_product_dropdown.currentText()
+        product_option = self.grid_product_options_dropdown.currentText()
+
+        color = self.getTypeFromProductNameAndProductOption(product_name, product_option)
+
         grid = self.db_manager.createUniqueGrid(width=width, height=height, brand=brand, color=color)
 
         list_widget_item = QListWidgetItem("Grid " + str(grid.getName())) 
@@ -299,14 +302,15 @@ class Gui(QWidget):
         product_option = str("'" + product_option + "'")
 
         cursor = self.db_sitemanager_cursor
-        cursor.execute("SELECT fwpl.fsm_website_product_id from fsm_website_product inner join fsm_website_product_language fwpl inner join fsm_website_product_option fwpo on fsm_website_product.id = fwpo.fsm_website_product_id inner join fsm_website_product_option_language fwpol on fwpo.id = fwpol.fsm_website_product_option_id WHERE fsm_website_id = 68 and fwpl.name = " + product_name)
-        product_name_code = cursor.fetchall()[0]
+        query = "SELECT fwpl.fsm_website_product_id, fwpol.id, fwpol.name FROM fsm_website_product p INNER JOIN fsm_website_product_language fwpl ON fwpl.fsm_website_product_id = p.id INNER JOIN fsm_website_product_option fwpo ON p.id = fwpo.fsm_website_product_id INNER JOIN fsm_website_product_option_language fwpol ON fwpo.id = fwpol.fsm_website_product_option_id WHERE p.fsm_website_id = 68 AND fwpl.name = " + product_name + " AND fwpol.name = " + product_option
+        print(query)
+        cursor.execute(query)
+        result = cursor.fetchall()
+        print(result)
+        product_name_code = result[0][0]
+        product_option_code = result[0][1]
 
-        cursor = self.db_sitemanager_cursor
-        cursor.execute("SELECT fwpol.id from fsm_website_product inner join fsm_website_product_language fwpl inner join fsm_website_product_option fwpo on fsm_website_product.id = fwpo.fsm_website_product_id inner join fsm_website_product_option_language fwpol on fwpo.id = fwpol.fsm_website_product_option_id WHERE fsm_website_id = 68 and fwpl.name = " + product_name + " and " + "fwpol.name = " + product_option)
-        product_option_code = cursor.fetchall()[0]
-
-        return product_name_code + "." + product_option_code
+        return str(product_name_code) + "." + str(product_option_code)
 
     def onEmptyGridClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])
