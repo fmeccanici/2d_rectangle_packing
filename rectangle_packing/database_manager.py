@@ -157,6 +157,8 @@ class DatabaseManager(object):
             print("Creating first grid")
 
             grid = Grid(width=width, height=height, name=1, article_name=article_name, material=material, brand=brand, color=color)
+            print(grid.color)
+            print(grid.brand)
             self.addGrid(grid)
             
         return grid
@@ -215,6 +217,7 @@ class DatabaseManager(object):
     
         cursor = self.grids_collection.find(query)
         for document in cursor:
+            print(document)
             grid = Grid(width=document['width'], height=document['height'], brand=document['brand'], article_name=document['article_name'], material=document['material'], color=document['color'], name=document['name'], is_cut=document['isCut'])
             rectangles = self.getRectangles(grid)
             grid.setStackedRectangles(rectangles)

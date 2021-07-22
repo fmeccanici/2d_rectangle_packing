@@ -297,20 +297,53 @@ class Gui(QWidget):
 
         self.list_widget_grids.repaint()
 
+    def transformType(self, _type):
+
+        transformation_dict = {
+        "82783-0": "82783-0",
+        "82782-0": "82782-0" ,
+        "102082-0": "13747-388585" ,
+        "98305-0": "13747-388585" ,
+        "102075-0": "13747-388585" ,
+        "102078-0": "13747-3885845" ,
+        "98304-0": "13738-388571",
+        "98303-0": "13738-388571" ,
+        "102081-0": "13738-388571" ,
+        "14778-0": "13738-388571" ,
+        "102074-0": "13738-388570" ,
+        "102083-0": "13743-388577" ,
+        "100906-0": "13743-388577" ,
+        "102076-0": "13743-388577" ,
+        "102079-0": "13743-388576" ,
+        "102080-0": "13746-388583" ,
+        "100907-0": "13746-388583" ,
+        "102077-0": "13746-388583" ,
+        "102084-0": "13746-388582" ,
+        }
+
+        if _type in transformation_dict.keys():
+            return transformation_dict[_type]
+        else:
+            return _type
+
     def getTypeFromProductNameAndProductOption(self, product_name, product_option):
         product_name = str("'" + product_name + "'")
         product_option = str("'" + product_option + "'")
 
         cursor = self.db_sitemanager_cursor
-        query = "SELECT fwpl.fsm_website_product_id, fwpol.id, fwpol.name FROM fsm_website_product p INNER JOIN fsm_website_product_language fwpl ON fwpl.fsm_website_product_id = p.id INNER JOIN fsm_website_product_option fwpo ON p.id = fwpo.fsm_website_product_id INNER JOIN fsm_website_product_option_language fwpol ON fwpo.id = fwpol.fsm_website_product_option_id WHERE p.fsm_website_id = 68 AND fwpl.name = " + product_name + " AND fwpol.name = " + product_option
-        print(query)
+        query = "SELECT fwpl.fsm_website_product_id, fwpo.id, fwpol.name FROM fsm_website_product p INNER JOIN fsm_website_product_language fwpl ON fwpl.fsm_website_product_id = p.id INNER JOIN fsm_website_product_option fwpo ON p.id = fwpo.fsm_website_product_id INNER JOIN fsm_website_product_option_language fwpol ON fwpo.id = fwpol.fsm_website_product_option_id WHERE p.fsm_website_id = 68 AND fwpl.name = " + product_name + " AND fwpol.name = " + product_option
+
         cursor.execute(query)
         result = cursor.fetchall()
-        print(result)
+
         product_name_code = result[0][0]
         product_option_code = result[0][1]
 
-        return str(product_name_code) + "." + str(product_option_code)
+        _type = str(product_name_code) + "-" + str(product_option_code)
+
+        _type = self.transformType(_type)
+
+        return _type
 
     def onEmptyGridClick(self):
         grid_number = int(self.list_widget_grids.currentItem().text().split(' ')[1])

@@ -328,6 +328,9 @@ class Stacker(object):
         color = rectangle.getColor()
         brand = rectangle.getBrand()
 
+        print("Is grid available?")
+        print("Color: " + rectangle.getColor())
+        print("Brand: " + rectangle.getBrand())
         return len(self.db_manager.getGridsNotCutByWidthBrandColor(width=grid_width, color=color, brand=brand)) > 0        
 
     def rectangleAndGridPropertiesMatch(self):
